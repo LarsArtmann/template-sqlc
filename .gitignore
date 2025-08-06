@@ -1,0 +1,137 @@
+# === sqlc Generated Files ===
+# Generated Go code from sqlc - these should be committed to version control
+# internal/db/
+# *.go (uncomment if you prefer not to commit generated code)
+
+# === Go Files ===
+# Go binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool
+*.out
+
+# Go workspace files
+go.work
+go.work.sum
+
+# === Database Files ===
+# SQLite databases (if using local files)
+*.db
+*.sqlite
+*.sqlite3
+
+# Database backups
+*.sql.bak
+*.dump
+
+# === Environment Files ===
+# Environment variables and secrets
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+
+# === IDE and Editor Files ===
+# VSCode
+.vscode/
+*.code-workspace
+
+# GoLand/IntelliJ
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# === OS Files ===
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.fuse_hidden*
+.Trash-*
+.nfs*
+
+# === Temporary Files ===
+# Logs
+*.log
+logs/
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# === Build and Distribution ===
+# Build directories
+/build/
+/dist/
+/bin/
+/pkg/
+
+# Dependency directories
+/vendor/
+
+# === sqlc Cloud ===
+# sqlc Cloud configuration (if it contains sensitive data)
+# .sqlc/
+
+# === Testing ===
+# Test databases
+test.db
+testdata/*.db
+
+# === Documentation ===
+# Generated documentation
+/docs/build/
+
+# === Backup Files ===
+*.bak
+*.backup
+*-backup
+*_backup
+
+# === Custom Project Files ===
+# Add your project-specific ignores here
+# /custom-ignore-file
+# /project-specific-dir/
