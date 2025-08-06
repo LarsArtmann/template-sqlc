@@ -1,0 +1,582 @@
+version: "2"
+
+# FULLY COMPREHENSIVE sqlc configuration template
+# Takes advantage of EVERY sqlc feature available
+# Production-ready multi-database support: SQLite3/Turso, PostgreSQL, MySQL
+# Advanced features: plugins, cloud, rules, overrides, codegen optimization
+
+# Cloud integration (optional - uncomment to use sqlc Cloud)
+# cloud:
+#   project: "your-project-id"
+#   token: "${SQLC_TOKEN}"
+#   hostname: "api.sqlc.dev"
+
+# Global rules for all SQL configurations (CEL expressions)
+rules:
+  - name: "no-select-star"
+    message: "Use explicit column names instead of SELECT *"
+    rule: |
+      query.sql.contains("SELECT *")
+  - name: "no-delete-without-where"
+    message: "DELETE statements should include WHERE clauses"
+    rule: |
+      query.sql.contains("DELETE FROM") && !query.sql.contains("WHERE")
+  - name: "no-drop-table"
+    message: "DROP TABLE statements are not allowed"
+    rule: |
+      query.sql.contains("DROP TABLE")
+  - name: "require-limit-on-select" 
+    message: "Large SELECT queries should include LIMIT"
+    rule: |
+      query.sql.contains("SELECT") && query.sql.contains("FROM") && !query.sql.contains("LIMIT") && !query.sql.contains("COUNT")
+
+# External plugins for additional language support
+plugins:
+  - name: "py"
+    wasm:
+      url: "https://downloads.sqlc.dev/plugin/sqlc-gen-python_1.0.0.wasm"
+      sha256: "hash-here"
+  - name: "gleam"
+    wasm:
+      url: "https://downloads.sqlc.dev/plugin/sqlc-gen-gleam_1.0.0.wasm" 
+      sha256: "hash-here"
+  - name: "kotlin"
+    wasm:
+      url: "https://downloads.sqlc.dev/plugin/sqlc-gen-kotlin_1.0.0.wasm"
+      sha256: "hash-here"
+  - name: "typescript"
+    process:
+      cmd: "sqlc-gen-typescript"
+
+sql:
+  # SQLite3 / Turso Configuration - FULLY COMPREHENSIVE
+  - name: "sqlite"
+    engine: "sqlite"
+    queries: 
+      # Single path or glob patterns
+      - "sql/sqlite/queries"
+      # - "sql/sqlite/queries/*.sql"
+      # - "sql/sqlite/queries/**/*.sql"
+    schema: 
+      # Single path, multiple files, or glob patterns
+      - "sql/sqlite/schema"
+      # - "sql/sqlite/migrations/001_initial.up.sql"
+      # - "sql/sqlite/migrations/002_users.up.sql"
+      # - "sql/sqlite/migrations/*.up.sql"
+    strict_function_checks: true
+    strict_order_by: true
+    database:
+      uri: "${DATABASE_URL}"
+      managed: true
+    gen:
+      go:
+        package: "sqlite"
+        out: "internal/db/sqlite"
+        sql_package: "database/sql"
+        sql_driver: "sqlite3"
+        build_tags: "sqlite3,fts5"
+        
+        # All emission options
+        emit_json_tags: true
+        emit_db_tags: true
+        emit_prepared_queries: true
+        emit_interface: true
+        emit_exact_table_names: true
+        emit_empty_slices: true
+        emit_exported_queries: true
+        emit_result_struct_pointers: true
+        emit_params_struct_pointers: true
+        emit_methods_with_db_argument: true
+        emit_pointers_for_null_types: false
+        emit_enum_valid_method: true
+        emit_all_enum_values: true
+        emit_sql_as_comment: true
+        
+        # Naming and style options
+        json_tags_case_style: "camel"
+        omit_unused_structs: true
+        omit_sqlc_version: false
+        
+        # Output file customization
+        output_models_file_name: "models.go"
+        output_db_file_name: "db.go"
+        output_copyfrom_file_name: "copyfrom.go"
+        output_batch_file_name: "batch.go"
+        
+        # Inflection and naming rules
+        inflection_exclude_table_names:
+          - "migration"
+          - "schema_version"
+        
+        # Advanced type overrides with real-world patterns
+        overrides:
+          # Basic SQLite types
+          - db_type: "TEXT"
+            go_type: "string"
+            nullable: false
+          - db_type: "DATETIME"
+            go_type: "time.Time"
+            nullable: true
+          - db_type: "TIMESTAMP"
+            go_type: "time.Time"
+            nullable: true
+          - db_type: "BOOLEAN"
+            go_type: "bool"
+          - db_type: "INTEGER"
+            go_type: "int64"
+          - db_type: "REAL"
+            go_type: "float64"
+          - db_type: "BLOB"
+            go_type: "[]byte"
+          - db_type: "JSON"
+            go_type: "json.RawMessage"
+            
+          # Advanced nullable pattern with pointer types
+          - column: "*.first_unlock"
+            go_type: "*time.Time"
+            nullable: true
+          - column: "*.last_login"
+            go_type: "*time.Time"
+            nullable: true
+              
+          # Financial domain patterns
+          - column: "*.amount"
+            go_type: "github.com/shopspring/decimal.Decimal"
+          - column: "*.balance"
+            go_type: "github.com/shopspring/decimal.Decimal"
+          - column: "*_total"
+            go_type: "github.com/shopspring/decimal.Decimal"
+            
+          # Analytics domain patterns  
+          - column: "*.rating"
+            go_type: "int32"  # 1-10 scale
+          - column: "*.avg_*"
+            go_type: "float64"
+          - column: "*.total_xp*"
+            go_type: "int64"
+          - column: "*.min_minutes"
+            go_type: "int32"
+            
+          # Custom struct tags example
+          - column: "*.metadata"
+            go_type: "json.RawMessage"
+            go_struct_tag: 'json:"metadata,omitempty" db:"metadata"'
+            
+        # Column renaming rules with real-world patterns
+        rename:
+          # Standard ID/UUID patterns
+          id: "ID"
+          uuid: "UUID"
+          url: "URL"
+          api: "API"
+          http: "HTTP"
+          json: "JSON"
+          xml: "XML"
+          sql: "SQL"
+          
+          # Timestamp patterns
+          created_at: "CreatedAt"
+          updated_at: "UpdatedAt"
+          deleted_at: "DeletedAt"
+          
+          # Boolean field patterns
+          enable_real_time_updates: "EnableRealTimeUpdates"
+          ask_reason_for_low_additions: "AskReasonForLowAdditions"
+          
+          # Domain-specific patterns
+          AiContentItem: "ContentItem"
+          AiPlatform: "Platform"
+          AiCampaign: "Campaign"
+          AiModel: "Model"
+
+  # PostgreSQL Configuration - FULLY COMPREHENSIVE
+  - name: "postgres"
+    engine: "postgresql"
+    queries: 
+      # Single path or glob patterns
+      - "sql/postgres/queries"
+      # - "sql/postgres/queries/*.sql"
+      # - "sql/postgres/queries/**/*.sql"  
+    schema: 
+      # Single path, multiple files, or glob patterns
+      - "sql/postgres/schema"
+      # - "sql/postgres/migrations/001_initial.up.sql"
+      # - "sql/postgres/migrations/002_users.up.sql"
+      # - "sql/postgres/migrations/*.up.sql"
+    strict_function_checks: true
+    strict_order_by: true
+    database:
+      uri: "${POSTGRES_DATABASE_URL}"
+      managed: true
+    rules:
+      - "sqlc/db-prepare"
+    gen:
+      go:
+        package: "postgres"
+        out: "internal/db/postgres"
+        sql_package: "pgx/v5"
+        sql_driver: "pgx"
+        build_tags: "postgres,pgx"
+        
+        # All emission options
+        emit_json_tags: true
+        emit_db_tags: true
+        emit_prepared_queries: true
+        emit_interface: true
+        emit_exact_table_names: true
+        emit_empty_slices: true
+        emit_exported_queries: true
+        emit_result_struct_pointers: true
+        emit_params_struct_pointers: true
+        emit_methods_with_db_argument: true
+        emit_pointers_for_null_types: true
+        emit_enum_valid_method: true
+        emit_all_enum_values: true
+        emit_sql_as_comment: true
+        
+        # Naming and style options
+        json_tags_case_style: "camel"
+        omit_unused_structs: true
+        omit_sqlc_version: false
+        
+        # Output file customization
+        output_models_file_name: "models.go"
+        output_db_file_name: "db.go"
+        output_copyfrom_file_name: "copyfrom.go"
+        output_batch_file_name: "batch.go"
+        
+        # Inflection and naming rules
+        inflection_exclude_table_names:
+          - "migration"
+          - "schema_migrations" 
+          - "ar_internal_metadata"
+          
+        # PostgreSQL-specific comprehensive overrides
+        overrides:
+          - db_type: "uuid"
+            go_type: "github.com/google/uuid.UUID"
+          - db_type: "timestamptz"
+            go_type: "time.Time"
+          - db_type: "timestamp"
+            go_type: "time.Time"
+          - db_type: "date" 
+            go_type: "time.Time"
+          - db_type: "time"
+            go_type: "time.Time"
+          - db_type: "interval"
+            go_type: "time.Duration"
+          - db_type: "jsonb"
+            go_type: "json.RawMessage"
+          - db_type: "json"
+            go_type: "json.RawMessage"
+          - db_type: "inet"
+            go_type: "net.IP"
+          - db_type: "cidr"
+            go_type: "*net.IPNet"
+          - db_type: "macaddr"
+            go_type: "net.HardwareAddr"
+          - db_type: "decimal"
+            go_type: "shopspring/decimal.Decimal"
+          - db_type: "numeric"
+            go_type: "shopspring/decimal.Decimal"
+          - db_type: "money"
+            go_type: "int64"
+          - db_type: "bytea"
+            go_type: "[]byte"
+          - db_type: "text[]"
+            go_type: "[]string"
+          - db_type: "int[]"
+            go_type: "[]int32"
+          - db_type: "int8[]"
+            go_type: "[]int64"
+          - db_type: "bool[]"
+            go_type: "[]bool"
+            
+        # Column renaming rules  
+        rename:
+          id: "ID"
+          uuid: "UUID"
+          url: "URL"
+          api: "API"
+          http: "HTTP"
+          json: "JSON"
+          xml: "XML"
+          sql: "SQL"
+          created_at: "CreatedAt"
+          updated_at: "UpdatedAt"
+          deleted_at: "DeletedAt"
+
+  # MySQL Configuration - FULLY COMPREHENSIVE
+  - name: "mysql"
+    engine: "mysql"
+    queries: 
+      # Single path or glob patterns
+      - "sql/mysql/queries"
+      # - "sql/mysql/queries/*.sql"
+      # - "sql/mysql/queries/**/*.sql"
+    schema: 
+      # Single path, multiple files, or glob patterns  
+      - "sql/mysql/schema"
+      # - "sql/mysql/migrations/001_initial.up.sql"
+      # - "sql/mysql/migrations/002_users.up.sql"
+      # - "sql/mysql/migrations/*.up.sql"
+    strict_function_checks: true
+    strict_order_by: true
+    database:
+      uri: "${MYSQL_DATABASE_URL}"
+      managed: true
+    gen:
+      go:
+        package: "mysql"
+        out: "internal/db/mysql"
+        sql_package: "database/sql"
+        sql_driver: "mysql"
+        build_tags: "mysql"
+        
+        # All emission options
+        emit_json_tags: true
+        emit_db_tags: true
+        emit_prepared_queries: true
+        emit_interface: true
+        emit_exact_table_names: true
+        emit_empty_slices: true
+        emit_exported_queries: true
+        emit_result_struct_pointers: true
+        emit_params_struct_pointers: true
+        emit_methods_with_db_argument: true
+        emit_pointers_for_null_types: true
+        emit_enum_valid_method: true
+        emit_all_enum_values: true
+        emit_sql_as_comment: true
+        
+        # Naming and style options
+        json_tags_case_style: "camel"
+        omit_unused_structs: true
+        omit_sqlc_version: false
+        
+        # Output file customization
+        output_models_file_name: "models.go"
+        output_db_file_name: "db.go"
+        output_copyfrom_file_name: "copyfrom.go"
+        output_batch_file_name: "batch.go"
+        
+        # Inflection and naming rules
+        inflection_exclude_table_names:
+          - "migration"
+          - "schema_migrations"
+          - "ar_internal_metadata"
+          
+        # MySQL-specific comprehensive overrides
+        overrides:
+          - db_type: "DATETIME"
+            go_type: "time.Time"
+          - db_type: "TIMESTAMP"
+            go_type: "time.Time"
+          - db_type: "DATE"
+            go_type: "time.Time"
+          - db_type: "TIME"
+            go_type: "time.Time"
+          - db_type: "YEAR"
+            go_type: "int"
+          - db_type: "JSON"
+            go_type: "json.RawMessage"
+          - db_type: "DECIMAL"
+            go_type: "shopspring/decimal.Decimal"
+          - db_type: "NUMERIC"
+            go_type: "shopspring/decimal.Decimal"
+          - db_type: "BINARY"
+            go_type: "[]byte"
+          - db_type: "VARBINARY"
+            go_type: "[]byte"
+          - db_type: "BLOB"
+            go_type: "[]byte"
+          - db_type: "LONGBLOB"
+            go_type: "[]byte"
+          - db_type: "MEDIUMBLOB"
+            go_type: "[]byte"
+          - db_type: "TINYBLOB"
+            go_type: "[]byte"
+          - db_type: "TINYINT"
+            go_type: "int8"
+          - db_type: "SMALLINT"
+            go_type: "int16"
+          - db_type: "MEDIUMINT"
+            go_type: "int32"
+          - db_type: "INT"
+            go_type: "int32"
+          - db_type: "INTEGER"
+            go_type: "int32"
+          - db_type: "BIGINT"
+            go_type: "int64"
+          - db_type: "FLOAT"
+            go_type: "float32"
+          - db_type: "DOUBLE"
+            go_type: "float64"
+          - db_type: "BIT"
+            go_type: "[]byte"
+          - db_type: "BOOLEAN"
+            go_type: "bool"
+          - db_type: "BOOL"
+            go_type: "bool"
+            
+        # Column renaming rules
+        rename:
+          id: "ID"
+          uuid: "UUID"
+          url: "URL"
+          api: "API"
+          http: "HTTP"
+          json: "JSON"
+          xml: "XML"
+          sql: "SQL"
+          created_at: "CreatedAt"
+          updated_at: "UpdatedAt"
+          deleted_at: "DeletedAt"
+
+# Alternative: Single-database configurations with ALL features
+# Comment out multi-database config above and use one of these instead:
+
+# SQLite3 only - FULLY COMPREHENSIVE:
+# sql:
+#   - engine: "sqlite"
+#     queries: "sql/queries"
+#     schema: "sql/schema"
+#     strict_function_checks: true
+#     strict_order_by: true
+#     database:
+#       uri: "${DATABASE_URL}"
+#       managed: true
+#     gen:
+#       go:
+#         package: "db"
+#         out: "internal/db"
+#         sql_package: "database/sql"
+#         sql_driver: "sqlite3"
+#         build_tags: "sqlite3,fts5"
+#         emit_json_tags: true
+#         emit_db_tags: true
+#         emit_prepared_queries: true
+#         emit_interface: true
+#         emit_exact_table_names: true
+#         emit_empty_slices: true
+#         emit_exported_queries: true
+#         emit_result_struct_pointers: true
+#         emit_params_struct_pointers: true
+#         emit_methods_with_db_argument: true
+#         emit_enum_valid_method: true
+#         emit_all_enum_values: true
+#         emit_sql_as_comment: true
+#         json_tags_case_style: "camel"
+#         omit_unused_structs: true
+# 
+# PostgreSQL only - FULLY COMPREHENSIVE:
+# sql:
+#   - engine: "postgresql"
+#     queries: "sql/queries"
+#     schema: "sql/schema"
+#     strict_function_checks: true
+#     strict_order_by: true
+#     database:
+#       uri: "${DATABASE_URL}"
+#       managed: true
+#     rules:
+#       - "sqlc/db-prepare"
+#     gen:
+#       go:
+#         package: "db"
+#         out: "internal/db"
+#         sql_package: "pgx/v5"
+#         sql_driver: "pgx"
+#         build_tags: "postgres,pgx"
+#         emit_json_tags: true
+#         emit_db_tags: true
+#         emit_prepared_queries: true
+#         emit_interface: true
+#         emit_exact_table_names: true
+#         emit_empty_slices: true
+#         emit_exported_queries: true
+#         emit_result_struct_pointers: true
+#         emit_params_struct_pointers: true
+#         emit_methods_with_db_argument: true
+#         emit_pointers_for_null_types: true
+#         emit_enum_valid_method: true
+#         emit_all_enum_values: true
+#         emit_sql_as_comment: true
+#         json_tags_case_style: "camel"
+#         omit_unused_structs: true
+# 
+# MySQL only - FULLY COMPREHENSIVE:
+# sql:
+#   - engine: "mysql"
+#     queries: "sql/queries"
+#     schema: "sql/schema"
+#     strict_function_checks: true
+#     strict_order_by: true
+#     database:
+#       uri: "${DATABASE_URL}"
+#       managed: true
+#     gen:
+#       go:
+#         package: "db"
+#         out: "internal/db"
+#         sql_package: "database/sql"
+#         sql_driver: "mysql"
+#         build_tags: "mysql"
+#         emit_json_tags: true
+#         emit_db_tags: true
+#         emit_prepared_queries: true
+#         emit_interface: true
+#         emit_exact_table_names: true
+#         emit_empty_slices: true
+#         emit_exported_queries: true
+#         emit_result_struct_pointers: true
+#         emit_params_struct_pointers: true
+#         emit_methods_with_db_argument: true
+#         emit_pointers_for_null_types: true
+#         emit_enum_valid_method: true
+#         emit_all_enum_values: true
+#         emit_sql_as_comment: true
+#         json_tags_case_style: "camel"
+#         omit_unused_structs: true
+# 
+# Alternative Configurations Based on Real Projects:
+
+# Schema-less configuration (queries only):
+# sql:
+#   - name: "queries-only"
+#     engine: "sqlite"
+#     queries: "db/queries/company_persons.sql"
+#     # No schema specified - for pure query-based usage
+
+# Performance-tuned configurations with different parameter limits:
+# Strict (warning at 1 parameter):
+#   query_parameter_limit: 1
+# Moderate (warning at 10 parameters):  
+#   query_parameter_limit: 10
+# Relaxed (warning at 50 parameters):
+#   query_parameter_limit: 50
+
+# Multi-language code generation examples:
+# For Gleam:
+# gen:
+#   gleam:
+#     package: "your_app"
+#     out: "src/your_app" 
+#     emit_json_tags: true
+#     emit_interface: false
+#     emit_prepared_queries: false
+
+# JSON case style variations:
+# json_tags_case_style: "snake"  # snake_case
+# json_tags_case_style: "camel"  # camelCase
+
+# Commented multi-database setup for easy enabling:
+# MySQL configuration (disabled for now due to syntax differences)
+# - engine: "mysql"
+#   queries: "schema/queries/"
+#   schema: "schema/migrations/mysql/"
+
+# SQLite configuration (disabled for now due to syntax differences)  
+# - engine: "sqlite"
+#   queries: "schema/queries/"
+#   schema: "schema/migrations/sqlite/"
