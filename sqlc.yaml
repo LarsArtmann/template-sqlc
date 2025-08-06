@@ -42,31 +42,36 @@ rules:
       query.sql.contains("SELECT") && query.sql.contains("FROM") && !query.sql.contains("LIMIT") && !query.sql.contains("COUNT")
 
 # === MULTI-LANGUAGE PLUGIN SUPPORT ===
-# Generate code in languages beyond Go using WASM or process plugins
-# 🚫 COMMENTED OUT: Uncomment and configure hash values as needed
+# Generate code in languages beyond Go using WASM plugins
+# ✅ VERIFIED: All plugins below have been verified to exist with correct URLs/hashes
+# 🚫 COMMENTED OUT: Uncomment plugins as needed for your project
 plugins:
-  # Python code generation via WASM plugin
+  # Python code generation via WASM plugin (Beta - MySQL/PostgreSQL only)
+  # ✅ OFFICIAL: sqlc-gen-python v1.3.0 - SQLite not implemented yet
   - name: "py"
     wasm:
-      url: "https://downloads.sqlc.dev/plugin/sqlc-gen-python_1.0.0.wasm"
-      sha256: "hash-here"  # Replace with actual SHA256 hash
+      url: "https://downloads.sqlc.dev/plugin/sqlc-gen-python_1.3.0.wasm"
+      sha256: "fbedae96b5ecae2380a70fb5b925fd4bff58a6cfb1f3140375d098fbab7b3a3c"
       
-  # Gleam functional language support  
-  - name: "gleam"
-    wasm:
-      url: "https://downloads.sqlc.dev/plugin/sqlc-gen-gleam_1.0.0.wasm" 
-      sha256: "hash-here"  # Replace with actual SHA256 hash
-      
-  # Kotlin JVM language support
+  # Kotlin JVM language support (Beta - MySQL/PostgreSQL only)
+  # ✅ OFFICIAL: sqlc-gen-kotlin v1.2.0 - SQLite not implemented yet  
   - name: "kotlin"
     wasm:
-      url: "https://downloads.sqlc.dev/plugin/sqlc-gen-kotlin_1.0.0.wasm"
-      sha256: "hash-here"  # Replace with actual SHA256 hash
+      url: "https://downloads.sqlc.dev/plugin/sqlc-gen-kotlin_1.2.0.wasm"
+      sha256: "22b437ecaea66417bbd3b958339d9868ba89368ce542c936c37305acf373104b"
       
-  # TypeScript via external process (requires separate installation)
+  # TypeScript via WASM plugin (Early Access - PostgreSQL/MySQL/SQLite)
+  # ✅ OFFICIAL: sqlc-gen-typescript v0.1.3 - All databases supported
   - name: "typescript"
-    process:
-      cmd: "sqlc-gen-typescript"  # Must be in PATH
+    wasm:
+      url: "https://downloads.sqlc.dev/plugin/sqlc-gen-typescript_0.1.3.wasm"
+      sha256: "287df8f6cc06377d67ad5ba02c9e0f00c585509881434d15ea8bd9fc751a9368"
+      
+  # 📝 GLEAM SUPPORT: No official sqlc WASM plugin exists
+  # Alternative: Use the community 'parrot' library for Gleam projects
+  # Installation: gleam add parrot
+  # Repository: https://github.com/daniellionel01/parrot
+  # This wraps sqlc-generated Go code for use in Gleam projects
 
 # === DATABASE CONFIGURATIONS ===
 sql:
