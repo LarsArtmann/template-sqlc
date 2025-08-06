@@ -1,0 +1,162 @@
+# README Configuration for [template-sqlc](https://github.com/LarsArtmann/template-sqlc)
+# This file defines how the `README.md` should be generated
+
+version: "1.0"
+
+project:
+  name: "template-sqlc"
+  description: "🚀 The Ultimate sqlc Configuration Template - Production-ready, comprehensive sqlc configuration template that works for ALL project types. Takes advantage of EVERY sqlc feature with real working plugins and validated configurations."
+  type: "library"
+  language: "go"
+  keywords: ["sqlc", "template", "database", "sql", "go", "configuration", "production", "mysql", "postgresql", "sqlite", "turso"]
+  homepage: "https://github.com/LarsArtmann/template-sqlc"
+
+  repository:
+    url: "https://github.com/LarsArtmann/template-sqlc"
+    owner: "LarsArtmann"
+    name: "template-sqlc"
+    branch: "master"
+    private: false
+
+  contact:
+    name: "Lars Artmann"
+    website: "https://lars.software"
+    github: "LarsArtmann"
+
+  license:
+    type: "MIT"
+    file: "LICENSE"
+    url: "https://opensource.org/licenses/MIT"
+
+template:
+  type: "advanced"
+  variant: "comprehensive"
+  include_toc: true
+  toc_depth: 3
+  sections:
+    - "description"
+    - "overview"
+    - "features"
+    - "quick_start"
+    - "installation"
+    - "usage"
+    - "database_support"
+    - "configuration_sections"
+    - "project_type_templates"
+    - "usage_examples"
+    - "production_deployment"
+    - "troubleshooting"
+    - "contributing"
+    - "license"
+    - "contact"
+
+badges:
+  enabled: true
+  license: true
+  version: false
+  stars: true
+  forks: true
+  issues: true
+  build_status: false
+  style: "flat-square"
+  coverage: false
+  custom:
+    - label: "sqlc"
+      value: "v1.29.0"
+      color: "blue"
+      url: "https://img.shields.io/badge/sqlc-v1.29.0-blue"
+      link: "https://sqlc.dev/"
+    - label: "Go"
+      value: "ready"
+      color: "00ADD8"
+      url: "https://img.shields.io/badge/go-%2300ADD8.svg?style=flat&logo=go&logoColor=white"
+      link: "https://golang.org/"
+
+content:
+  features:
+    - icon: "🛡️"
+      title: "Production Safety"
+      description: "CEL validation rules prevent dangerous queries (SELECT *, DELETE without WHERE)"
+    - icon: "⚡"
+      title: "Multi-Database Excellence"
+      description: "SQLite/Turso, PostgreSQL, MySQL - comprehensive support with isolated configurations"
+    - icon: "🎨"
+      title: "Code Generation Mastery"
+      description: "All emit_* options configured with detailed explanations and trade-offs"
+    - icon: "🔧"
+      title: "Real Working Plugins"
+      description: "Verified Python, Kotlin, TypeScript plugins with actual SHA256 hashes"
+    - icon: "🌍"
+      title: "Universal Project Support"
+      description: "10+ project type templates from hobby to enterprise scale"
+    - icon: "📊"
+      title: "Comprehensive Type Overrides"
+      description: "30+ real-world type mapping patterns for domain-specific needs"
+    - icon: "✅"
+      title: "Production Validated"
+      description: "Based on analysis of 21+ real projects, sqlc vet verified"
+    - icon: "🎯"
+      title: "Smart Configuration Management"
+      description: "Environment variables, build tags, conditional compilation support"
+
+  quick_start:
+    copy_template: |
+      # Clone this repository
+      git clone https://github.com/LarsArtmann/template-sqlc.git
+      cd template-sqlc
+
+      # Copy to your project
+      cp sqlc.yaml /path/to/your/project/
+    customize: |
+      # Edit the configuration
+      vim sqlc.yaml
+
+      # Uncomment your preferred setup
+      # Modify paths, database URLs, and domain-specific overrides
+      # Test the configuration
+      sqlc compile
+
+  usage_examples:
+    basic_setup: |
+      # 1. Copy template
+      cp sqlc.yaml your-project/
+
+      # 2. Create directories
+      mkdir -p sql/{sqlite,postgres,mysql}/{queries,schema}
+
+      # 3. Add your schema
+      echo "CREATE TABLE users (id INTEGER PRIMARY KEY, email TEXT);" > sql/sqlite/schema/001_users.sql
+
+      # 4. Add queries
+      echo "-- name: GetUser :one\\nSELECT * FROM users WHERE id = ?;" > sql/sqlite/queries/users.sql
+
+      # 5. Generate code
+      sqlc generate
+
+  contributing:
+    enabled: true
+    guidelines:
+      - "Test thoroughly: Ensure `sqlc compile` passes"
+      - "Add comments: Explain WHY each setting is chosen"
+      - "Consider trade-offs: Document performance/flexibility implications"  
+      - "Keep universal: Avoid domain-specific hardcoded values"
+    process:
+      - "Fork the repository"
+      - "Create a feature branch: `git checkout -b feature/amazing-feature`"
+      - "Test your changes: `sqlc compile && sqlc vet`"
+      - "Commit your changes: `git commit -m 'Add amazing feature'`"
+      - "Push to the branch: `git push origin feature/amazing-feature`"
+      - "Open a Pull Request"
+
+github:
+  enabled: true
+  owner: "LarsArtmann"
+  repository: "template-sqlc"
+  default_branch: "master"
+  topics: ["sqlc", "template", "database", "sql", "go", "configuration", "production"]
+
+automation:
+  enabled: false
+  smart_updates: true
+  force_update: false
+  ignore_timestamp: true
