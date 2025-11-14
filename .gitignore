@@ -134,4 +134,6 @@ testdata/*.db
 # === Custom Project Files ===
 # Add your project-specific ignores here
 # /custom-ignore-file
-# /project-specific-dir/
+# /project-specific-dir/.claude/settings.local.json
+.readme/assets/
+.claude/settings.local.json
