@@ -1,0 +1,138 @@
+# Base sqlc configuration
+# Core rules and global validation
+
+version: "2"
+
+# === GLOBAL VALIDATION RULES ===
+# CEL (Common Expression Language) rules for query validation
+rules:
+  - name: "no-select-star"
+    message: "Use explicit column names instead of SELECT *"
+    rule: |
+      query.sql.contains("SELECT *")
+
+  - name: "no-delete-without-where"
+    message: "DELETE statements should include WHERE clauses"
+    rule: |
+      query.sql.contains("DELETE FROM") && !query.sql.contains("WHERE")
+
+  - name: "no-drop-table"
+    message: "DROP TABLE statements are not allowed"
+    rule: |
+      query.sql.contains("DROP TABLE")
+
+  - name: "require-limit-on-select"
+    message: "Large SELECT queries should include LIMIT"
+    rule: |
+      query.sql.contains("SELECT") && query.sql.contains("FROM") && !query.sql.contains("LIMIT") && !query.sql.contains("COUNT")
+
+# === MULTI-LANGUAGE PLUGIN SUPPORT ===
+plugins:
+  - name: "typescript"
+    wasm:
+      url: "https://downloads.sqlc.dev/plugin/sqlc-gen-typescript_0.1.3.wasm"
+      sha256: "287df8f6cc06377d67ad5ba02c9e0f00c585509881434d15ea8bd9fc751a9368"
+
+  - name: "py"
+    wasm:
+      url: "https://downloads.sqlc.dev/plugin/sqlc-gen-python_1.3.0.wasm"
+      sha256: "fbedae96b5ecae2380a70fb5b925fd4bff58a6cfb1f3140375d098fbab7b3a3c"
+# === postgres SPECIFIC CONFIGURATION ===
+sql:
+  - name: "postgres"
+    engine: "postgresql"
+    # === PATHS ===
+    queries:
+      - "sql/postgres/queries"
+    schema:
+      - "sql/postgres/schema"
+    # === VALIDATION ===
+    strict_function_checks: true
+    strict_order_by: true
+    # === CONNECTION ===
+    database:
+      uri: "${POSTGRES_DATABASE_URL}"
+      managed: true
+    # === POSTGRES-SPECIFIC RULES ===
+    rules:
+      - "sqlc/db-prepare"
+    # === CODE GENERATION ===
+    gen:
+      go:
+        package: "postgres"
+        out: "internal/db/postgres"
+        sql_package: "pgx/v5"
+        build_tags: "postgres,pgx"
+        # === CORE EMISSION OPTIONS ===
+        emit_json_tags: true
+        emit_db_tags: true
+        emit_prepared_queries: true
+        emit_interface: true
+        emit_exact_table_names: true
+        emit_empty_slices: true
+        emit_exported_queries: true
+        emit_result_struct_pointers: true
+        emit_params_struct_pointers: true
+        emit_methods_with_db_argument: false
+        emit_pointers_for_null_types: true
+        emit_enum_valid_method: true
+        emit_all_enum_values: true
+        emit_sql_as_comment: true
+        # === NAMING ===
+        json_tags_case_style: "camel"
+        omit_unused_structs: true
+        omit_sqlc_version: false
+        # === OUTPUT FILES ===
+        output_models_file_name: "models.go"
+        output_db_file_name: "db.go"
+        output_copyfrom_file_name: "copyfrom.go"
+        output_batch_file_name: "batch.go"
+        # === INFLECTION EXCLUDES ===
+        inflection_exclude_table_names:
+          - "migration"
+          - "schema_migrations"
+          - "ar_internal_metadata"
+        # === POSTGRES-SPECIFIC OVERRIDES ===
+        overrides:
+          - db_type: "uuid"
+            go_type: "github.com/google/uuid.UUID"
+          - db_type: "timestamptz"
+            go_type: "time.Time"
+          - db_type: "timestamp"
+            go_type: "time.Time"
+          - db_type: "date"
+            go_type: "time.Time"
+          - db_type: "time"
+            go_type: "time.Time"
+          - db_type: "interval"
+            go_type: "time.Duration"
+          - db_type: "jsonb"
+            go_type: "json.RawMessage"
+          - db_type: "json"
+            go_type: "json.RawMessage"
+          - db_type: "inet"
+            go_type: "net.IP"
+          - db_type: "cidr"
+            go_type: "*net.IPNet"
+          - db_type: "macaddr"
+            go_type: "net.HardwareAddr"
+          - db_type: "decimal"
+            go_type: "shopspring/decimal.Decimal"
+          - db_type: "numeric"
+            go_type: "shopspring/decimal.Decimal"
+          - db_type: "money"
+            go_type: "int64"
+        # === COLUMN RENAMING ===
+        rename:
+          id: "ID"
+          uuid: "UUID"
+          url: "URL"
+          api: "API"
+          http: "HTTP"
+          json: "JSON"
+          xml: "XML"
+          sql: "SQL"
+          created_at: "CreatedAt"
+          updated_at: "UpdatedAt"
+          deleted_at: "DeletedAt"
+  - "sqlc/db-prepare"

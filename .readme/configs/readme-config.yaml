@@ -8,7 +8,20 @@ project:
   description: "🚀 The Ultimate sqlc Configuration Template - Production-ready, comprehensive sqlc configuration template that works for ALL project types. Takes advantage of EVERY sqlc feature with real working plugins and validated configurations."
   type: "library"
   language: "go"
-  keywords: ["sqlc", "template", "database", "sql", "go", "configuration", "production", "mysql", "postgresql", "sqlite", "turso"]
+  keywords:
+    [
+      "sqlc",
+      "template",
+      "database",
+      "sql",
+      "go",
+      "configuration",
+      "production",
+      "mysql",
+      "postgresql",
+      "sqlite",
+      "turso",
+    ]
   homepage: "https://github.com/LarsArtmann/template-sqlc"
 
   repository:
@@ -138,7 +151,7 @@ content:
     guidelines:
       - "Test thoroughly: Ensure `sqlc compile` passes"
       - "Add comments: Explain WHY each setting is chosen"
-      - "Consider trade-offs: Document performance/flexibility implications"  
+      - "Consider trade-offs: Document performance/flexibility implications"
       - "Keep universal: Avoid domain-specific hardcoded values"
     process:
       - "Fork the repository"

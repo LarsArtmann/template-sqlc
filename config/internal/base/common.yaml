@@ -1,0 +1,39 @@
+# Base sqlc configuration
+# Core rules and global validation
+
+version: "2"
+
+# === GLOBAL VALIDATION RULES ===
+# CEL (Common Expression Language) rules for query validation
+rules:
+  - name: "no-select-star"
+    message: "Use explicit column names instead of SELECT *"
+    rule: |
+      query.sql.contains("SELECT *")
+
+  - name: "no-delete-without-where"
+    message: "DELETE statements should include WHERE clauses"
+    rule: |
+      query.sql.contains("DELETE FROM") && !query.sql.contains("WHERE")
+
+  - name: "no-drop-table"
+    message: "DROP TABLE statements are not allowed"
+    rule: |
+      query.sql.contains("DROP TABLE")
+
+  - name: "require-limit-on-select"
+    message: "Large SELECT queries should include LIMIT"
+    rule: |
+      query.sql.contains("SELECT") && query.sql.contains("FROM") && !query.sql.contains("LIMIT") && !query.sql.contains("COUNT")
+
+# === MULTI-LANGUAGE PLUGIN SUPPORT ===
+plugins:
+  - name: "typescript"
+    wasm:
+      url: "https://downloads.sqlc.dev/plugin/sqlc-gen-typescript_0.1.3.wasm"
+      sha256: "287df8f6cc06377d67ad5ba02c9e0f00c585509881434d15ea8bd9fc751a9368"
+
+  - name: "py"
+    wasm:
+      url: "https://downloads.sqlc.dev/plugin/sqlc-gen-python_1.3.0.wasm"
+      sha256: "fbedae96b5ecae2380a70fb5b925fd4bff58a6cfb1f3140375d098fbab7b3a3c"

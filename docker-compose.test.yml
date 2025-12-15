@@ -1,0 +1,92 @@
+version: "3.8"
+
+services:
+  # PostgreSQL for testing
+  postgres:
+    image: postgres:15-alpine
+    container_name: sqlc-postgres-test
+    environment:
+      POSTGRES_DB: sqlc_test
+      POSTGRES_USER: sqlc_user
+      POSTGRES_PASSWORD: sqlc_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./test-data/postgres:/docker-entrypoint-initdb.d
+    networks:
+      - sqlc-test
+
+  # MySQL for testing
+  mysql:
+    image: mysql:8.0
+    container_name: sqlc-mysql-test
+    environment:
+      MYSQL_DATABASE: sqlc_test
+      MYSQL_USER: sqlc_user
+      MYSQL_PASSWORD: sqlc_password
+      MYSQL_ROOT_PASSWORD: root_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./test-data/mysql:/docker-entrypoint-initdb.d
+    networks:
+      - sqlc-test
+
+  # SQLite test container (for convenience)
+  sqlite:
+    image: keinos/sqlite3:latest
+    container_name: sqlc-sqlite-test
+    volumes:
+      - ./test-data/sqlite:/data
+      - ./examples/sqlite:/sqls
+    command: >
+      sh -c "
+        if [ ! -f /data/test.db ]; then
+          sqlite3 /data/test.db < /sqls/user.sql
+        fi
+        sqlite3 /data/test.db '.tables'
+      "
+    networks:
+      - sqlc-test
+
+  # sqlc validation container
+  sqlc-validator:
+    image: sqlc/sqlc:latest
+    container_name: sqlc-validator
+    volumes:
+      - .:/workspace
+    working_dir: /workspace
+    environment:
+      POSTGRES_DATABASE_URL: postgres://sqlc_user:sqlc_password@postgres:5432/sqlc_test?sslmode=disable
+      MYSQL_DATABASE_URL: sqlc_user:sqlc_password@tcp(mysql:3306)/sqlc_test?parseTime=true
+      DATABASE_URL: /data/test.db
+    command: >
+      sh -c "
+        echo 'Validating PostgreSQL configuration...'
+        sqlc -f sqlc.yaml -y examples/postgres/queries -y examples/postgres/schema compile || exit 1
+        echo 'PostgreSQL validation passed!'
+        
+        echo 'Validating MySQL configuration...'
+        sqlc -f sqlc.yaml -y examples/mysql/queries -y examples/mysql/schema compile || exit 1
+        echo 'MySQL validation passed!'
+        
+        echo 'Validating SQLite configuration...'
+        sqlc -f sqlc.yaml -y examples/sqlite/queries -y examples/sqlite/schema compile || exit 1
+        echo 'SQLite validation passed!'
+        
+        echo 'All validations successful!'
+      "
+    depends_on:
+      - postgres
+      - mysql
+      - sqlite
+    networks:
+      - sqlc-test
+
+networks:
+  sqlc-test:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  mysql-data:

@@ -22,20 +22,20 @@ rules:
     # 🛡️ SECURITY: Prevents accidental exposure of sensitive columns
     rule: |
       query.sql.contains("SELECT *")
-
+      
   - name: "no-delete-without-where"
     message: "DELETE statements should include WHERE clauses"
     # 🛡️ SAFETY: Prevents accidental deletion of all records
     rule: |
       query.sql.contains("DELETE FROM") && !query.sql.contains("WHERE")
-
+      
   - name: "no-drop-table"
     message: "DROP TABLE statements are not allowed"
     # 🛡️ SAFETY: Prevents accidental table deletion in application code
     rule: |
       query.sql.contains("DROP TABLE")
-
-  - name: "require-limit-on-select"
+      
+  - name: "require-limit-on-select" 
     message: "Large SELECT queries should include LIMIT"
     # 🚀 PERFORMANCE: Prevents unbounded result sets that could cause OOM
     rule: |
@@ -52,21 +52,21 @@ plugins:
     wasm:
       url: "https://downloads.sqlc.dev/plugin/sqlc-gen-python_1.3.0.wasm"
       sha256: "fbedae96b5ecae2380a70fb5b925fd4bff58a6cfb1f3140375d098fbab7b3a3c"
-
+      
   # Kotlin JVM language support (Beta - MySQL/PostgreSQL only)
-  # ✅ OFFICIAL: sqlc-gen-kotlin v1.2.0 - SQLite not implemented yet
+  # ✅ OFFICIAL: sqlc-gen-kotlin v1.2.0 - SQLite not implemented yet  
   - name: "kotlin"
     wasm:
       url: "https://downloads.sqlc.dev/plugin/sqlc-gen-kotlin_1.2.0.wasm"
       sha256: "22b437ecaea66417bbd3b958339d9868ba89368ce542c936c37305acf373104b"
-
+      
   # TypeScript via WASM plugin (Early Access - PostgreSQL/MySQL/SQLite)
   # ✅ OFFICIAL: sqlc-gen-typescript v0.1.3 - All databases supported
   - name: "typescript"
     wasm:
       url: "https://downloads.sqlc.dev/plugin/sqlc-gen-typescript_0.1.3.wasm"
       sha256: "287df8f6cc06377d67ad5ba02c9e0f00c585509881434d15ea8bd9fc751a9368"
-
+      
   # 📝 GLEAM SUPPORT: No official sqlc WASM plugin exists
   # Alternative: Use the community 'parrot' library for Gleam projects
   # Installation: gleam add parrot
@@ -79,28 +79,28 @@ sql:
   # Comprehensive configuration with all available options explained
   - name: "sqlite"
     engine: "sqlite"
-
+    
     # === QUERY AND SCHEMA PATHS ===
     # Flexible path configuration - supports directories, files, or glob patterns
-    queries:
-      - "sql/sqlite/queries" # Directory containing .sql files
+    queries: 
+      - "sql/sqlite/queries"              # Directory containing .sql files
       # - "sql/sqlite/queries/*.sql"      # Glob pattern for specific files
       # - "sql/sqlite/queries/**/*.sql"   # Recursive glob pattern
-    schema:
-      - "sql/sqlite/schema" # Directory containing schema files
+    schema: 
+      - "sql/sqlite/schema"               # Directory containing schema files
       # - "sql/sqlite/migrations/001_initial.up.sql"  # Specific migration files
       # - "sql/sqlite/migrations/*.up.sql"            # Migration glob pattern
-
+    
     # === QUERY VALIDATION SETTINGS ===
     # strict_function_checks: Validate SQL function existence (recommended for production)
     strict_function_checks: true
-    # strict_order_by: Prevent ambiguous ORDER BY columns (recommended for production)
+    # strict_order_by: Prevent ambiguous ORDER BY columns (recommended for production)  
     strict_order_by: true
-
+    
     # === DATABASE CONNECTION SETTINGS ===
     database:
-      uri: "${DATABASE_URL}" # Connection string from environment variable
-      managed: true # Use sqlc Cloud managed database for vet operations
+      uri: "${DATABASE_URL}"    # Connection string from environment variable
+      managed: true             # Use sqlc Cloud managed database for vet operations
     gen:
       go:
         package: "sqlite"
@@ -109,115 +109,115 @@ sql:
         # build_tags: Go build tags for conditional compilation
         # SQLite + FTS5 full-text search support
         # build_tags: "sqlite3,fts5"
-
+        
         # === CODE GENERATION OPTIONS ===
         # These options control what sqlc generates and how it structures the code
-
+        
         # emit_json_tags: Add `json:"field_name"` tags to generated structs
         # ✅ ENABLED: Essential for API responses and JSON marshaling
         emit_json_tags: true
-
-        # emit_db_tags: Add `db:"field_name"` tags to generated structs
+        
+        # emit_db_tags: Add `db:"field_name"` tags to generated structs  
         # ✅ ENABLED: Useful for database/sql scanning and ORM integration
         emit_db_tags: true
-
+        
         # emit_prepared_queries: Generate Prepare() method for pre-compiled SQL statements
         # ✅ ENABLED: Performance optimization - prepared statements are faster for repeated queries
         # 🚫 CONFLICTS with emit_methods_with_db_argument (see below)
         emit_prepared_queries: true
-
+        
         # emit_interface: Generate a Querier interface for the generated methods
         # ✅ ENABLED: Enables dependency injection, mocking, and testing
         emit_interface: true
-
+        
         # emit_exact_table_names: Use exact table names for struct names (vs singularized)
         # ✅ ENABLED: More predictable - "users" table = "Users" struct, not "User"
         emit_exact_table_names: true
-
+        
         # emit_empty_slices: Return empty slices instead of nil for :many queries
         # ✅ ENABLED: Safer for JSON marshaling and prevents nil pointer issues
         emit_empty_slices: true
-
+        
         # emit_exported_queries: Make autogenerated SQL constants exportable
         # ✅ ENABLED: Useful for debugging, testing, and manual query execution
         emit_exported_queries: true
-
+        
         # emit_result_struct_pointers: Return pointers to structs from queries
         # ✅ ENABLED: Memory efficient for large structs, enables nil returns
         emit_result_struct_pointers: true
-
+        
         # emit_params_struct_pointers: Accept pointers for query parameters
         # ✅ ENABLED: Consistent with result pointers, handles large parameter structs
         emit_params_struct_pointers: true
-
+        
         # emit_methods_with_db_argument: Methods take DBTX arg instead of storing on struct
         # 🚫 DISABLED: Conflicts with emit_prepared_queries (prepared statements need stable connection)
         # Trade-off: Prepared statement performance > flexible connection management
         # Alternative: Enable this and disable emit_prepared_queries for more flexible connection handling
         emit_methods_with_db_argument: false
-
+        
         # emit_pointers_for_null_types: Use *Type for nullable columns instead of sql.NullType
         # 🚫 DISABLED for SQLite: Limited support, sql.NullString more explicit for nullable fields
         emit_pointers_for_null_types: false
-
+        
         # emit_enum_valid_method: Generate Valid() method for enum types
         # ✅ ENABLED: Runtime validation for enum values, prevents invalid data
         emit_enum_valid_method: true
-
+        
         # emit_all_enum_values: Generate function returning all valid enum values
         # ✅ ENABLED: Useful for dropdowns, validation, and API documentation
         emit_all_enum_values: true
-
+        
         # emit_sql_as_comment: Include original SQL as comment above generated functions
         # ✅ ENABLED: Improves code readability and debugging
         emit_sql_as_comment: true
-
+        
         # === NAMING AND STYLE OPTIONS ===
-
+        
         # json_tags_case_style: Case style for JSON tags (camel, snake, pascal, none)
         # ✅ CAMEL: JavaScript/JSON standard - "firstName" instead of "first_name"
         json_tags_case_style: "camel"
-
+        
         # omit_unused_structs: Skip generating structs for tables not used in queries
         # ✅ ENABLED: Cleaner generated code, faster compilation, smaller binaries
         omit_unused_structs: true
-
+        
         # omit_sqlc_version: Exclude sqlc version from generated file headers
         # 🚫 DISABLED: Include version for debugging and compatibility tracking
         omit_sqlc_version: false
-
+        
         # === OUTPUT FILE CUSTOMIZATION ===
         # Control the names of generated Go files
-
+        
         # output_models_file_name: File containing struct definitions
         output_models_file_name: "models.go"
-
+        
         # output_db_file_name: File containing database interface and connection code
         output_db_file_name: "db.go"
-
+        
         # output_copyfrom_file_name: File containing batch insert operations (PostgreSQL)
         output_copyfrom_file_name: "copyfrom.go"
-
+        
         # output_batch_file_name: File containing batch operations
         output_batch_file_name: "batch.go"
-
+        
         # === TABLE NAME INFLECTION RULES ===
         # Tables to exclude from automatic singular/plural inflection
         # ✅ MIGRATION TABLES: Keep these names exactly as-is
         inflection_exclude_table_names:
-          - "migration" # Don't change to "Migration"
-          - "schema_version" # Don't change to "SchemaVersion"
-
+          - "migration"        # Don't change to "Migration" 
+          - "schema_version"    # Don't change to "SchemaVersion"
+        
         # === TYPE OVERRIDES WITH REAL-WORLD PATTERNS ===
         # Custom Go type mappings for specific database types and columns
         overrides:
           # === BASIC SQLite TYPE MAPPINGS ===
-
+          
           # TEXT -> string: Standard string mapping
           - db_type: "TEXT"
             go_type: "string"
             nullable: false
-
+            
           # DATETIME/TIMESTAMP -> time.Time: Standard time handling
           - db_type: "DATETIME"
             go_type: "time.Time"
@@ -225,27 +225,27 @@ sql:
           - db_type: "TIMESTAMP"
             go_type: "time.Time"
             nullable: true
-
-          # BOOLEAN -> bool: Standard boolean mapping
+            
+          # BOOLEAN -> bool: Standard boolean mapping  
           - db_type: "BOOLEAN"
             go_type: "bool"
-
+            
           # INTEGER -> int64: Use int64 for all integers (SQLite doesn't distinguish sizes)
           - db_type: "INTEGER"
             go_type: "int64"
-
+            
           # REAL -> float64: Standard floating point mapping
           - db_type: "REAL"
             go_type: "float64"
-
+            
           # JSON -> json.RawMessage: Preserve raw JSON for flexible handling
           - db_type: "JSON"
             go_type: "json.RawMessage"
-
+            
           # === DOMAIN-SPECIFIC COLUMN PATTERNS (EXAMPLES) ===
           # Add your own column-specific type overrides here as needed.
           # These examples show common patterns - uncomment and modify as needed:
-
+          
           # NULLABLE TIMESTAMP PATTERNS:
           # - column: "*.last_login"
           #   go_type: "*time.Time"
@@ -253,7 +253,7 @@ sql:
           # - column: "*.created_at"
           #   go_type: "time.Time"
           #   nullable: false
-
+          
           # FINANCIAL/MONETARY PATTERNS:
           # - column: "*.amount"
           #   go_type: "github.com/shopspring/decimal.Decimal"
@@ -261,20 +261,20 @@ sql:
           #   go_type: "github.com/shopspring/decimal.Decimal"
           # - column: "*_cents"
           #   go_type: "int64"  # Store cents as integers
-
+          
           # ID AND REFERENCE PATTERNS:
           # - column: "*.uuid"
           #   go_type: "github.com/google/uuid.UUID"
           # - column: "*_id"
           #   go_type: "string"  # If your system uses string IDs
-
+          
           # JSON/METADATA PATTERNS:
-          # - column: "*.metadata"
+          # - column: "*.metadata" 
           #   go_type: "json.RawMessage"
           #   go_struct_tag: 'json:"metadata,omitempty" db:"metadata"'
           # - column: "*.config"
           #   go_type: "json.RawMessage"
-
+          
           # ANALYTICS/METRICS PATTERNS:
           # - column: "*.rating"
           #   go_type: "int32"     # 1-10 scale ratings
@@ -282,65 +282,65 @@ sql:
           #   go_type: "float64"   # Decimal scores
           # - column: "*.count"
           #   go_type: "int64"     # Large counters
-
+          
           # NETWORK/URL PATTERNS:
           # - column: "*.ip_address"
           #   go_type: "net.IP"
           # - column: "*.url"
           #   go_type: "*url.URL"
-
+            
         # === COLUMN RENAMING RULES ===
         # Convert database column names to Go struct field names
         rename:
           # === STANDARD ACRONYM PATTERNS ===
           # Follow Go conventions: acronyms should be ALL CAPS in field names
-          id: "ID" # user_id -> UserID (not UserId)
-          uuid: "UUID" # user_uuid -> UserUUID
-          url: "URL" # profile_url -> ProfileURL
-          api: "API" # api_key -> APIKey
-          http: "HTTP" # http_status -> HTTPStatus
-          json: "JSON" # json_data -> JSONData
-          xml: "XML" # xml_content -> XMLContent
-          sql: "SQL" # sql_query -> SQLQuery
-
-          # === TIMESTAMP PATTERNS ===
+          id: "ID"           # user_id -> UserID (not UserId)
+          uuid: "UUID"       # user_uuid -> UserUUID  
+          url: "URL"         # profile_url -> ProfileURL
+          api: "API"         # api_key -> APIKey
+          http: "HTTP"       # http_status -> HTTPStatus
+          json: "JSON"       # json_data -> JSONData
+          xml: "XML"         # xml_content -> XMLContent
+          sql: "SQL"         # sql_query -> SQLQuery
+          
+          # === TIMESTAMP PATTERNS ===  
           # Standard audit trail field names
-          created_at: "CreatedAt" # created_at -> CreatedAt
-          updated_at: "UpdatedAt" # updated_at -> UpdatedAt
-          deleted_at: "DeletedAt" # deleted_at -> DeletedAt (soft delete)
-
+          created_at: "CreatedAt"  # created_at -> CreatedAt
+          updated_at: "UpdatedAt"  # updated_at -> UpdatedAt  
+          deleted_at: "DeletedAt"  # deleted_at -> DeletedAt (soft delete)
+          
           # === BOOLEAN FIELD PATTERNS (EXAMPLES) ===
           # Add your own boolean field rename rules here as needed:
           # is_active: "IsActive"                    # Standard boolean pattern
           # has_premium: "HasPremium"                # Has/Is prefixes
           # can_edit: "CanEdit"                      # Permission patterns
           # should_notify: "ShouldNotify"            # Action patterns
-          #
+          # 
           # Examples from real projects (uncomment if needed):
           # enable_notifications: "EnableNotifications"
-          # require_approval: "RequireApproval"
+          # require_approval: "RequireApproval" 
           # allow_guests: "AllowGuests"
-
+          
           # === DOMAIN-SPECIFIC PATTERNS (EXAMPLES) ===
           # Add your own domain-specific rename rules here as needed:
           # user_profile: "UserProfile"      # Domain-specific field names
           # product_category: "ProductCategory"
           # order_status: "OrderStatus"
-          #
+          # 
           # Examples of common patterns you might want to customize:
-          # - Remove prefixes: AiModel -> Model, DbUser -> User
+          # - Remove prefixes: AiModel -> Model, DbUser -> User  
           # - Fix legacy naming: usr_nm -> UserName, prod_desc -> ProductDescription
           # - Standardize acronyms: api_key -> APIKey, json_data -> JSONData
 
   # PostgreSQL Configuration - FULLY COMPREHENSIVE
   - name: "postgres"
     engine: "postgresql"
-    queries:
+    queries: 
       # Single path or glob patterns
       - "sql/postgres/queries"
       # - "sql/postgres/queries/*.sql"
-      # - "sql/postgres/queries/**/*.sql"
-    schema:
+      # - "sql/postgres/queries/**/*.sql"  
+    schema: 
       # Single path, multiple files, or glob patterns
       - "sql/postgres/schema"
       # - "sql/postgres/migrations/001_initial.up.sql"
@@ -359,7 +359,7 @@ sql:
         out: "internal/db/postgres"
         sql_package: "pgx/v5"
         build_tags: "postgres,pgx"
-
+        
         # All emission options
         emit_json_tags: true
         emit_db_tags: true
@@ -375,24 +375,24 @@ sql:
         emit_enum_valid_method: true
         emit_all_enum_values: true
         emit_sql_as_comment: true
-
+        
         # Naming and style options
         json_tags_case_style: "camel"
         omit_unused_structs: true
         omit_sqlc_version: false
-
+        
         # Output file customization
         output_models_file_name: "models.go"
         output_db_file_name: "db.go"
         output_copyfrom_file_name: "copyfrom.go"
         output_batch_file_name: "batch.go"
-
+        
         # Inflection and naming rules
         inflection_exclude_table_names:
           - "migration"
-          - "schema_migrations"
+          - "schema_migrations" 
           - "ar_internal_metadata"
-
+          
         # PostgreSQL-specific comprehensive overrides
         overrides:
           - db_type: "uuid"
@@ -401,7 +401,7 @@ sql:
             go_type: "time.Time"
           - db_type: "timestamp"
             go_type: "time.Time"
-          - db_type: "date"
+          - db_type: "date" 
             go_type: "time.Time"
           - db_type: "time"
             go_type: "time.Time"
@@ -423,8 +423,8 @@ sql:
             go_type: "shopspring/decimal.Decimal"
           - db_type: "money"
             go_type: "int64"
-
-        # Column renaming rules
+            
+        # Column renaming rules  
         rename:
           id: "ID"
           uuid: "UUID"
@@ -441,13 +441,13 @@ sql:
   # MySQL Configuration - FULLY COMPREHENSIVE
   - name: "mysql"
     engine: "mysql"
-    queries:
+    queries: 
       # Single path or glob patterns
       - "sql/mysql/queries"
       # - "sql/mysql/queries/*.sql"
       # - "sql/mysql/queries/**/*.sql"
-    schema:
-      # Single path, multiple files, or glob patterns
+    schema: 
+      # Single path, multiple files, or glob patterns  
       - "sql/mysql/schema"
       # - "sql/mysql/migrations/001_initial.up.sql"
       # - "sql/mysql/migrations/002_users.up.sql"
@@ -463,7 +463,7 @@ sql:
         out: "internal/db/mysql"
         sql_package: "database/sql"
         build_tags: "mysql"
-
+        
         # All emission options
         emit_json_tags: true
         emit_db_tags: true
@@ -479,24 +479,24 @@ sql:
         emit_enum_valid_method: true
         emit_all_enum_values: true
         emit_sql_as_comment: true
-
+        
         # Naming and style options
         json_tags_case_style: "camel"
         omit_unused_structs: true
         omit_sqlc_version: false
-
+        
         # Output file customization
         output_models_file_name: "models.go"
         output_db_file_name: "db.go"
         output_copyfrom_file_name: "copyfrom.go"
         output_batch_file_name: "batch.go"
-
+        
         # Inflection and naming rules
         inflection_exclude_table_names:
           - "migration"
           - "schema_migrations"
           - "ar_internal_metadata"
-
+          
         # MySQL-specific comprehensive overrides
         overrides:
           - db_type: "DATETIME"
@@ -535,7 +535,7 @@ sql:
             go_type: "bool"
           - db_type: "BOOL"
             go_type: "bool"
-
+            
         # Column renaming rules
         rename:
           id: "ID"
@@ -584,7 +584,7 @@ sql:
 #         emit_sql_as_comment: true
 #         json_tags_case_style: "camel"
 #         omit_unused_structs: true
-#
+# 
 # PostgreSQL only - FULLY COMPREHENSIVE:
 # sql:
 #   - engine: "postgresql"
@@ -619,7 +619,7 @@ sql:
 #         emit_sql_as_comment: true
 #         json_tags_case_style: "camel"
 #         omit_unused_structs: true
-#
+# 
 # MySQL only - FULLY COMPREHENSIVE:
 # sql:
 #   - engine: "mysql"
@@ -652,7 +652,7 @@ sql:
 #         emit_sql_as_comment: true
 #         json_tags_case_style: "camel"
 #         omit_unused_structs: true
-#
+# 
 # ========================================================================
 # === ALTERNATIVE CONFIGURATIONS FOR ALL PROJECT TYPES ===
 # ========================================================================
@@ -702,7 +702,7 @@ sql:
 #     schema: "services/user/schema"
 #     gen:
 #       go:
-#         package: "userdb"
+#         package: "userdb" 
 #         out: "services/user/db"
 #   - name: "order_service"
 #     engine: "mysql"
@@ -735,7 +735,7 @@ sql:
 # sql:
 #   - engine: "postgresql"
 #     queries: "db/queries/"
-#     schema:
+#     schema: 
 #       - "db/migrations/000001_init.up.sql"
 #       - "db/migrations/000002_users.up.sql"
 #       - "db/migrations/000003_orders.up.sql"

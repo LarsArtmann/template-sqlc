@@ -1,0 +1,104 @@
+# SQLite3 Configuration
+# Optimized for SQLite/Turso with FTS5 support
+
+# Extend base configuration
+extends: "../base/common.yaml"
+
+sql:
+  - name: "sqlite"
+    engine: "sqlite"
+
+    # === PATHS ===
+    queries:
+      - "../examples/sqlite/queries"
+    schema:
+      - "../examples/sqlite"
+
+    # === VALIDATION ===
+    strict_function_checks: true
+    strict_order_by: true
+
+    # === CONNECTION ===
+    database:
+      uri: "${DATABASE_URL}"
+      managed: true
+
+    # === CODE GENERATION ===
+    gen:
+      go:
+        package: "sqlite"
+        out: "internal/db/sqlite"
+        sql_package: "database/sql"
+        # Uncomment for FTS5 support: build_tags: "sqlite3,fts5"
+
+        # === CORE EMISSION OPTIONS ===
+        emit_json_tags: true
+        emit_db_tags: true
+        emit_prepared_queries: true
+        emit_interface: true
+        emit_exact_table_names: true
+        emit_empty_slices: true
+        emit_exported_queries: true
+        emit_result_struct_pointers: true
+        emit_params_struct_pointers: true
+        emit_methods_with_db_argument: false
+        emit_pointers_for_null_types: false
+        emit_enum_valid_method: true
+        emit_all_enum_values: true
+        emit_sql_as_comment: true
+
+        # === NAMING ===
+        json_tags_case_style: "camel"
+        omit_unused_structs: true
+        omit_sqlc_version: false
+
+        # === OUTPUT FILES ===
+        output_models_file_name: "models.go"
+        output_db_file_name: "db.go"
+        output_copyfrom_file_name: "copyfrom.go"
+        output_batch_file_name: "batch.go"
+
+        # === INFLECTION EXCLUDES ===
+        inflection_exclude_table_names:
+          - "migration"
+          - "schema_version"
+
+        # === TYPE OVERRIDES ===
+        overrides:
+          - db_type: "TEXT"
+            go_type: "string"
+            nullable: false
+
+          - db_type: "DATETIME"
+            go_type: "time.Time"
+            nullable: true
+
+          - db_type: "TIMESTAMP"
+            go_type: "time.Time"
+            nullable: true
+
+          - db_type: "BOOLEAN"
+            go_type: "bool"
+
+          - db_type: "INTEGER"
+            go_type: "int64"
+
+          - db_type: "REAL"
+            go_type: "float64"
+
+          - db_type: "JSON"
+            go_type: "json.RawMessage"
+
+        # === COLUMN RENAMING ===
+        rename:
+          id: "ID"
+          uuid: "UUID"
+          url: "URL"
+          api: "API"
+          http: "HTTP"
+          json: "JSON"
+          xml: "XML"
+          sql: "SQL"
+          created_at: "CreatedAt"
+          updated_at: "UpdatedAt"
+          deleted_at: "DeletedAt"
