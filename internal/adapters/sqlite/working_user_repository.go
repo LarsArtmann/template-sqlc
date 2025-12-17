@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/LarsArtmann/template-sqlc/internal/adapters/mappers"
 	"github.com/LarsArtmann/template-sqlc/internal/adapters/converters"
+	"github.com/LarsArtmann/template-sqlc/internal/adapters/mappers"
 	"github.com/LarsArtmann/template-sqlc/internal/domain/entities"
 	"github.com/LarsArtmann/template-sqlc/internal/domain/repositories"
 	"github.com/LarsArtmann/template-sqlc/pkg/errors"
@@ -23,17 +23,17 @@ type WorkingSQLiteUserRepository struct {
 // NewWorkingSQLiteUserRepository creates a new working SQLite user repository
 func NewWorkingSQLiteUserRepository(db *sql.DB) repositories.UserRepository {
 	return &WorkingSQLiteUserRepository{
-		db: db,
+		db:     db,
 		mapper: mappers.UserMapper{},
 		converters: &converters.SQLiteConverterSet{
-			UUID:    converters.NewSQLiteUUIDConverter(),
+			UUID:     converters.NewSQLiteUUIDConverter(),
 			Time:     converters.NewTimeConverter("sqlite"),
 			Bool:     converters.NewBoolConverter("sqlite"),
 			Email:    converters.NewDefaultEmailConverter(),
-			Username:  converters.NewDefaultUsernameConverter(),
-			Password:  converters.NewDefaultPasswordHashConverter(),
-			Status:    converters.NewDefaultUserStatusConverter(),
-			Role:      converters.NewDefaultUserRoleConverter(),
+			Username: converters.NewDefaultUsernameConverter(),
+			Password: converters.NewDefaultPasswordHashConverter(),
+			Status:   converters.NewDefaultUserStatusConverter(),
+			Role:     converters.NewDefaultUserRoleConverter(),
 		},
 	}
 }
@@ -45,7 +45,7 @@ func (r *WorkingSQLiteUserRepository) Create(ctx context.Context, user *entities
 		INSERT INTO users (email, username, password_hash, first_name, last_name, status, role, is_verified, metadata, tags)
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 	`
-	
+
 	// Convert domain values to database-compatible types
 	email := r.converters.Email.DomainToDB(user.Email())
 	username := r.converters.Username.DomainToDB(user.Username())
@@ -55,26 +55,26 @@ func (r *WorkingSQLiteUserRepository) Create(ctx context.Context, user *entities
 	status := r.converters.Status.DomainToDB(user.Status())
 	role := r.converters.Role.DomainToDB(user.Role())
 	isVerified := r.converters.Bool.DomainToDB(user.IsVerified())
-	
+
 	// Convert metadata and tags to JSON
 	metadataJSON := "{}"
 	tagsJSON := "[]"
-	
-	result, err := r.db.ExecContext(ctx, query, 
+
+	result, err := r.db.ExecContext(ctx, query,
 		email, username, passwordHash, firstName, lastName, status, role, isVerified, metadataJSON, tagsJSON)
 	if err != nil {
 		return errors.NewDatabaseError("failed to create user", err)
 	}
-	
+
 	rows, err := result.RowsAffected()
 	if err != nil {
 		return errors.NewDatabaseError("failed to check affected rows", err)
 	}
-	
+
 	if rows == 0 {
 		return errors.NewDatabaseError("no rows affected", fmt.Errorf("user creation failed"))
 	}
-	
+
 	return nil
 }
 
@@ -86,30 +86,29 @@ func (r *WorkingSQLiteUserRepository) GetByID(ctx context.Context, id entities.U
 		FROM users 
 		WHERE id = ?
 	`
-	
+
 	user := &entities.User{} // This is wrong - need proper constructor
 	var email, username, passwordHash, firstName, lastName, status, role string
 	var isVerified bool
 	var metadataJSON, tagsJSON string
 	var createdAt, updatedAt, lastLoginAt sql.NullTime
-	
+
 	err := r.db.QueryRowContext(ctx, query, id).Scan(
 		&id, &email, &username, &passwordHash, &firstName, &lastName, &status, &role,
 		&isVerified, &metadataJSON, &tagsJSON, &createdAt, &updatedAt, &lastLoginAt,
 	)
-	
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, entities.ErrUserNotFound
 		}
 		return nil, errors.NewDatabaseError("failed to get user by ID", err)
 	}
-	
+
 	// This is a simplified example - proper implementation would:
 	// 1. Convert database types to domain entities
 	// 2. Use proper entity constructors
 	// 3. Handle all field conversions
-	
+
 	// For now, return nil to show pattern
 	return nil, fmt.Errorf("implementation in progress - user found with ID %d", id)
 }
