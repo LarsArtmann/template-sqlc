@@ -16,19 +16,19 @@ The template-sqlc project is a comprehensive, production-ready sqlc configuratio
 
 ### Configuration System
 
-| Component | Status | Notes |
-|-----------|--------|-------|
-| Root `sqlc.yaml` | Stable | 853 lines, fully documented |
-| Modular configs | Available | `config/modular/` split by database |
-| Build system | Working | Go-based builder in `config/builder.go` |
+| Component        | Status    | Notes                                   |
+| ---------------- | --------- | --------------------------------------- |
+| Root `sqlc.yaml` | Stable    | 853 lines, fully documented             |
+| Modular configs  | Available | `config/modular/` split by database     |
+| Build system     | Working   | Go-based builder in `config/builder.go` |
 
 ### Multi-Database Support
 
-| Database | Config | Examples | Adapters |
-|----------|--------|----------|----------|
-| SQLite | Complete | `examples/sqlite/` | `internal/adapters/sqlite/` |
+| Database   | Config   | Examples             | Adapters                      |
+| ---------- | -------- | -------------------- | ----------------------------- |
+| SQLite     | Complete | `examples/sqlite/`   | `internal/adapters/sqlite/`   |
 | PostgreSQL | Complete | `examples/postgres/` | `internal/adapters/postgres/` |
-| MySQL | Complete | `examples/mysql/` | `internal/adapters/mysql/` |
+| MySQL      | Complete | `examples/mysql/`    | `internal/adapters/mysql/`    |
 
 ### Architecture
 
@@ -51,13 +51,13 @@ internal/
 
 ### Recent Commits (Last 10)
 
-| Commit | Description |
-|--------|-------------|
-| `16a46e2` | chore(ci): add golangci-lint configuration |
-| `f4a7cd8` | chore(lint): update golangci-lint configuration |
+| Commit    | Description                                                   |
+| --------- | ------------------------------------------------------------- |
+| `16a46e2` | chore(ci): add golangci-lint configuration                    |
+| `f4a7cd8` | chore(lint): update golangci-lint configuration               |
 | `5c4f31c` | feat: add SQLC configuration and project status documentation |
-| `16f120f` | refactor: import organization in working_user_repository |
-| `4ac57f2` | feat: complete project initialization |
+| `16f120f` | refactor: import organization in working_user_repository      |
+| `4ac57f2` | feat: complete project initialization                         |
 
 ---
 
@@ -94,13 +94,13 @@ internal/
 
 ## Project Health
 
-| Metric | Status |
-|--------|--------|
-| Build | Passing |
-| CI/CD | GitHub Actions configured |
-| Linting | golangci-lint configured |
-| Tests | Unit, integration, BDD, e2e directories |
-| Documentation | README, CONTRIBUTING, examples |
+| Metric        | Status                                  |
+| ------------- | --------------------------------------- |
+| Build         | Passing                                 |
+| CI/CD         | GitHub Actions configured               |
+| Linting       | golangci-lint configured                |
+| Tests         | Unit, integration, BDD, e2e directories |
+| Documentation | README, CONTRIBUTING, examples          |
 
 ---
 
@@ -138,12 +138,12 @@ sqlc compile && sqlc vet
 
 ## Files of Interest
 
-| File | Purpose |
-|------|---------|
-| `sqlc.yaml` | Main configuration (what most users need) |
-| `config/MIGRATION_GUIDE.md` | Guide for migrating existing projects |
-| `examples/` | Working schema/query examples |
-| `internal/adapters/` | Reference implementations |
+| File                        | Purpose                                   |
+| --------------------------- | ----------------------------------------- |
+| `sqlc.yaml`                 | Main configuration (what most users need) |
+| `config/MIGRATION_GUIDE.md` | Guide for migrating existing projects     |
+| `examples/`                 | Working schema/query examples             |
+| `internal/adapters/`        | Reference implementations                 |
 
 ---
 
