@@ -151,14 +151,8 @@ func (r *PostgresUserRepository) List(ctx context.Context, status entities.UserS
 // Search searches users by query in PostgreSQL using FTS
 func (r *PostgresUserRepository) Search(ctx context.Context, query string, status entities.UserStatus, limit int) ([]*entities.User, error) {
 	// Validate search query
-	if len(query) == 0 {
-		return nil, errors.NewValidationError("query", "cannot be empty")
-	}
-	if len(query) > 500 {
-		return nil, errors.NewValidationError("query", "cannot exceed 500 characters")
-	}
-	if limit <= 0 || limit > 100 {
-		return nil, errors.NewValidationError("limit", "must be between 1 and 100")
+	if err := entities.ValidateSearchQuery(query, limit); err != nil {
+		return nil, err
 	}
 
 	// Use PostgreSQL's tsvector search

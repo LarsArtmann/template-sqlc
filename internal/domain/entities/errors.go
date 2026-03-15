@@ -42,6 +42,21 @@ func NewValidationError(field, message string) *ValidationError {
 	}
 }
 
+// ValidateSearchQuery validates search query parameters
+// Returns nil if valid, otherwise returns a ValidationError
+func ValidateSearchQuery(query string, limit int) error {
+	if len(query) == 0 {
+		return NewValidationError("query", "cannot be empty")
+	}
+	if len(query) > 500 {
+		return NewValidationError("query", "cannot exceed 500 characters")
+	}
+	if limit <= 0 || limit > 100 {
+		return NewValidationError("limit", "must be between 1 and 100")
+	}
+	return nil
+}
+
 func (e *ValidationError) Error() string {
 	return fmt.Sprintf("validation error on field '%s': %s", e.Field, e.Message)
 }
