@@ -63,3 +63,5 @@ testdata/*.db
 # === Project Specific ===
 .readme/assets/
 .claude/settings.local.json
+# Dependencies
+node_modules/
