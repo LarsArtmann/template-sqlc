@@ -39,16 +39,16 @@ func (t SessionToken) String() string  { return uuid.UUID(t).String() }
 
 // SessionDeviceInfo contains device information for a session
 type SessionDeviceInfo struct {
-	Platform string                 `json:"platform"`
-	Device   string                 `json:"device"`
-	Browser  string                 `json:"browser"`
-	Version  string                 `json:"version"`
-	Metadata map[string]interface{} `json:"metadata"`
+	Platform string         `json:"platform"`
+	Device   string         `json:"device"`
+	Browser  string         `json:"browser"`
+	Version  string         `json:"version"`
+	Metadata map[string]any `json:"metadata"`
 }
 
 func NewSessionDeviceInfo() SessionDeviceInfo {
 	return SessionDeviceInfo{
-		Metadata: make(map[string]interface{}),
+		Metadata: make(map[string]any),
 	}
 }
 
@@ -105,15 +105,15 @@ func (s *UserSession) Extend(duration time.Duration) {
 }
 
 // GetMetadata returns device metadata
-func (d SessionDeviceInfo) GetMetadata(key string) (interface{}, bool) {
+func (d SessionDeviceInfo) GetMetadata(key string) (any, bool) {
 	val, ok := d.Metadata[key]
 	return val, ok
 }
 
 // SetMetadata sets device metadata
-func (d SessionDeviceInfo) SetMetadata(key string, value interface{}) {
+func (d SessionDeviceInfo) SetMetadata(key string, value any) {
 	if d.Metadata == nil {
-		d.Metadata = make(map[string]interface{})
+		d.Metadata = make(map[string]any)
 	}
 	d.Metadata[key] = value
 }

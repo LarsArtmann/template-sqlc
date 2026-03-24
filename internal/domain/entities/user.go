@@ -3,6 +3,7 @@ package entities
 import (
 	"fmt"
 	"regexp"
+	"slices"
 	"strings"
 	"time"
 
@@ -176,17 +177,17 @@ func (r UserRole) IsValid() bool {
 }
 
 // UserMetadata represents flexible user metadata
-type UserMetadata map[string]interface{}
+type UserMetadata map[string]any
 
 func NewUserMetadata() UserMetadata {
 	return make(UserMetadata)
 }
 
-func (m UserMetadata) Set(key string, value interface{}) {
+func (m UserMetadata) Set(key string, value any) {
 	m[key] = value
 }
 
-func (m UserMetadata) Get(key string) (interface{}, bool) {
+func (m UserMetadata) Get(key string) (any, bool) {
 	val, ok := m[key]
 	return val, ok
 }
@@ -309,10 +310,8 @@ func (u *User) RecordLogin() {
 
 // AddTag adds a tag to user if not already present
 func (u *User) AddTag(tag string) {
-	for _, existingTag := range u.tags {
-		if existingTag == tag {
-			return
-		}
+	if slices.Contains(u.tags, tag) {
+		return
 	}
 	u.tags = append(u.tags, tag)
 	u.updatedAt = time.Now()

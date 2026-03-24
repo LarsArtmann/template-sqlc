@@ -11,7 +11,7 @@ type UserEvent struct {
 	ID        entities.IDID   `json:"id"`
 	Type      EventType       `json:"type"`
 	UserID    entities.UserID `json:"user_id"`
-	Data      interface{}     `json:"data"`
+	Data      any             `json:"data"`
 	Timestamp time.Time       `json:"timestamp"`
 	Version   string          `json:"version"`
 }
@@ -60,9 +60,9 @@ type UserCreatedEvent struct {
 
 // UserUpdatedEvent data for user updates
 type UserUpdatedEvent struct {
-	UserID    entities.UserID        `json:"user_id"`
-	Changes   map[string]interface{} `json:"changes"`
-	UpdatedBy entities.UserID        `json:"updated_by"`
+	UserID    entities.UserID `json:"user_id"`
+	Changes   map[string]any  `json:"changes"`
+	UpdatedBy entities.UserID `json:"updated_by"`
 }
 
 // UserLoginEvent data for user login
@@ -90,7 +90,7 @@ type RoleChangedEvent struct {
 }
 
 // NewUserEvent creates a new user domain event
-func NewUserEvent(eventType EventType, userID entities.UserID, data interface{}) *UserEvent {
+func NewUserEvent(eventType EventType, userID entities.UserID, data any) *UserEvent {
 	return &UserEvent{
 		ID:        entities.AsIDID(time.Now().UnixNano()),
 		Type:      eventType,
@@ -116,7 +116,7 @@ func UserCreated(userID entities.UserID, email, username, firstName, lastName, r
 }
 
 // UserUpdated creates a user updated event
-func UserUpdated(userID entities.UserID, changes map[string]interface{}, updatedBy entities.UserID) *UserEvent {
+func UserUpdated(userID entities.UserID, changes map[string]any, updatedBy entities.UserID) *UserEvent {
 	data := UserUpdatedEvent{
 		UserID:    userID,
 		Changes:   changes,

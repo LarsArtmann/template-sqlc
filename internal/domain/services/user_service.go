@@ -150,7 +150,7 @@ func (s *UserService) UpdateUser(ctx context.Context, req *UpdateUserRequest) (*
 	}
 
 	// Build changes map for event tracking
-	changes := make(map[string]interface{})
+	changes := make(map[string]any)
 
 	// Update fields if provided
 	if req.FirstName != nil {
@@ -158,7 +158,7 @@ func (s *UserService) UpdateUser(ctx context.Context, req *UpdateUserRequest) (*
 		if err != nil {
 			return nil, fmt.Errorf("invalid first name: %w", err)
 		}
-		changes["first_name"] = map[string]interface{}{
+		changes["first_name"] = map[string]any{
 			"old": user.FirstName().String(),
 			"new": firstName.String(),
 		}
@@ -170,7 +170,7 @@ func (s *UserService) UpdateUser(ctx context.Context, req *UpdateUserRequest) (*
 		if err != nil {
 			return nil, fmt.Errorf("invalid last name: %w", err)
 		}
-		changes["last_name"] = map[string]interface{}{
+		changes["last_name"] = map[string]any{
 			"old": user.LastName().String(),
 			"new": lastName.String(),
 		}
@@ -182,7 +182,7 @@ func (s *UserService) UpdateUser(ctx context.Context, req *UpdateUserRequest) (*
 		for k, v := range *req.Metadata {
 			metadata.Set(k, v)
 		}
-		changes["metadata"] = map[string]interface{}{
+		changes["metadata"] = map[string]any{
 			"old": user.Metadata(),
 			"new": metadata,
 		}
@@ -190,7 +190,7 @@ func (s *UserService) UpdateUser(ctx context.Context, req *UpdateUserRequest) (*
 	}
 
 	if req.Tags != nil {
-		changes["tags"] = map[string]interface{}{
+		changes["tags"] = map[string]any{
 			"old": user.Tags(),
 			"new": *req.Tags,
 		}
@@ -385,23 +385,23 @@ func (s *UserService) GetUserStats(ctx context.Context) (*entities.UserStats, er
 
 // CreateUserRequest represents a request to create a user
 type CreateUserRequest struct {
-	Email        string                 `json:"email" validate:"required,email"`
-	Username     string                 `json:"username" validate:"required,min=3,max=50"`
-	PasswordHash string                 `json:"password_hash" validate:"required"`
-	FirstName    string                 `json:"first_name" validate:"required"`
-	LastName     string                 `json:"last_name" validate:"required"`
-	Status       string                 `json:"status" validate:"required"`
-	Role         string                 `json:"role" validate:"required"`
-	Tags         []string               `json:"tags"`
-	Metadata     map[string]interface{} `json:"metadata"`
+	Email        string         `json:"email" validate:"required,email"`
+	Username     string         `json:"username" validate:"required,min=3,max=50"`
+	PasswordHash string         `json:"password_hash" validate:"required"`
+	FirstName    string         `json:"first_name" validate:"required"`
+	LastName     string         `json:"last_name" validate:"required"`
+	Status       string         `json:"status" validate:"required"`
+	Role         string         `json:"role" validate:"required"`
+	Tags         []string       `json:"tags"`
+	Metadata     map[string]any `json:"metadata"`
 }
 
 // UpdateUserRequest represents a request to update a user
 type UpdateUserRequest struct {
-	UserID    entities.UserID         `json:"user_id" validate:"required"`
-	FirstName *string                 `json:"first_name,omitempty" validate:"omitempty,min=1"`
-	LastName  *string                 `json:"last_name,omitempty" validate:"omitempty,min=1"`
-	Metadata  *map[string]interface{} `json:"metadata,omitempty"`
-	Tags      *[]string               `json:"tags,omitempty"`
-	UpdatedBy string                  `json:"updated_by" validate:"required"`
+	UserID    entities.UserID `json:"user_id" validate:"required"`
+	FirstName *string         `json:"first_name,omitempty" validate:"omitempty,min=1"`
+	LastName  *string         `json:"last_name,omitempty" validate:"omitempty,min=1"`
+	Metadata  *map[string]any `json:"metadata,omitempty"`
+	Tags      *[]string       `json:"tags,omitempty"`
+	UpdatedBy string          `json:"updated_by" validate:"required"`
 }

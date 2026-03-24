@@ -12,20 +12,20 @@ import (
 
 // UUIDConverter handles UUID conversions between domain and database
 type UUIDConverter interface {
-	DomainToDB(domain uuid.UUID) interface{}
-	DBToDomain(db interface{}) (uuid.UUID, error)
+	DomainToDB(domain uuid.UUID) any
+	DBToDomain(db any) (uuid.UUID, error)
 }
 
 // TimeConverter handles time conversions between domain and database
 type TimeConverter interface {
-	DomainToDB(domain time.Time) interface{}
-	DBToDomain(db interface{}) (time.Time, error)
+	DomainToDB(domain time.Time) any
+	DBToDomain(db any) (time.Time, error)
 }
 
 // BoolConverter handles boolean conversions between domain and database
 type BoolConverter interface {
-	DomainToDB(domain bool) interface{}
-	DBToDomain(db interface{}) (bool, error)
+	DomainToDB(domain bool) any
+	DBToDomain(db any) (bool, error)
 }
 
 // EmailConverter handles email conversions between domain and database
@@ -60,8 +60,8 @@ type UserRoleConverter interface {
 
 // SessionTokenConverter handles session token conversions between domain and database
 type SessionTokenConverter interface {
-	DomainToDB(domain entities.SessionToken) interface{}
-	DBToDomain(db interface{}) (entities.SessionToken, error)
+	DomainToDB(domain entities.SessionToken) any
+	DBToDomain(db any) (entities.SessionToken, error)
 }
 
 // Default implementations
@@ -73,14 +73,14 @@ func NewSQLiteUUIDConverter() *SQLiteUUIDConverter {
 	return &SQLiteUUIDConverter{}
 }
 
-func (c *SQLiteUUIDConverter) DomainToDB(domain uuid.UUID) interface{} {
+func (c *SQLiteUUIDConverter) DomainToDB(domain uuid.UUID) any {
 	if domain == uuid.Nil {
 		return nil
 	}
 	return domain.String()
 }
 
-func (c *SQLiteUUIDConverter) DBToDomain(db interface{}) (uuid.UUID, error) {
+func (c *SQLiteUUIDConverter) DBToDomain(db any) (uuid.UUID, error) {
 	if db == nil {
 		return uuid.Nil, nil
 	}
@@ -100,11 +100,11 @@ func NewPostgresUUIDConverter() *PostgresUUIDConverter {
 	return &PostgresUUIDConverter{}
 }
 
-func (c *PostgresUUIDConverter) DomainToDB(domain uuid.UUID) interface{} {
+func (c *PostgresUUIDConverter) DomainToDB(domain uuid.UUID) any {
 	return domain // PostgreSQL handles UUID natively
 }
 
-func (c *PostgresUUIDConverter) DBToDomain(db interface{}) (uuid.UUID, error) {
+func (c *PostgresUUIDConverter) DBToDomain(db any) (uuid.UUID, error) {
 	if db == nil {
 		return uuid.Nil, nil
 	}
@@ -127,11 +127,11 @@ func NewMySQLUUIDConverter() *MySQLUUIDConverter {
 	return &MySQLUUIDConverter{}
 }
 
-func (c *MySQLUUIDConverter) DomainToDB(domain uuid.UUID) interface{} {
+func (c *MySQLUUIDConverter) DomainToDB(domain uuid.UUID) any {
 	return domain[:] // Convert to byte slice
 }
 
-func (c *MySQLUUIDConverter) DBToDomain(db interface{}) (uuid.UUID, error) {
+func (c *MySQLUUIDConverter) DBToDomain(db any) (uuid.UUID, error) {
 	if db == nil {
 		return uuid.Nil, nil
 	}
@@ -154,14 +154,14 @@ func NewSQLiteTimeConverter() *SQLiteTimeConverter {
 	return &SQLiteTimeConverter{}
 }
 
-func (c *SQLiteTimeConverter) DomainToDB(domain time.Time) interface{} {
+func (c *SQLiteTimeConverter) DomainToDB(domain time.Time) any {
 	if domain.IsZero() {
 		return nil
 	}
 	return domain
 }
 
-func (c *SQLiteTimeConverter) DBToDomain(db interface{}) (time.Time, error) {
+func (c *SQLiteTimeConverter) DBToDomain(db any) (time.Time, error) {
 	if db == nil {
 		return time.Time{}, nil
 	}
@@ -184,11 +184,11 @@ func NewSQLiteBoolConverter() *SQLiteBoolConverter {
 	return &SQLiteBoolConverter{}
 }
 
-func (c *SQLiteBoolConverter) DomainToDB(domain bool) interface{} {
+func (c *SQLiteBoolConverter) DomainToDB(domain bool) any {
 	return domain // SQLite supports boolean natively in recent versions
 }
 
-func (c *SQLiteBoolConverter) DBToDomain(db interface{}) (bool, error) {
+func (c *SQLiteBoolConverter) DBToDomain(db any) (bool, error) {
 	if db == nil {
 		return false, nil
 	}
@@ -210,10 +210,10 @@ func (c *SQLiteBoolConverter) DBToDomain(db interface{}) (bool, error) {
 // Conversion errors
 type ConversionError struct {
 	Message string
-	Value   interface{}
+	Value   any
 }
 
-func NewConversionError(message string, value interface{}) *ConversionError {
+func NewConversionError(message string, value any) *ConversionError {
 	return &ConversionError{
 		Message: message,
 		Value:   value,
@@ -352,11 +352,11 @@ func NewDefaultSessionTokenConverter() *DefaultSessionTokenConverter {
 	return &DefaultSessionTokenConverter{}
 }
 
-func (c *DefaultSessionTokenConverter) DomainToDB(domain entities.SessionToken) interface{} {
+func (c *DefaultSessionTokenConverter) DomainToDB(domain entities.SessionToken) any {
 	return domain.UUID().String()
 }
 
-func (c *DefaultSessionTokenConverter) DBToDomain(db interface{}) (entities.SessionToken, error) {
+func (c *DefaultSessionTokenConverter) DBToDomain(db any) (entities.SessionToken, error) {
 	var tokenUUID uuid.UUID
 
 	switch v := db.(type) {
@@ -384,7 +384,7 @@ func (c *DefaultSessionTokenConverter) DBToDomain(db interface{}) (entities.Sess
 // Helper functions
 
 // ConvertToGeneric converts any type to interface{} for database operations
-func ConvertToGeneric(value interface{}) interface{} {
+func ConvertToGeneric(value any) any {
 	if value == nil {
 		return nil
 	}
@@ -392,7 +392,7 @@ func ConvertToGeneric(value interface{}) interface{} {
 }
 
 // SafeString safely converts interface{} to string
-func SafeString(value interface{}) string {
+func SafeString(value any) string {
 	if value == nil {
 		return ""
 	}
@@ -408,7 +408,7 @@ func SafeString(value interface{}) string {
 }
 
 // SafeTime safely converts interface{} to time.Time
-func SafeTime(value interface{}) time.Time {
+func SafeTime(value any) time.Time {
 	if value == nil {
 		return time.Time{}
 	}

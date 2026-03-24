@@ -18,28 +18,29 @@ import (
 // This adapts PostgreSQL-specific types to domain interfaces
 type PostgresUserRepository struct {
 	pool       *pgxpool.Pool
-	mapper     mappers.UserMapper
+	mapper     *mappers.UserMapper
 	converters *PostgresConverterSet
 }
 
 // PostgresConverterSet holds all type converters for PostgreSQL
 type PostgresConverterSet struct {
-	UUID     converters.PostgresUUIDConverter
+	UUID     converters.UUIDConverter
 	Time     converters.TimeConverter
 	Bool     converters.BoolConverter
-	Email    converters.DefaultEmailConverter
-	Username converters.DefaultUsernameConverter
-	Password converters.DefaultPasswordHashConverter
-	Status   converters.DefaultUserStatusConverter
-	Role     converters.DefaultUserRoleConverter
+	Email    converters.EmailConverter
+	Username converters.UsernameConverter
+	Password converters.PasswordHashConverter
+	Status   converters.UserStatusConverter
+	Role     converters.UserRoleConverter
 }
 
 // NewPostgresUserRepository creates a new PostgreSQL user repository
 func NewPostgresUserRepository(pool *pgxpool.Pool) repositories.UserRepository {
 	return &PostgresUserRepository{
-		pool: pool,
+		pool:   pool,
+		mapper: mappers.NewUserMapper(),
 		converters: &PostgresConverterSet{
-			UUID:     converters.NewPostgresUUIDConverter(),
+			UUID:     converters.NewUUIDConverter("postgres"),
 			Time:     converters.NewTimeConverter("postgres"),
 			Bool:     converters.NewBoolConverter("postgres"),
 			Email:    converters.NewDefaultEmailConverter(),
@@ -54,7 +55,7 @@ func NewPostgresUserRepository(pool *pgxpool.Pool) repositories.UserRepository {
 // Create saves a new user to PostgreSQL
 func (r *PostgresUserRepository) Create(ctx context.Context, user *entities.User) error {
 	// Convert domain entity to PostgreSQL model
-	postgresUser, err := mappers.PostgresUserFromDomain(user)
+	_, err := r.mapper.PostgresUserFromDomain(user)
 	if err != nil {
 		return fmt.Errorf("failed to convert user: %w", err)
 	}
@@ -91,18 +92,12 @@ func (r *PostgresUserRepository) GetByUUID(ctx context.Context, uuid entities.Uu
 
 // GetByEmail retrieves a user by email from PostgreSQL
 func (r *PostgresUserRepository) GetByEmail(ctx context.Context, email entities.Email) (*entities.User, error) {
-	// Convert to database format
-	dbEmail := r.converters.Email.DomainToDB(email)
-
 	// Query using case-insensitive search (CITEXT)
 	panic("implement me: use actual sqlc generated code for PostgreSQL")
 }
 
 // GetByUsername retrieves a user by username from PostgreSQL
 func (r *PostgresUserRepository) GetByUsername(ctx context.Context, username entities.Username) (*entities.User, error) {
-	// Convert to database format
-	dbUsername := r.converters.Username.DomainToDB(username)
-
 	// Query using case-insensitive search (CITEXT)
 	panic("implement me: use actual sqlc generated code for PostgreSQL")
 }
@@ -110,7 +105,7 @@ func (r *PostgresUserRepository) GetByUsername(ctx context.Context, username ent
 // Update updates an existing user in PostgreSQL
 func (r *PostgresUserRepository) Update(ctx context.Context, user *entities.User) error {
 	// Convert domain entity to PostgreSQL model
-	postgresUser, err := mappers.PostgresUserFromDomain(user)
+	_, err := r.mapper.PostgresUserFromDomain(user)
 	if err != nil {
 		return fmt.Errorf("failed to convert user: %w", err)
 	}
@@ -134,9 +129,6 @@ func (r *PostgresUserRepository) List(ctx context.Context, status entities.UserS
 	if offset < 0 {
 		return nil, errors.NewValidationError("offset", "must be non-negative")
 	}
-
-	// Convert status to database format
-	dbStatus := r.converters.Status.DomainToDB(status)
 
 	// Query database
 	panic("implement me: use actual sqlc generated code for PostgreSQL")
@@ -181,19 +173,12 @@ func (r *PostgresUserRepository) GetStats(ctx context.Context) (*entities.UserSt
 
 // VerifyCredentials verifies user credentials in PostgreSQL
 func (r *PostgresUserRepository) VerifyCredentials(ctx context.Context, email entities.Email, password entities.PasswordHash) (*entities.User, error) {
-	// Convert to database format
-	dbEmail := r.converters.Email.DomainToDB(email)
-	dbPassword := r.converters.Password.DomainToDB(password)
-
 	// Query user by email and verify password
 	panic("implement me: use actual sqlc generated code for PostgreSQL")
 }
 
 // UpdatePassword updates user password in PostgreSQL
 func (r *PostgresUserRepository) UpdatePassword(ctx context.Context, id entities.UserID, password entities.PasswordHash) error {
-	// Convert to database format
-	dbPassword := r.converters.Password.DomainToDB(password)
-
 	// Update password
 	panic("implement me: use actual sqlc generated code for PostgreSQL")
 }
@@ -210,9 +195,6 @@ func (r *PostgresUserRepository) ChangeStatus(ctx context.Context, id entities.U
 	if !status.IsValid() {
 		return errors.NewValidationError("status", "invalid user status")
 	}
-
-	// Convert to database format
-	dbStatus := r.converters.Status.DomainToDB(status)
 
 	// Update status
 	panic("implement me: use actual sqlc generated code for PostgreSQL")
@@ -239,9 +221,6 @@ func (r *PostgresUserRepository) ChangeRole(ctx context.Context, id entities.Use
 	if !role.IsValid() {
 		return errors.NewValidationError("role", "invalid user role")
 	}
-
-	// Convert to database format
-	dbRole := r.converters.Role.DomainToDB(role)
 
 	// Update role
 	panic("implement me: use actual sqlc generated code for PostgreSQL")

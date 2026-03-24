@@ -18,26 +18,27 @@ import (
 // This adapts MySQL-specific types to domain interfaces
 type MySQLUserRepository struct {
 	db         *sql.DB
-	mapper     mappers.UserMapper
+	mapper     *mappers.UserMapper
 	converters *MySQLConverterSet
 }
 
 // MySQLConverterSet holds all type converters for MySQL
 type MySQLConverterSet struct {
-	UUID     converters.MySQLUUIDConverter
+	UUID     converters.UUIDConverter
 	Time     converters.TimeConverter
 	Bool     converters.BoolConverter
-	Email    converters.DefaultEmailConverter
-	Username converters.DefaultUsernameConverter
-	Password converters.DefaultPasswordHashConverter
-	Status   converters.DefaultUserStatusConverter
-	Role     converters.DefaultUserRoleConverter
+	Email    converters.EmailConverter
+	Username converters.UsernameConverter
+	Password converters.PasswordHashConverter
+	Status   converters.UserStatusConverter
+	Role     converters.UserRoleConverter
 }
 
 // NewMySQLUserRepository creates a new MySQL user repository
 func NewMySQLUserRepository(db *sql.DB) repositories.UserRepository {
 	return &MySQLUserRepository{
-		db: db,
+		db:     db,
+		mapper: mappers.NewUserMapper(),
 		converters: &MySQLConverterSet{
 			UUID:     converters.NewMySQLUUIDConverter(),
 			Time:     converters.NewTimeConverter("mysql"),
@@ -54,7 +55,7 @@ func NewMySQLUserRepository(db *sql.DB) repositories.UserRepository {
 // Create saves a new user to MySQL
 func (r *MySQLUserRepository) Create(ctx context.Context, user *entities.User) error {
 	// Convert domain entity to MySQL model
-	mysqlUser, err := mappers.MySQLUserFromDomain(user)
+	_, err := r.mapper.MySQLUserFromDomain(user)
 	if err != nil {
 		return fmt.Errorf("failed to convert user: %w", err)
 	}
@@ -91,18 +92,12 @@ func (r *MySQLUserRepository) GetByUUID(ctx context.Context, uuid entities.UuID)
 
 // GetByEmail retrieves a user by email from MySQL
 func (r *MySQLUserRepository) GetByEmail(ctx context.Context, email entities.Email) (*entities.User, error) {
-	// Convert to database format
-	dbEmail := r.converters.Email.DomainToDB(email)
-
 	// Query using case-insensitive search (COLLATE utf8mb4_unicode_ci)
 	panic("implement me: use actual sqlc generated code for MySQL")
 }
 
 // GetByUsername retrieves a user by username from MySQL
 func (r *MySQLUserRepository) GetByUsername(ctx context.Context, username entities.Username) (*entities.User, error) {
-	// Convert to database format
-	dbUsername := r.converters.Username.DomainToDB(username)
-
 	// Query using case-insensitive search
 	panic("implement me: use actual sqlc generated code for MySQL")
 }
@@ -110,7 +105,7 @@ func (r *MySQLUserRepository) GetByUsername(ctx context.Context, username entiti
 // Update updates an existing user in MySQL
 func (r *MySQLUserRepository) Update(ctx context.Context, user *entities.User) error {
 	// Convert domain entity to MySQL model
-	mysqlUser, err := mappers.MySQLUserFromDomain(user)
+	_, err := r.mapper.MySQLUserFromDomain(user)
 	if err != nil {
 		return fmt.Errorf("failed to convert user: %w", err)
 	}
@@ -135,9 +130,6 @@ func (r *MySQLUserRepository) List(ctx context.Context, status entities.UserStat
 		return nil, errors.NewValidationError("offset", "must be non-negative")
 	}
 
-	// Convert status to database format
-	dbStatus := r.converters.Status.DomainToDB(status)
-
 	// Query database
 	panic("implement me: use actual sqlc generated code for MySQL")
 }
@@ -155,9 +147,6 @@ func (r *MySQLUserRepository) Search(ctx context.Context, query string, status e
 		return nil, errors.NewValidationError("limit", "must be between 1 and 100")
 	}
 
-	// Convert status to database format
-	dbStatus := r.converters.Status.DomainToDB(status)
-
 	// Use MySQL's FULLTEXT search with MATCH() AGAINST()
 	panic("implement me: use actual sqlc generated code for MySQL")
 }
@@ -171,9 +160,6 @@ func (r *MySQLUserRepository) SearchByTags(ctx context.Context, tags []string, s
 	if len(tags) > 10 {
 		return nil, errors.NewValidationError("tags", "cannot exceed 10 tags")
 	}
-
-	// Convert status to database format
-	dbStatus := r.converters.Status.DomainToDB(status)
 
 	// Use MySQL's JSON_CONTAINS or JSON_SEARCH functions
 	panic("implement me: use actual sqlc generated code for MySQL")
@@ -193,19 +179,12 @@ func (r *MySQLUserRepository) GetStats(ctx context.Context) (*entities.UserStats
 
 // VerifyCredentials verifies user credentials in MySQL
 func (r *MySQLUserRepository) VerifyCredentials(ctx context.Context, email entities.Email, password entities.PasswordHash) (*entities.User, error) {
-	// Convert to database format
-	dbEmail := r.converters.Email.DomainToDB(email)
-	dbPassword := r.converters.Password.DomainToDB(password)
-
 	// Query user by email and verify password
 	panic("implement me: use actual sqlc generated code for MySQL")
 }
 
 // UpdatePassword updates user password in MySQL
 func (r *MySQLUserRepository) UpdatePassword(ctx context.Context, id entities.UserID, password entities.PasswordHash) error {
-	// Convert to database format
-	dbPassword := r.converters.Password.DomainToDB(password)
-
 	// Update password
 	panic("implement me: use actual sqlc generated code for MySQL")
 }
@@ -222,9 +201,6 @@ func (r *MySQLUserRepository) ChangeStatus(ctx context.Context, id entities.User
 	if !status.IsValid() {
 		return errors.NewValidationError("status", "invalid user status")
 	}
-
-	// Convert to database format
-	dbStatus := r.converters.Status.DomainToDB(status)
 
 	// Update status
 	panic("implement me: use actual sqlc generated code for MySQL")
@@ -251,9 +227,6 @@ func (r *MySQLUserRepository) ChangeRole(ctx context.Context, id entities.UserID
 	if !role.IsValid() {
 		return errors.NewValidationError("role", "invalid user role")
 	}
-
-	// Convert to database format
-	dbRole := r.converters.Role.DomainToDB(role)
 
 	// Update role
 	panic("implement me: use actual sqlc generated code for MySQL")

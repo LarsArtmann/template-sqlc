@@ -9,9 +9,15 @@ import (
 
 // UserMapper handles conversion between domain entities and database models
 // This isolates domain entities from database-specific types
+type UserMapper struct{}
+
+// NewUserMapper creates a new UserMapper instance
+func NewUserMapper() *UserMapper {
+	return &UserMapper{}
+}
 
 // DomainUserFromSQLite converts SQLite model to domain entity
-func DomainUserFromSQLite(sqliteUser interface{}) (*entities.User, error) {
+func (m *UserMapper) DomainUserFromSQLite(sqliteUser any) (*entities.User, error) {
 	// This would be implemented based on actual generated SQLite types
 	// Example implementation - adapt to your actual generated types
 
@@ -26,19 +32,19 @@ func DomainUserFromSQLite(sqliteUser interface{}) (*entities.User, error) {
 }
 
 // DomainUserFromPostgres converts PostgreSQL model to domain entity
-func DomainUserFromPostgres(postgresUser interface{}) (*entities.User, error) {
+func (m *UserMapper) DomainUserFromPostgres(postgresUser any) (*entities.User, error) {
 	// Similar implementation for PostgreSQL types
 	panic("implement me: convert PostgreSQL user to domain entity")
 }
 
 // DomainUserFromMySQL converts MySQL model to domain entity
-func DomainUserFromMySQL(mysqlUser interface{}) (*entities.User, error) {
+func (m *UserMapper) DomainUserFromMySQL(mysqlUser any) (*entities.User, error) {
 	// Similar implementation for MySQL types
 	panic("implement me: convert MySQL user to domain entity")
 }
 
 // SQLiteUserFromDomain converts domain entity to SQLite model
-func SQLiteUserFromDomain(user *entities.User) (interface{}, error) {
+func (m *UserMapper) SQLiteUserFromDomain(user *entities.User) (any, error) {
 	// Convert domain entity to SQLite-specific model
 	// This would be implemented based on your actual generated types
 
@@ -54,44 +60,44 @@ func SQLiteUserFromDomain(user *entities.User) (interface{}, error) {
 }
 
 // PostgresUserFromDomain converts domain entity to PostgreSQL model
-func PostgresUserFromDomain(user *entities.User) (interface{}, error) {
+func (m *UserMapper) PostgresUserFromDomain(user *entities.User) (any, error) {
 	// Similar implementation for PostgreSQL
 	panic("implement me: convert domain entity to PostgreSQL user")
 }
 
 // MySQLUserFromDomain converts domain entity to MySQL model
-func MySQLUserFromDomain(user *entities.User) (interface{}, error) {
+func (m *UserMapper) MySQLUserFromDomain(user *entities.User) (any, error) {
 	// Similar implementation for MySQL
 	panic("implement me: convert domain entity to MySQL user")
 }
 
 // DomainSessionFromSQLite converts SQLite session to domain entity
-func DomainSessionFromSQLite(sqliteSession interface{}) (*entities.UserSession, error) {
+func (m *UserMapper) DomainSessionFromSQLite(sqliteSession any) (*entities.UserSession, error) {
 	panic("implement me: convert SQLite session to domain entity")
 }
 
 // DomainSessionFromPostgres converts PostgreSQL session to domain entity
-func DomainSessionFromPostgres(postgresSession interface{}) (*entities.UserSession, error) {
+func (m *UserMapper) DomainSessionFromPostgres(postgresSession any) (*entities.UserSession, error) {
 	panic("implement me: convert PostgreSQL session to domain entity")
 }
 
 // DomainSessionFromMySQL converts MySQL session to domain entity
-func DomainSessionFromMySQL(mysqlSession interface{}) (*entities.UserSession, error) {
+func (m *UserMapper) DomainSessionFromMySQL(mysqlSession any) (*entities.UserSession, error) {
 	panic("implement me: convert MySQL session to domain entity")
 }
 
 // SQLiteSessionFromDomain converts domain entity to SQLite model
-func SQLiteSessionFromDomain(session *entities.UserSession) (interface{}, error) {
+func (m *UserMapper) SQLiteSessionFromDomain(session *entities.UserSession) (any, error) {
 	panic("implement me: convert domain entity to SQLite session")
 }
 
 // PostgresSessionFromDomain converts domain entity to PostgreSQL model
-func PostgresSessionFromDomain(session *entities.UserSession) (interface{}, error) {
+func (m *UserMapper) PostgresSessionFromDomain(session *entities.UserSession) (any, error) {
 	panic("implement me: convert domain entity to PostgreSQL session")
 }
 
 // MySQLSessionFromDomain converts domain entity to MySQL model
-func MySQLSessionFromDomain(session *entities.UserSession) (interface{}, error) {
+func (m *UserMapper) MySQLSessionFromDomain(session *entities.UserSession) (any, error) {
 	panic("implement me: convert domain entity to MySQL session")
 }
 
@@ -136,7 +142,7 @@ func FormatTime(t time.Time) string {
 }
 
 // ParseBool safely parses boolean from various database formats
-func ParseBool(value interface{}) bool {
+func ParseBool(value any) bool {
 	switch v := value.(type) {
 	case bool:
 		return v
@@ -154,12 +160,12 @@ func ParseBool(value interface{}) bool {
 }
 
 // FormatBool safely formats boolean to database format
-func FormatBool(b bool) interface{} {
+func FormatBool(b bool) any {
 	return b
 }
 
 // ParseInterface safely parses interface{} to string
-func ParseInterface(value interface{}) string {
+func ParseInterface(value any) string {
 	if value == nil {
 		return ""
 	}
