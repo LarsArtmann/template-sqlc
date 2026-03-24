@@ -299,11 +299,11 @@ func NewDefaultPasswordHashConverter() *DefaultPasswordHashConverter {
 	return &DefaultPasswordHashConverter{}
 }
 
-func (c *DefaultPasswordConverter) DomainToDB(domain entities.PasswordHash) string {
+func (c *DefaultPasswordHashConverter) DomainToDB(domain entities.PasswordHash) string {
 	return domain.String()
 }
 
-func (c *DefaultPasswordConverter) DBToDomain(db string) (entities.PasswordHash, error) {
+func (c *DefaultPasswordHashConverter) DBToDomain(db string) (entities.PasswordHash, error) {
 	return entities.NewPasswordHash(db)
 }
 

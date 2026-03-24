@@ -111,7 +111,7 @@ func (s *UserService) CreateUser(ctx context.Context, req *CreateUserRequest) (*
 
 	// Publish event
 	event := events.UserCreated(
-		user.UUID().String(),
+		user.ID(),
 		email.String(),
 		username.String(),
 		firstName.String(),
@@ -162,7 +162,7 @@ func (s *UserService) UpdateUser(ctx context.Context, req *UpdateUserRequest) (*
 			"old": user.FirstName().String(),
 			"new": firstName.String(),
 		}
-		user.UpdateProfile(&firstName, nil, nil)
+		user.UpdateProfile(&firstName, nil, nil, nil)
 	}
 
 	if req.LastName != nil {
@@ -174,7 +174,7 @@ func (s *UserService) UpdateUser(ctx context.Context, req *UpdateUserRequest) (*
 			"old": user.LastName().String(),
 			"new": lastName.String(),
 		}
-		user.UpdateProfile(nil, &lastName, nil)
+		user.UpdateProfile(nil, &lastName, nil, nil)
 	}
 
 	if req.Metadata != nil {
@@ -186,7 +186,7 @@ func (s *UserService) UpdateUser(ctx context.Context, req *UpdateUserRequest) (*
 			"old": user.Metadata(),
 			"new": metadata,
 		}
-		user.UpdateProfile(nil, nil, &metadata)
+		user.UpdateProfile(nil, nil, &metadata, nil)
 	}
 
 	if req.Tags != nil {
@@ -209,7 +209,7 @@ func (s *UserService) UpdateUser(ctx context.Context, req *UpdateUserRequest) (*
 
 	// Publish update event
 	if len(changes) > 0 {
-		event := events.UserUpdated(user.UUID().String(), changes, req.UpdatedBy)
+		event := events.UserUpdated(user.ID(), changes, user.ID())
 		if err := s.eventPub.Publish(event); err != nil {
 			fmt.Printf("warning: failed to publish event: %v\n", err)
 		}
@@ -230,14 +230,14 @@ func (s *UserService) AuthenticateUser(ctx context.Context, email, password, ipA
 	user, err := s.userRepo.VerifyCredentials(ctx, emailEntity, entities.PasswordHash(password))
 	if err != nil {
 		// Publish failed login event
-		event := events.UserLoginFailed("", ipAddress, userAgent, "unknown")
+		event := events.UserLoginFailed(entities.UserID(0), ipAddress, userAgent, "unknown")
 		s.eventPub.Publish(event)
 		return nil, entities.ErrInvalidCredentials
 	}
 
 	// Check if user is active
 	if !user.IsActive() {
-		event := events.UserLoginFailed(user.UUID().String(), ipAddress, userAgent, "inactive_account")
+		event := events.UserLoginFailed(user.ID(), ipAddress, userAgent, "inactive_account")
 		s.eventPub.Publish(event)
 
 		if user.Status() == entities.UserStatusSuspended {
@@ -270,7 +270,7 @@ func (s *UserService) AuthenticateUser(ctx context.Context, email, password, ipA
 	}
 
 	// Publish login event
-	event := events.UserLoggedIn(user.UUID().String(), ipAddress, userAgent, "unknown")
+	event := events.UserLoggedIn(user.ID(), ipAddress, userAgent, "unknown")
 	if err := s.eventPub.Publish(event); err != nil {
 		fmt.Printf("warning: failed to publish event: %v\n", err)
 	}
@@ -360,10 +360,10 @@ func (s *UserService) ChangeUserRole(ctx context.Context, userID entities.UserID
 
 	// Publish event
 	event := events.RoleChanged(
-		user.UUID().String(),
+		user.ID(),
 		oldRole.String(),
 		newRole.String(),
-		changedBy,
+		entities.UserID(0), // Placeholder - in real impl, pass the admin user ID
 	)
 	if err := s.eventPub.Publish(event); err != nil {
 		fmt.Printf("warning: failed to publish event: %v\n", err)

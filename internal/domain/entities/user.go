@@ -2,6 +2,7 @@ package entities
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 	"time"
 
@@ -33,6 +34,45 @@ type UserID int64
 
 func (id UserID) Int64() int64   { return int64(id) }
 func (id UserID) String() string { return fmt.Sprintf("user:%d", id) }
+
+// IDID is a strongly-typed event identifier
+type IDID int64
+
+func (id IDID) Int64() int64   { return int64(id) }
+func (id IDID) String() string { return fmt.Sprintf("event:%d", id) }
+
+// AsIDID converts an int64 to IDID
+func AsIDID(value int64) IDID { return IDID(value) }
+
+// UuID is a strongly-typed UUID identifier
+type UuID string
+
+func (id UuID) String() string { return string(id) }
+
+// NewUuID generates a new UuID from a UUID string
+func NewUuID(s string) (UuID, error) {
+	if s == "" {
+		return "", nil
+	}
+	parsed, err := uuid.Parse(s)
+	if err != nil {
+		return "", err
+	}
+	return UuID(parsed.String()), nil
+}
+
+// NewUuIDFromUUID creates a UuID from a uuid.UUID
+func NewUuIDFromUUID(u uuid.UUID) UuID {
+	return UuID(u.String())
+}
+
+// emailRegex is a simple email validation pattern
+var emailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
+
+// isValidEmail validates an email address
+func isValidEmail(email string) bool {
+	return emailRegex.MatchString(email)
+}
 
 // Email represents a validated email address
 type Email string
@@ -287,4 +327,28 @@ func (u *User) RemoveTag(tag string) {
 			return
 		}
 	}
+}
+
+// UserStats represents user statistics
+type UserStats struct {
+	TotalUsers       int64   `json:"total_users"`
+	ActiveUsers      int64   `json:"active_users"`
+	InactiveUsers    int64   `json:"inactive_users"`
+	SuspendedUsers   int64   `json:"suspended_users"`
+	VerifiedUsers    int64   `json:"verified_users"`
+	UsersWithLogins  int64   `json:"users_with_logins"`
+	NewUsers30d      int64   `json:"new_users_30d"`
+	NewUsers7d       int64   `json:"new_users_7d"`
+	ActivePercentage float64 `json:"active_percentage"`
+	VerificationRate float64 `json:"verification_rate"`
+}
+
+// SessionStats represents session statistics
+type SessionStats struct {
+	TotalSessions   int64 `json:"total_sessions"`
+	ActiveSessions  int64 `json:"active_sessions"`
+	ExpiredSessions int64 `json:"expired_sessions"`
+	Sessions24h     int64 `json:"sessions_24h"`
+	Sessions7d      int64 `json:"sessions_7d"`
+	Sessions30d     int64 `json:"sessions_30d"`
 }

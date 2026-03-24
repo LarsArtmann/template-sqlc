@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/promhttp"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 // Metrics collects and exposes sqlc-related metrics
@@ -33,7 +33,7 @@ type Metrics struct {
 
 	// Configuration metrics
 	ConfigFileSize prometheus.Gauge
-	ConfigDatabase prometheus.Counter
+	ConfigDatabase prometheus.Gauge
 
 	// Build metrics
 	BuildDuration prometheus.Histogram
@@ -164,8 +164,8 @@ func NewMetrics() *Metrics {
 				Subsystem: "config",
 			},
 		),
-		ConfigDatabase: prometheus.NewCounter(
-			prometheus.CounterOpts{
+		ConfigDatabase: prometheus.NewGauge(
+			prometheus.GaugeOpts{
 				Name:      "sqlc_config_databases_total",
 				Help:      "Total number of databases configured in sqlc.yaml",
 				Namespace: "sqlc",

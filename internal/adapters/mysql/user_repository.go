@@ -84,14 +84,8 @@ func (r *MySQLUserRepository) GetByID(ctx context.Context, id entities.UserID) (
 }
 
 // GetByUUID retrieves a user by UUID from MySQL
-func (r *MySQLUserRepository) GetByUUID(ctx context.Context, uuid string) (*entities.User, error) {
-	// Convert string to UUID for MySQL query
-	uuidObj, err := r.converters.UUID.DBToDomain(uuid)
-	if err != nil {
-		return nil, errors.NewValidationError("uuid", "invalid UUID format")
-	}
-
-	// Query using UUID as binary
+func (r *MySQLUserRepository) GetByUUID(ctx context.Context, uuid entities.UuID) (*entities.User, error) {
+	// Query using UUID
 	panic("implement me: use actual sqlc generated code for MySQL")
 }
 

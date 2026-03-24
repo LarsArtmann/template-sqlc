@@ -82,7 +82,7 @@ func (r *SQLiteUserRepository) GetByID(ctx context.Context, id entities.UserID) 
 }
 
 // GetByUUID retrieves a user by UUID from SQLite
-func (r *SQLiteUserRepository) GetByUUID(ctx context.Context, uuid string) (*entities.User, error) {
+func (r *SQLiteUserRepository) GetByUUID(ctx context.Context, uuid entities.UuID) (*entities.User, error) {
 	// Similar implementation for UUID lookup
 	panic("implement me: use actual sqlc generated code")
 }

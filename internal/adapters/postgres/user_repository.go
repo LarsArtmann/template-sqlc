@@ -84,13 +84,7 @@ func (r *PostgresUserRepository) GetByID(ctx context.Context, id entities.UserID
 }
 
 // GetByUUID retrieves a user by UUID from PostgreSQL
-func (r *PostgresUserRepository) GetByUUID(ctx context.Context, uuid string) (*entities.User, error) {
-	// Convert string to UUID type
-	uuidObj, err := r.converters.UUID.DBToDomain(uuid)
-	if err != nil {
-		return nil, errors.NewValidationError("uuid", "invalid UUID format")
-	}
-
+func (r *PostgresUserRepository) GetByUUID(ctx context.Context, uuid entities.UuID) (*entities.User, error) {
 	// Query using UUID type
 	panic("implement me: use actual sqlc generated code for PostgreSQL")
 }

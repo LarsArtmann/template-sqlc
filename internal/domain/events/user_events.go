@@ -3,17 +3,17 @@ package events
 import (
 	"time"
 
-	"github.com/google/uuid"
+	"github.com/LarsArtmann/template-sqlc/internal/domain/entities"
 )
 
 // UserEvent represents a domain event related to users
 type UserEvent struct {
-	ID        string      `json:"id"`
-	Type      EventType   `json:"type"`
-	UserID    string      `json:"user_id"`
-	Data      interface{} `json:"data"`
-	Timestamp time.Time   `json:"timestamp"`
-	Version   string      `json:"version"`
+	ID        entities.IDID   `json:"id"`
+	Type      EventType       `json:"type"`
+	UserID    entities.UserID `json:"user_id"`
+	Data      interface{}     `json:"data"`
+	Timestamp time.Time       `json:"timestamp"`
+	Version   string          `json:"version"`
 }
 
 // EventType represents the type of domain event
@@ -49,50 +49,50 @@ const (
 
 // UserCreatedEvent data for user creation
 type UserCreatedEvent struct {
-	UserID    string `json:"user_id"`
-	Email     string `json:"email"`
-	Username  string `json:"username"`
-	FirstName string `json:"first_name"`
-	LastName  string `json:"last_name"`
-	Role      string `json:"role"`
-	Status    string `json:"status"`
+	UserID    entities.UserID `json:"user_id"`
+	Email     string          `json:"email"`
+	Username  string          `json:"username"`
+	FirstName string          `json:"first_name"`
+	LastName  string          `json:"last_name"`
+	Role      string          `json:"role"`
+	Status    string          `json:"status"`
 }
 
 // UserUpdatedEvent data for user updates
 type UserUpdatedEvent struct {
-	UserID    string                 `json:"user_id"`
+	UserID    entities.UserID        `json:"user_id"`
 	Changes   map[string]interface{} `json:"changes"`
-	UpdatedBy string                 `json:"updated_by"`
+	UpdatedBy entities.UserID        `json:"updated_by"`
 }
 
 // UserLoginEvent data for user login
 type UserLoginEvent struct {
-	UserID    string `json:"user_id"`
-	IPAddress string `json:"ip_address"`
-	UserAgent string `json:"user_agent"`
-	Device    string `json:"device"`
-	Success   bool   `json:"success"`
+	UserID    entities.UserID `json:"user_id"`
+	IPAddress string          `json:"ip_address"`
+	UserAgent string          `json:"user_agent"`
+	Device    string          `json:"device"`
+	Success   bool            `json:"success"`
 }
 
 // UserVerifiedEvent data for user verification
 type UserVerifiedEvent struct {
-	UserID    string    `json:"user_id"`
-	Method    string    `json:"method"`
-	Timestamp time.Time `json:"timestamp"`
+	UserID    entities.UserID `json:"user_id"`
+	Method    string          `json:"method"`
+	Timestamp time.Time       `json:"timestamp"`
 }
 
 // RoleChangedEvent data for role changes
 type RoleChangedEvent struct {
-	UserID    string `json:"user_id"`
-	OldRole   string `json:"old_role"`
-	NewRole   string `json:"new_role"`
-	ChangedBy string `json:"changed_by"`
+	UserID    entities.UserID `json:"user_id"`
+	OldRole   string          `json:"old_role"`
+	NewRole   string          `json:"new_role"`
+	ChangedBy entities.UserID `json:"changed_by"`
 }
 
 // NewUserEvent creates a new user domain event
-func NewUserEvent(eventType EventType, userID string, data interface{}) *UserEvent {
+func NewUserEvent(eventType EventType, userID entities.UserID, data interface{}) *UserEvent {
 	return &UserEvent{
-		ID:        uuid.New().String(),
+		ID:        entities.AsIDID(time.Now().UnixNano()),
 		Type:      eventType,
 		UserID:    userID,
 		Data:      data,
@@ -102,7 +102,7 @@ func NewUserEvent(eventType EventType, userID string, data interface{}) *UserEve
 }
 
 // UserCreated creates a user created event
-func UserCreated(userID, email, username, firstName, lastName, role, status string) *UserEvent {
+func UserCreated(userID entities.UserID, email, username, firstName, lastName, role, status string) *UserEvent {
 	data := UserCreatedEvent{
 		UserID:    userID,
 		Email:     email,
@@ -116,7 +116,7 @@ func UserCreated(userID, email, username, firstName, lastName, role, status stri
 }
 
 // UserUpdated creates a user updated event
-func UserUpdated(userID string, changes map[string]interface{}, updatedBy string) *UserEvent {
+func UserUpdated(userID entities.UserID, changes map[string]interface{}, updatedBy entities.UserID) *UserEvent {
 	data := UserUpdatedEvent{
 		UserID:    userID,
 		Changes:   changes,
@@ -126,7 +126,7 @@ func UserUpdated(userID string, changes map[string]interface{}, updatedBy string
 }
 
 // UserLoggedIn creates a user login event
-func UserLoggedIn(userID, ipAddress, userAgent, device string) *UserEvent {
+func UserLoggedIn(userID entities.UserID, ipAddress, userAgent, device string) *UserEvent {
 	data := UserLoginEvent{
 		UserID:    userID,
 		IPAddress: ipAddress,
@@ -138,7 +138,7 @@ func UserLoggedIn(userID, ipAddress, userAgent, device string) *UserEvent {
 }
 
 // UserLoginFailed creates a user login failed event
-func UserLoginFailed(userID, ipAddress, userAgent, device string) *UserEvent {
+func UserLoginFailed(userID entities.UserID, ipAddress, userAgent, device string) *UserEvent {
 	data := UserLoginEvent{
 		UserID:    userID,
 		IPAddress: ipAddress,
@@ -150,7 +150,7 @@ func UserLoginFailed(userID, ipAddress, userAgent, device string) *UserEvent {
 }
 
 // UserVerified creates a user verified event
-func UserVerified(userID, method string) *UserEvent {
+func UserVerified(userID entities.UserID, method string) *UserEvent {
 	data := UserVerifiedEvent{
 		UserID:    userID,
 		Method:    method,
@@ -160,7 +160,7 @@ func UserVerified(userID, method string) *UserEvent {
 }
 
 // RoleChanged creates a role changed event
-func RoleChanged(userID, oldRole, newRole, changedBy string) *UserEvent {
+func RoleChanged(userID entities.UserID, oldRole, newRole string, changedBy entities.UserID) *UserEvent {
 	data := RoleChangedEvent{
 		UserID:    userID,
 		OldRole:   oldRole,

@@ -114,7 +114,7 @@ func (r *WorkingSQLiteUserRepository) GetByID(ctx context.Context, id entities.U
 }
 
 // GetByUUID retrieves a user by UUID from SQLite
-func (r *WorkingSQLiteUserRepository) GetByUUID(ctx context.Context, uuid string) (*entities.User, error) {
+func (r *WorkingSQLiteUserRepository) GetByUUID(ctx context.Context, uuid entities.UuID) (*entities.User, error) {
 	// Implementation following same pattern as GetByID
 	return nil, fmt.Errorf("implementation in progress - get by UUID %s", uuid)
 }

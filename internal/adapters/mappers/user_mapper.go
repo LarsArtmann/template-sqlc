@@ -98,11 +98,11 @@ func MySQLSessionFromDomain(session *entities.UserSession) (interface{}, error) 
 // Helper functions for common conversions
 
 // ParseUUID safely parses UUID from string
-func ParseUUID(uuidStr string) (uuid.UUID, error) {
+func ParseUUID(uuidStr entities.UuID) (uuid.UUID, error) {
 	if uuidStr == "" {
 		return uuid.Nil, nil
 	}
-	return uuid.Parse(uuidStr)
+	return uuid.Parse(string(uuidStr))
 }
 
 // FormatUUID safely formats UUID to string

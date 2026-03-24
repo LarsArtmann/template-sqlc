@@ -12,7 +12,7 @@ type UserRepository interface {
 	// CRUD operations
 	Create(ctx context.Context, user *entities.User) error
 	GetByID(ctx context.Context, id entities.UserID) (*entities.User, error)
-	GetByUUID(ctx context.Context, uuid string) (*entities.User, error)
+	GetByUUID(ctx context.Context, uuid entities.UuID) (*entities.User, error)
 	GetByEmail(ctx context.Context, email entities.Email) (*entities.User, error)
 	GetByUsername(ctx context.Context, username entities.Username) (*entities.User, error)
 	Update(ctx context.Context, user *entities.User) error

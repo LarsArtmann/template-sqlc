@@ -31,7 +31,7 @@ DO NOT EDIT MANUALLY - Changes will be overwritten
 
 ## Overview
 
-This project creates professional README templates by analyzing patterns from real-world projects and implementing best practices for documentation. It provides a Go-based generator that creates hierarchical templates for different project types and complexity levels.
+This is a comprehensive, production-ready sqlc configuration template that supports SQLite, PostgreSQL, and MySQL databases. It provides fully configured code generation with all sqlc features, including multi-language plugins (Python, Kotlin, TypeScript), CEL validation rules for production safety, and 30+ type mapping patterns for common domain needs.
 
 ## Features
 
