@@ -53,7 +53,7 @@ func NewSQLiteUserRepository(db *sql.DB) repositories.UserRepository {
 // Create saves a new user to SQLite
 func (r *SQLiteUserRepository) Create(ctx context.Context, user *entities.User) error {
 	// Convert domain entity to SQLite model
-	sqliteUser, err := mappers.SQLiteUserFromDomain(user)
+	_, err := mappers.SQLiteUserFromDomain(user)
 	if err != nil {
 		return fmt.Errorf("failed to convert user: %w", err)
 	}
@@ -103,7 +103,7 @@ func (r *SQLiteUserRepository) GetByUsername(ctx context.Context, username entit
 // Update updates an existing user in SQLite
 func (r *SQLiteUserRepository) Update(ctx context.Context, user *entities.User) error {
 	// Convert domain entity to SQLite model
-	sqliteUser, err := mappers.SQLiteUserFromDomain(user)
+	_, err := mappers.SQLiteUserFromDomain(user)
 	if err != nil {
 		return fmt.Errorf("failed to convert user: %w", err)
 	}

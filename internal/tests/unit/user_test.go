@@ -27,7 +27,7 @@ func TestUserCreation(t *testing.T) {
 			name:      "valid user",
 			email:     "test@example.com",
 			username:  "testuser",
-			password:  "SecurePass123!",
+			password:  "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZRGdjGj/n3.rsQ5pPjZ5yVlWK5WAe",
 			firstName: "John",
 			lastName:  "Doe",
 			status:    "active",
@@ -37,7 +37,7 @@ func TestUserCreation(t *testing.T) {
 			name:        "invalid email",
 			email:       "invalid-email",
 			username:    "testuser",
-			password:    "SecurePass123!",
+			password:    "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZRGdjGj/n3.rsQ5pPjZ5yVlWK5WAe",
 			firstName:   "John",
 			lastName:    "Doe",
 			status:      "active",
@@ -49,7 +49,7 @@ func TestUserCreation(t *testing.T) {
 			name:        "short username",
 			email:       "test@example.com",
 			username:    "ab",
-			password:    "SecurePass123!",
+			password:    "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZRGdjGj/n3.rsQ5pPjZ5yVlWK5WAe",
 			firstName:   "John",
 			lastName:    "Doe",
 			status:      "active",
@@ -61,7 +61,7 @@ func TestUserCreation(t *testing.T) {
 			name:        "empty first name",
 			email:       "test@example.com",
 			username:    "testuser",
-			password:    "SecurePass123!",
+			password:    "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZRGdjGj/n3.rsQ5pPjZ5yVlWK5WAe",
 			firstName:   "",
 			lastName:    "Doe",
 			status:      "active",
@@ -73,7 +73,7 @@ func TestUserCreation(t *testing.T) {
 			name:        "invalid status",
 			email:       "test@example.com",
 			username:    "testuser",
-			password:    "SecurePass123!",
+			password:    "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZRGdjGj/n3.rsQ5pPjZ5yVlWK5WAe",
 			firstName:   "John",
 			lastName:    "Doe",
 			status:      "invalid",
@@ -85,7 +85,7 @@ func TestUserCreation(t *testing.T) {
 			name:        "invalid role",
 			email:       "test@example.com",
 			username:    "testuser",
-			password:    "SecurePass123!",
+			password:    "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZRGdjGj/n3.rsQ5pPjZ5yVlWK5WAe",
 			firstName:   "John",
 			lastName:    "Doe",
 			status:      "active",
@@ -395,8 +395,7 @@ func BenchmarkUserCreation(b *testing.B) {
 	metadata := entities.NewUserMetadata()
 	tags := []string{"tag1", "tag2"}
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, _ = entities.NewUser(
 			email,
 			username,

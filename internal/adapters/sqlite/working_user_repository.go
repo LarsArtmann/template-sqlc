@@ -87,7 +87,7 @@ func (r *WorkingSQLiteUserRepository) GetByID(ctx context.Context, id entities.U
 		WHERE id = ?
 	`
 
-	user := &entities.User{} // This is wrong - need proper constructor
+	_ = &entities.User{} // This is wrong - need proper constructor
 	var email, username, passwordHash, firstName, lastName, status, role string
 	var isVerified bool
 	var metadataJSON, tagsJSON string

@@ -93,13 +93,13 @@ func (s *UserFeaturesTestSuite) createUserWithEmailUsername(email, username stri
 	req := &services.CreateUserRequest{
 		Email:        email,
 		Username:     username,
-		PasswordHash: "hashed_password_min_32_chars_for_testing",
+		PasswordHash: "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZRGdjGj/n3.rsQ5pPjZ5yVlWK5WAe",
 		FirstName:    "Test",
 		LastName:     "User",
 		Status:       "active",
 		Role:         "user",
 		Tags:         []string{"test"},
-		Metadata:     map[string]interface{}{"source": "bdd"},
+		Metadata:     map[string]any{"source": "bdd"},
 	}
 
 	user, err := s.userService.CreateUser(context.Background(), req)
@@ -113,7 +113,7 @@ func (s *UserFeaturesTestSuite) createUserWithStatus(status string) error {
 	req := &services.CreateUserRequest{
 		Email:        "status@example.com",
 		Username:     "statususer",
-		PasswordHash: "hashed_password_min_32_chars_for_testing",
+		PasswordHash: "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZRGdjGj/n3.rsQ5pPjZ5yVlWK5WAe",
 		FirstName:    "Status",
 		LastName:     "User",
 		Status:       status,
@@ -153,13 +153,13 @@ func (s *UserFeaturesTestSuite) createUserWithValidData() error {
 	req := &services.CreateUserRequest{
 		Email:        "valid@example.com",
 		Username:     "validuser",
-		PasswordHash: "hashed_password_min_32_chars_for_testing",
+		PasswordHash: "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZRGdjGj/n3.rsQ5pPjZ5yVlWK5WAe",
 		FirstName:    "Valid",
 		LastName:     "User",
 		Status:       "active",
 		Role:         "user",
 		Tags:         []string{"valid", "test"},
-		Metadata:     map[string]interface{}{"test": true},
+		Metadata:     map[string]any{"test": true},
 	}
 
 	user, err := s.userService.CreateUser(context.Background(), req)
@@ -173,7 +173,7 @@ func (s *UserFeaturesTestSuite) createUserWithEmail(email string) error {
 	req := &services.CreateUserRequest{
 		Email:        email,
 		Username:     "emailuser",
-		PasswordHash: "hashed_password_min_32_chars_for_testing",
+		PasswordHash: "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZRGdjGj/n3.rsQ5pPjZ5yVlWK5WAe",
 		FirstName:    "Email",
 		LastName:     "User",
 		Status:       "active",
@@ -191,7 +191,7 @@ func (s *UserFeaturesTestSuite) createUserWithUsername(username string) error {
 	req := &services.CreateUserRequest{
 		Email:        "username@example.com",
 		Username:     username,
-		PasswordHash: "hashed_password_min_32_chars_for_testing",
+		PasswordHash: "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZRGdjGj/n3.rsQ5pPjZ5yVlWK5WAe",
 		FirstName:    "Username",
 		LastName:     "User",
 		Status:       "active",
@@ -293,7 +293,7 @@ func (s *UserFeaturesTestSuite) deactivateUserAccount() error {
 }
 
 func (s *UserFeaturesTestSuite) getUserStatistics() error {
-	_, err := s.userService.GetUserStatistics(context.Background())
+	_, err := s.userService.GetUserStats(context.Background())
 	s.lastError = err
 
 	return nil
@@ -556,6 +556,16 @@ func TestUserFeatures(t *testing.T) {
 // Standalone test for simple scenarios
 func TestUserManagementFeatures(t *testing.T) {
 	suite := &UserFeaturesTestSuite{}
+	suite.eventPublisher = events.NewInMemoryEventPublisher()
+	suite.validator = validation.NewUserValidator()
+	suite.userRepo = integration.NewMockUserRepository()
+	suite.sessionRepo = integration.NewMockSessionRepository()
+	suite.userService = services.NewUserService(
+		suite.userRepo,
+		suite.sessionRepo,
+		suite.eventPublisher,
+		suite.validator,
+	)
 
 	// Test user creation flow
 	t.Run("User Creation", func(t *testing.T) {

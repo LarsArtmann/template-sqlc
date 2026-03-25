@@ -37,10 +37,25 @@ func (s *UserServiceIntegrationTestSuite) SetupSuite() {
 	// Initialize validator
 	s.validator = validation.NewUserValidator()
 
-	// Set up test database based on environment
-	s.setupTestDatabase()
+	// Initialize mock repositories
+	s.userRepo = NewMockUserRepository()
+	s.sessionRepo = NewMockSessionRepository()
 
 	// Create user service
+	s.userService = services.NewUserService(
+		s.userRepo,
+		s.sessionRepo,
+		s.eventPublisher,
+		s.validator,
+	)
+}
+
+// SetupTest resets state before each test
+func (s *UserServiceIntegrationTestSuite) SetupTest() {
+	// Reset mock repositories for each test
+	s.eventPublisher.Clear()
+	s.userRepo = NewMockUserRepository()
+	s.sessionRepo = NewMockSessionRepository()
 	s.userService = services.NewUserService(
 		s.userRepo,
 		s.sessionRepo,
@@ -59,59 +74,18 @@ func (s *UserServiceIntegrationTestSuite) TearDownSuite() {
 	}
 }
 
-// setupTestDatabase sets up the test database
-func (s *UserServiceIntegrationTestSuite) setupTestDatabase() {
-	// This would be implemented based on the database being tested
-	// Example for SQLite:
-	// db, err := sql.Open("sqlite3", ":memory:")
-	// require.NoError(s.T(), err)
-	//
-	// // Run migrations
-	// _, err = db.Exec(`
-	//     CREATE TABLE users (
-	//         id INTEGER PRIMARY KEY AUTOINCREMENT,
-	//         uuid TEXT UNIQUE NOT NULL,
-	//         email TEXT UNIQUE NOT NULL,
-	//         username TEXT UNIQUE NOT NULL,
-	//         password_hash TEXT NOT NULL,
-	//         first_name TEXT NOT NULL,
-	//         last_name TEXT NOT NULL,
-	//         status TEXT NOT NULL,
-	//         role TEXT NOT NULL,
-	//         is_verified INTEGER DEFAULT FALSE NOT NULL,
-	//         metadata TEXT DEFAULT '{}',
-	//         tags TEXT DEFAULT '[]',
-	//         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-	//         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-	//         last_login_at DATETIME NULL
-	//     );
-	// `)
-	// require.NoError(s.T(), err)
-	//
-	// s.userRepo = repositories.NewSQLiteUserRepository(db)
-	// s.sessionRepo = repositories.NewSQLiteSessionRepository(db)
-	// s.cleanup = append(s.cleanup, func() error {
-	//     return db.Close()
-	// })
-
-	// For now, use mock repositories
-	s.userRepo = &MockUserRepository{users: make(map[entities.UserID]*entities.User)}
-	s.sessionRepo = &MockSessionRepository{sessions: make(map[entities.SessionID]*entities.UserSession)}
-	s.cleanup = []func() error{}
-}
-
 // TestCreateUser tests user creation
 func (s *UserServiceIntegrationTestSuite) TestCreateUser() {
 	req := &services.CreateUserRequest{
 		Email:        "test@example.com",
 		Username:     "testuser",
-		PasswordHash: "hashed_password_min_32_chars",
+		PasswordHash: "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZRGdjGj/n3.rsQ5pPjZ5yVlWK5WAe", // Valid bcrypt hash (60 chars)
 		FirstName:    "John",
 		LastName:     "Doe",
 		Status:       "active",
 		Role:         "user",
 		Tags:         []string{"developer", "golang"},
-		Metadata:     map[string]interface{}{"team": "engineering"},
+		Metadata:     map[string]any{"team": "engineering"},
 	}
 
 	user, err := s.userService.CreateUser(s.ctx, req)
@@ -141,7 +115,7 @@ func (s *UserServiceIntegrationTestSuite) TestCreateUserDuplicateEmail() {
 	req1 := &services.CreateUserRequest{
 		Email:        "test@example.com",
 		Username:     "testuser1",
-		PasswordHash: "hashed_password_min_32_chars",
+		PasswordHash: "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZRGdjGj/n3.rsQ5pPjZ5yVlWK5WAe",
 		FirstName:    "John",
 		LastName:     "Doe",
 		Status:       "active",
@@ -155,7 +129,7 @@ func (s *UserServiceIntegrationTestSuite) TestCreateUserDuplicateEmail() {
 	req2 := &services.CreateUserRequest{
 		Email:        "test@example.com",
 		Username:     "testuser2",
-		PasswordHash: "hashed_password_min_32_chars",
+		PasswordHash: "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZRGdjGj/n3.rsQ5pPjZ5yVlWK5WAe",
 		FirstName:    "Jane",
 		LastName:     "Smith",
 		Status:       "active",
@@ -174,7 +148,7 @@ func (s *UserServiceIntegrationTestSuite) TestGetUser() {
 	req := &services.CreateUserRequest{
 		Email:        "test@example.com",
 		Username:     "testuser",
-		PasswordHash: "hashed_password_min_32_chars",
+		PasswordHash: "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZRGdjGj/n3.rsQ5pPjZ5yVlWK5WAe",
 		FirstName:    "John",
 		LastName:     "Doe",
 		Status:       "active",
@@ -199,7 +173,7 @@ func (s *UserServiceIntegrationTestSuite) TestUpdateUser() {
 	createReq := &services.CreateUserRequest{
 		Email:        "test@example.com",
 		Username:     "testuser",
-		PasswordHash: "hashed_password_min_32_chars",
+		PasswordHash: "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZRGdjGj/n3.rsQ5pPjZ5yVlWK5WAe",
 		FirstName:    "John",
 		LastName:     "Doe",
 		Status:       "active",
@@ -234,7 +208,7 @@ func (s *UserServiceIntegrationTestSuite) TestAuthenticateUser() {
 	req := &services.CreateUserRequest{
 		Email:        "test@example.com",
 		Username:     "testuser",
-		PasswordHash: "hashed_password_min_32_chars",
+		PasswordHash: "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZRGdjGj/n3.rsQ5pPjZ5yVlWK5WAe",
 		FirstName:    "John",
 		LastName:     "Doe",
 		Status:       "active",
@@ -294,7 +268,7 @@ func (s *UserServiceIntegrationTestSuite) TestChangeUserRole() {
 	req := &services.CreateUserRequest{
 		Email:        "test@example.com",
 		Username:     "testuser",
-		PasswordHash: "hashed_password_min_32_chars",
+		PasswordHash: "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZRGdjGj/n3.rsQ5pPjZ5yVlWK5WAe",
 		FirstName:    "John",
 		LastName:     "Doe",
 		Status:       "active",
@@ -331,7 +305,7 @@ func (s *UserServiceIntegrationTestSuite) TestGetUserStats() {
 		req := &services.CreateUserRequest{
 			Email:        "user_" + userData.status + "_" + userData.role + "@example.com",
 			Username:     "user_" + userData.status + "_" + userData.role,
-			PasswordHash: "hashed_password_min_32_chars",
+			PasswordHash: "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZRGdjGj/n3.rsQ5pPjZ5yVlWK5WAe",
 			FirstName:    "Test",
 			LastName:     "User",
 			Status:       userData.status,

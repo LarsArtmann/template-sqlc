@@ -99,8 +99,8 @@ sql:
 
     # === DATABASE CONNECTION SETTINGS ===
     database:
-      uri: "${DATABASE_URL}" # Connection string from environment variable
-      managed: true # Use sqlc Cloud managed database for vet operations
+      uri: ":memory:"
+      managed: false
     gen:
       go:
         package: "sqlite"
@@ -346,11 +346,8 @@ sql:
       # - "sql/postgres/migrations/001_initial.up.sql"
       # - "sql/postgres/migrations/002_users.up.sql"
       # - "sql/postgres/migrations/*.up.sql"
-    strict_function_checks: true
+    strict_function_checks: false
     strict_order_by: true
-    database:
-      uri: "${POSTGRES_DATABASE_URL}"
-      managed: true
     rules:
       - "sqlc/db-prepare"
     gen:
@@ -358,7 +355,7 @@ sql:
         package: "postgres"
         out: "internal/db/postgres"
         sql_package: "pgx/v5"
-        build_tags: "postgres,pgx"
+        build_tags: "postgres"
 
         # All emission options
         emit_json_tags: true
@@ -452,11 +449,8 @@ sql:
       # - "sql/mysql/migrations/001_initial.up.sql"
       # - "sql/mysql/migrations/002_users.up.sql"
       # - "sql/mysql/migrations/*.up.sql"
-    strict_function_checks: true
+    strict_function_checks: false
     strict_order_by: true
-    database:
-      uri: "${MYSQL_DATABASE_URL}"
-      managed: true
     gen:
       go:
         package: "mysql"

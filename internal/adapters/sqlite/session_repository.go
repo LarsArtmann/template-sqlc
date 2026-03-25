@@ -34,7 +34,7 @@ func NewSQLiteSessionRepository(db *sql.DB) repositories.SessionRepository {
 // Create saves a new session to SQLite
 func (r *SQLiteSessionRepository) Create(ctx context.Context, session *entities.UserSession) error {
 	// Convert domain entity to SQLite model
-	sqliteSession, err := mappers.SQLiteSessionFromDomain(session)
+	_, err := mappers.SQLiteSessionFromDomain(session)
 	if err != nil {
 		return fmt.Errorf("failed to convert session: %w", err)
 	}
@@ -49,7 +49,7 @@ func (r *SQLiteSessionRepository) Create(ctx context.Context, session *entities.
 // GetByToken retrieves a session by token from SQLite
 func (r *SQLiteSessionRepository) GetByToken(ctx context.Context, token entities.SessionToken) (*entities.UserSession, error) {
 	// Convert token to database format
-	dbToken := r.converters.SessionToken.DomainToDB(token)
+	_ = r.converters.SessionToken.DomainToDB(token)
 
 	// Query database
 	// sqliteSession, err := r.queries.GetSessionByToken(ctx, dbToken)
@@ -89,7 +89,7 @@ func (r *SQLiteSessionRepository) GetByUserID(ctx context.Context, userID entiti
 // Update updates a session in SQLite
 func (r *SQLiteSessionRepository) Update(ctx context.Context, session *entities.UserSession) error {
 	// Convert domain entity to SQLite model
-	sqliteSession, err := mappers.SQLiteSessionFromDomain(session)
+	_, err := mappers.SQLiteSessionFromDomain(session)
 	if err != nil {
 		return fmt.Errorf("failed to convert session: %w", err)
 	}
@@ -107,7 +107,7 @@ func (r *SQLiteSessionRepository) Delete(ctx context.Context, id entities.Sessio
 // DeactivateByToken deactivates a session by token in SQLite
 func (r *SQLiteSessionRepository) DeactivateByToken(ctx context.Context, token entities.SessionToken) error {
 	// Convert token to database format
-	dbToken := r.converters.SessionToken.DomainToDB(token)
+	_ = r.converters.SessionToken.DomainToDB(token)
 
 	// Deactivate session
 	// _, err := r.queries.DeactivateSessionByToken(ctx, dbToken)
