@@ -91,6 +91,18 @@ func (m *UserMapper) SQLiteSessionFromDomain(session *entities.UserSession) (any
 	panic("implement me: convert domain entity to SQLite session")
 }
 
+// SQLiteUserFromDomain is a standalone function wrapper for backward compatibility
+func SQLiteUserFromDomain(user *entities.User) (any, error) {
+	m := &UserMapper{}
+	return m.SQLiteUserFromDomain(user)
+}
+
+// SQLiteSessionFromDomain is a standalone function wrapper for backward compatibility
+func SQLiteSessionFromDomain(session *entities.UserSession) (any, error) {
+	m := &UserMapper{}
+	return m.SQLiteSessionFromDomain(session)
+}
+
 // PostgresSessionFromDomain converts domain entity to PostgreSQL model
 func (m *UserMapper) PostgresSessionFromDomain(session *entities.UserSession) (any, error) {
 	panic("implement me: convert domain entity to PostgreSQL session")

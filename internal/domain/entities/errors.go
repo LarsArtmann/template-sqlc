@@ -148,3 +148,57 @@ func (e *InternalError) Error() string {
 func (e *InternalError) Unwrap() error {
 	return e.Cause
 }
+
+// IsValidationError checks if an error is a ValidationError
+func IsValidationError(err error) bool {
+	if err == nil {
+		return false
+	}
+	_, ok := err.(*ValidationError)
+	return ok
+}
+
+// IsNotFoundError checks if an error is a NotFoundError
+func IsNotFoundError(err error) bool {
+	if err == nil {
+		return false
+	}
+	_, ok := err.(*NotFoundError)
+	return ok
+}
+
+// IsConflictError checks if an error is a ConflictError
+func IsConflictError(err error) bool {
+	if err == nil {
+		return false
+	}
+	_, ok := err.(*ConflictError)
+	return ok
+}
+
+// IsAuthenticationError checks if an error is an AuthenticationError
+func IsAuthenticationError(err error) bool {
+	if err == nil {
+		return false
+	}
+	_, ok := err.(*AuthenticationError)
+	return ok
+}
+
+// IsUnauthorizedError checks if an error is an AuthorizationError
+func IsUnauthorizedError(err error) bool {
+	if err == nil {
+		return false
+	}
+	_, ok := err.(*AuthorizationError)
+	return ok
+}
+
+// IsInternalError checks if an error is an InternalError
+func IsInternalError(err error) bool {
+	if err == nil {
+		return false
+	}
+	_, ok := err.(*InternalError)
+	return ok
+}

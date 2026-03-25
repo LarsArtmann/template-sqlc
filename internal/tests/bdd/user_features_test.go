@@ -11,6 +11,7 @@ import (
 
 	"github.com/LarsArtmann/template-sqlc/internal/domain/entities"
 	"github.com/LarsArtmann/template-sqlc/internal/domain/events"
+	"github.com/LarsArtmann/template-sqlc/internal/domain/repositories"
 	"github.com/LarsArtmann/template-sqlc/internal/domain/services"
 	"github.com/LarsArtmann/template-sqlc/internal/tests/integration"
 	"github.com/LarsArtmann/template-sqlc/pkg/validation"
@@ -20,7 +21,10 @@ import (
 type UserFeaturesTestSuite struct {
 	ctx            context.Context
 	userService    *services.UserService
+	userRepo       repositories.UserRepository
+	sessionRepo    repositories.SessionRepository
 	eventPublisher *events.InMemoryEventPublisher
+	validator      *validation.UserValidator
 	currentUser    *entities.User
 	currentSession *entities.UserSession
 	lastError      error
@@ -439,13 +443,13 @@ func (s *UserFeaturesTestSuite) userAccountShouldBeDeactivated() error {
 }
 
 func (s *UserFeaturesTestSuite) userCreatedEventShouldBePublished() error {
-	events := s.eventPublisher.Events()
-	if len(events) == 0 {
+	userEvents := s.eventPublisher.Events()
+	if len(userEvents) == 0 {
 		return fmt.Errorf("expected events to be published, got none")
 	}
 
 	found := false
-	for _, event := range events {
+	for _, event := range userEvents {
 		if event.Type == events.EventUserCreated {
 			found = true
 			break
@@ -453,17 +457,17 @@ func (s *UserFeaturesTestSuite) userCreatedEventShouldBePublished() error {
 	}
 
 	if !found {
-		return fmt.Errorf("expected user created event to be published, but wasn't found in %v events", len(events))
+		return fmt.Errorf("expected user created event to be published, but wasn't found in %v events", len(userEvents))
 	}
 
 	return nil
 }
 
 func (s *UserFeaturesTestSuite) userUpdatedEventShouldBePublished() error {
-	events := s.eventPublisher.Events()
+	userEvents := s.eventPublisher.Events()
 
 	found := false
-	for _, event := range events {
+	for _, event := range userEvents {
 		if event.Type == events.EventUserUpdated {
 			found = true
 			break
@@ -478,10 +482,10 @@ func (s *UserFeaturesTestSuite) userUpdatedEventShouldBePublished() error {
 }
 
 func (s *UserFeaturesTestSuite) userLoginEventShouldBePublished() error {
-	events := s.eventPublisher.Events()
+	userEvents := s.eventPublisher.Events()
 
 	found := false
-	for _, event := range events {
+	for _, event := range userEvents {
 		if event.Type == events.EventUserLogin {
 			found = true
 			break
@@ -496,10 +500,10 @@ func (s *UserFeaturesTestSuite) userLoginEventShouldBePublished() error {
 }
 
 func (s *UserFeaturesTestSuite) userLoginFailEventShouldBePublished() error {
-	events := s.eventPublisher.Events()
+	userEvents := s.eventPublisher.Events()
 
 	found := false
-	for _, event := range events {
+	for _, event := range userEvents {
 		if event.Type == events.EventUserLoginFail {
 			found = true
 			break
@@ -514,10 +518,10 @@ func (s *UserFeaturesTestSuite) userLoginFailEventShouldBePublished() error {
 }
 
 func (s *UserFeaturesTestSuite) roleChangedEventShouldBePublished() error {
-	events := s.eventPublisher.Events()
+	userEvents := s.eventPublisher.Events()
 
 	found := false
-	for _, event := range events {
+	for _, event := range userEvents {
 		if event.Type == events.EventRoleChanged {
 			found = true
 			break

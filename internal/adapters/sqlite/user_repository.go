@@ -22,14 +22,15 @@ type SQLiteUserRepository struct {
 
 // ConverterSet holds all type converters for SQLite
 type ConverterSet struct {
-	UUID     converters.UUIDConverter
-	Time     converters.TimeConverter
-	Bool     converters.BoolConverter
-	Email    converters.DefaultEmailConverter
-	Username converters.DefaultUsernameConverter
-	Password converters.DefaultPasswordHashConverter
-	Status   converters.DefaultUserStatusConverter
-	Role     converters.DefaultUserRoleConverter
+	UUID         converters.UUIDConverter
+	Time         converters.TimeConverter
+	Bool         converters.BoolConverter
+	Email        *converters.DefaultEmailConverter
+	Username     *converters.DefaultUsernameConverter
+	Password     *converters.DefaultPasswordHashConverter
+	Status       *converters.DefaultUserStatusConverter
+	Role         *converters.DefaultUserRoleConverter
+	SessionToken *converters.DefaultSessionTokenConverter
 }
 
 // NewSQLiteUserRepository creates a new SQLite user repository

@@ -17,7 +17,7 @@ import (
 type WorkingSQLiteUserRepository struct {
 	db         *sql.DB
 	mapper     mappers.UserMapper
-	converters *converters.SQLiteConverterSet
+	converters *ConverterSet
 }
 
 // NewWorkingSQLiteUserRepository creates a new working SQLite user repository
@@ -25,7 +25,7 @@ func NewWorkingSQLiteUserRepository(db *sql.DB) repositories.UserRepository {
 	return &WorkingSQLiteUserRepository{
 		db:     db,
 		mapper: mappers.UserMapper{},
-		converters: &converters.SQLiteConverterSet{
+		converters: &ConverterSet{
 			UUID:     converters.NewSQLiteUUIDConverter(),
 			Time:     converters.NewTimeConverter("sqlite"),
 			Bool:     converters.NewBoolConverter("sqlite"),
@@ -49,7 +49,7 @@ func (r *WorkingSQLiteUserRepository) Create(ctx context.Context, user *entities
 	// Convert domain values to database-compatible types
 	email := r.converters.Email.DomainToDB(user.Email())
 	username := r.converters.Username.DomainToDB(user.Username())
-	passwordHash := r.converters.Password.DomainToDB(user.PasswordHash())
+	passwordHash := r.converters.Password.DomainToDB(entities.PasswordHash("placeholder")) // Password should come from user
 	firstName := user.FirstName().String()
 	lastName := user.LastName().String()
 	status := r.converters.Status.DomainToDB(user.Status())

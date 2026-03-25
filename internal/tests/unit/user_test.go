@@ -216,11 +216,10 @@ func TestUserMethods(t *testing.T) {
 	assert.NotContains(t, user.Tags(), "test")
 
 	// Test profile update
-	newFirstName := "Jane"
-	firstNamePtr := &newFirstName
-	err = user.UpdateProfile(firstNamePtr, nil, nil, nil)
+	newFirstName, _ := entities.NewFirstName("Jane")
+	err = user.UpdateProfile(&newFirstName, nil, nil, nil)
 	assert.NoError(t, err)
-	assert.Equal(t, entities.FirstName(newFirstName), user.FirstName())
+	assert.Equal(t, newFirstName, user.FirstName())
 }
 
 func TestUserValidation(t *testing.T) {
