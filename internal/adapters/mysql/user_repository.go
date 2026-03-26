@@ -57,7 +57,7 @@ func (r *MySQLUserRepository) Create(ctx context.Context, user *entities.User) e
 	// Convert domain entity to MySQL model
 	_, err := r.mapper.MySQLUserFromDomain(user)
 	if err != nil {
-		return fmt.Errorf("failed to convert user: %w", err)
+		return fmt.Errorf("failed to convert user %s: %w", user.ID(), err)
 	}
 
 	// This would use actual generated sqlc code for MySQL
@@ -107,7 +107,7 @@ func (r *MySQLUserRepository) Update(ctx context.Context, user *entities.User) e
 	// Convert domain entity to MySQL model
 	_, err := r.mapper.MySQLUserFromDomain(user)
 	if err != nil {
-		return fmt.Errorf("failed to convert user: %w", err)
+		return fmt.Errorf("failed to convert user %s: %w", user.ID(), err)
 	}
 
 	// Update in database

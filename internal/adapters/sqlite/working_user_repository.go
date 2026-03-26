@@ -63,12 +63,12 @@ func (r *WorkingSQLiteUserRepository) Create(ctx context.Context, user *entities
 	result, err := r.db.ExecContext(ctx, query,
 		email, username, passwordHash, firstName, lastName, status, role, isVerified, metadataJSON, tagsJSON)
 	if err != nil {
-		return errors.NewDatabaseError("failed to create user", err)
+		return errors.NewDatabaseError(fmt.Sprintf("failed to create user %s: %v", username, err), err)
 	}
 
 	rows, err := result.RowsAffected()
 	if err != nil {
-		return errors.NewDatabaseError("failed to check affected rows", err)
+		return errors.NewDatabaseError(fmt.Sprintf("failed to check affected rows for user %s: %v", username, err), err)
 	}
 
 	if rows == 0 {
@@ -99,9 +99,9 @@ func (r *WorkingSQLiteUserRepository) GetByID(ctx context.Context, id entities.U
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, entities.ErrUserNotFound
+			return nil, fmt.Errorf("user %s not found: %w", id, entities.ErrUserNotFound)
 		}
-		return nil, errors.NewDatabaseError("failed to get user by ID", err)
+		return nil, fmt.Errorf("failed to get user by ID %s: %w", id, err)
 	}
 
 	// This is a simplified example - proper implementation would:
@@ -110,7 +110,7 @@ func (r *WorkingSQLiteUserRepository) GetByID(ctx context.Context, id entities.U
 	// 3. Handle all field conversions
 
 	// For now, return nil to show pattern
-	return nil, fmt.Errorf("implementation in progress - user found with ID %d", id)
+	return nil, fmt.Errorf("implementation in progress - user found with ID %s", id)
 }
 
 // GetByUUID retrieves a user by UUID from SQLite

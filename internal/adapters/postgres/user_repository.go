@@ -57,7 +57,7 @@ func (r *PostgresUserRepository) Create(ctx context.Context, user *entities.User
 	// Convert domain entity to PostgreSQL model
 	_, err := r.mapper.PostgresUserFromDomain(user)
 	if err != nil {
-		return fmt.Errorf("failed to convert user: %w", err)
+		return fmt.Errorf("failed to convert user %s: %w", user.ID(), err)
 	}
 
 	// This would use actual generated sqlc code for PostgreSQL
@@ -107,7 +107,7 @@ func (r *PostgresUserRepository) Update(ctx context.Context, user *entities.User
 	// Convert domain entity to PostgreSQL model
 	_, err := r.mapper.PostgresUserFromDomain(user)
 	if err != nil {
-		return fmt.Errorf("failed to convert user: %w", err)
+		return fmt.Errorf("failed to convert user %s: %w", user.ID(), err)
 	}
 
 	// Update in database

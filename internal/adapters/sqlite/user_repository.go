@@ -55,7 +55,7 @@ func (r *SQLiteUserRepository) Create(ctx context.Context, user *entities.User) 
 	// Convert domain entity to SQLite model
 	_, err := mappers.SQLiteUserFromDomain(user)
 	if err != nil {
-		return fmt.Errorf("failed to convert user: %w", err)
+		return fmt.Errorf("failed to convert user %s: %w", user.ID(), err)
 	}
 
 	// This would use the actual generated sqlc code
@@ -105,7 +105,7 @@ func (r *SQLiteUserRepository) Update(ctx context.Context, user *entities.User) 
 	// Convert domain entity to SQLite model
 	_, err := mappers.SQLiteUserFromDomain(user)
 	if err != nil {
-		return fmt.Errorf("failed to convert user: %w", err)
+		return fmt.Errorf("failed to convert user %s: %w", user.ID(), err)
 	}
 
 	// Update in database

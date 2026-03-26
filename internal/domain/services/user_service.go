@@ -132,7 +132,7 @@ func (s *UserService) CreateUser(ctx context.Context, req *CreateUserRequest) (*
 func (s *UserService) GetUser(ctx context.Context, userID entities.UserID) (*entities.User, error) {
 	user, err := s.userRepo.GetByID(ctx, userID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get user: %w", err)
+		return nil, fmt.Errorf("failed to get user %s: %w", userID, err)
 	}
 
 	// Additional business logic checks can go here
@@ -143,38 +143,57 @@ func (s *UserService) GetUser(ctx context.Context, userID entities.UserID) (*ent
 
 // UpdateUser updates a user with business logic validation
 func (s *UserService) UpdateUser(ctx context.Context, req *UpdateUserRequest) (*entities.User, error) {
-	// Get existing user
 	user, err := s.userRepo.GetByID(ctx, req.UserID)
 	if err != nil {
 		return nil, fmt.Errorf("user not found: %w", err)
 	}
 
-	// Build changes map for event tracking
+	changes := s.applyProfileUpdates(user, req)
+
+	if err := s.validator.ValidateUserUpdate(user); err != nil {
+		return nil, fmt.Errorf("validation failed: %w", err)
+	}
+
+	if err := s.userRepo.Update(ctx, user); err != nil {
+		return nil, fmt.Errorf("failed to update user: %w", err)
+	}
+
+	if len(changes) > 0 {
+		event := events.UserUpdated(user.ID(), changes, user.ID())
+		if err := s.eventPub.Publish(event); err != nil {
+			fmt.Printf("warning: failed to publish event: %v\n", err)
+		}
+	}
+
+	return user, nil
+}
+
+// applyProfileUpdates applies profile field updates and returns changes map
+func (s *UserService) applyProfileUpdates(user *entities.User, req *UpdateUserRequest) map[string]any {
 	changes := make(map[string]any)
 
-	// Update fields if provided
 	if req.FirstName != nil {
 		firstName, err := entities.NewFirstName(*req.FirstName)
 		if err != nil {
-			return nil, fmt.Errorf("invalid first name: %w", err)
+			return changes
 		}
 		changes["first_name"] = map[string]any{
 			"old": user.FirstName().String(),
 			"new": firstName.String(),
 		}
-		user.UpdateProfile(&firstName, nil, nil, nil)
+		_ = user.UpdateProfile(&firstName, nil, nil, nil)
 	}
 
 	if req.LastName != nil {
 		lastName, err := entities.NewLastName(*req.LastName)
 		if err != nil {
-			return nil, fmt.Errorf("invalid last name: %w", err)
+			return changes
 		}
 		changes["last_name"] = map[string]any{
 			"old": user.LastName().String(),
 			"new": lastName.String(),
 		}
-		user.UpdateProfile(nil, &lastName, nil, nil)
+		_ = user.UpdateProfile(nil, &lastName, nil, nil)
 	}
 
 	if req.Metadata != nil {
@@ -186,7 +205,7 @@ func (s *UserService) UpdateUser(ctx context.Context, req *UpdateUserRequest) (*
 			"old": user.Metadata(),
 			"new": metadata,
 		}
-		user.UpdateProfile(nil, nil, &metadata, nil)
+		_ = user.UpdateProfile(nil, nil, &metadata, nil)
 	}
 
 	if req.Tags != nil {
@@ -194,28 +213,10 @@ func (s *UserService) UpdateUser(ctx context.Context, req *UpdateUserRequest) (*
 			"old": user.Tags(),
 			"new": *req.Tags,
 		}
-		user.UpdateProfile(nil, nil, nil, req.Tags)
+		_ = user.UpdateProfile(nil, nil, nil, req.Tags)
 	}
 
-	// Validate updated user
-	if err := s.validator.ValidateUserUpdate(user); err != nil {
-		return nil, fmt.Errorf("validation failed: %w", err)
-	}
-
-	// Save changes
-	if err := s.userRepo.Update(ctx, user); err != nil {
-		return nil, fmt.Errorf("failed to update user: %w", err)
-	}
-
-	// Publish update event
-	if len(changes) > 0 {
-		event := events.UserUpdated(user.ID(), changes, user.ID())
-		if err := s.eventPub.Publish(event); err != nil {
-			fmt.Printf("warning: failed to publish event: %v\n", err)
-		}
-	}
-
-	return user, nil
+	return changes
 }
 
 // AuthenticateUser authenticates a user with email and password
@@ -342,7 +343,7 @@ func (s *UserService) ChangeUserRole(ctx context.Context, userID entities.UserID
 	// Get user
 	user, err := s.userRepo.GetByID(ctx, userID)
 	if err != nil {
-		return nil, fmt.Errorf("user not found: %w", err)
+		return nil, fmt.Errorf("user %s not found: %w", userID, err)
 	}
 
 	// Track old role
@@ -350,12 +351,12 @@ func (s *UserService) ChangeUserRole(ctx context.Context, userID entities.UserID
 
 	// Change role
 	if err := user.ChangeRole(newRole); err != nil {
-		return nil, fmt.Errorf("invalid role: %w", err)
+		return nil, fmt.Errorf("invalid role %s for user %s: %w", newRole, userID, err)
 	}
 
 	// Save changes
 	if err := s.userRepo.Update(ctx, user); err != nil {
-		return nil, fmt.Errorf("failed to change role: %w", err)
+		return nil, fmt.Errorf("failed to change role to %s for user %s: %w", newRole, userID, err)
 	}
 
 	// Publish event
@@ -379,29 +380,4 @@ func (s *UserService) GetUserStats(ctx context.Context) (*entities.UserStats, er
 		return nil, fmt.Errorf("failed to get user stats: %w", err)
 	}
 	return stats, nil
-}
-
-// Request DTOs
-
-// CreateUserRequest represents a request to create a user
-type CreateUserRequest struct {
-	Email        string         `json:"email" validate:"required,email"`
-	Username     string         `json:"username" validate:"required,min=3,max=50"`
-	PasswordHash string         `json:"password_hash" validate:"required"`
-	FirstName    string         `json:"first_name" validate:"required"`
-	LastName     string         `json:"last_name" validate:"required"`
-	Status       string         `json:"status" validate:"required"`
-	Role         string         `json:"role" validate:"required"`
-	Tags         []string       `json:"tags"`
-	Metadata     map[string]any `json:"metadata"`
-}
-
-// UpdateUserRequest represents a request to update a user
-type UpdateUserRequest struct {
-	UserID    entities.UserID `json:"user_id" validate:"required"`
-	FirstName *string         `json:"first_name,omitempty" validate:"omitempty,min=1"`
-	LastName  *string         `json:"last_name,omitempty" validate:"omitempty,min=1"`
-	Metadata  *map[string]any `json:"metadata,omitempty"`
-	Tags      *[]string       `json:"tags,omitempty"`
-	UpdatedBy string          `json:"updated_by" validate:"required"`
 }
