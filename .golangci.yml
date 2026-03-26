@@ -1,75 +1,85 @@
 version: "2"
-
 run:
   timeout: 5m
+  go: ""
+  build-tags: []
+  allow-parallel-runners: false
+  allow-serial-runners: false
   issues-exit-code: 1
   tests: true
-
 output:
   formats:
     text:
       path: stdout
       print-issued-lines: true
       print-linter-name: true
-
 linters:
   enable:
-    - errcheck
-    - govet
+    - gochecknoinits
+    - intrange
+    - noctx
     - ineffassign
-    - staticcheck
+    - exhaustruct
+    - gosmopolitan
+    - unparam
     - unused
+    - prealloc
+    - wastedassign
+    - reassign
+    - recvcheck
+    - bodyclose
+    - forcetypeassert
+    - nilerr
+    - nilnesserr
+    - paralleltest
+    - unconvert
     - misspell
+    - exhaustive
+    - ginkgolinter
+    - sqlclosecheck
+    - dupl
+    - goconst
+    - protogetter
+    - spancheck
+    - govet
+    - durationcheck
+    - gochecknoglobals
+    - mirror
+    - thelper
+    - staticcheck
+    - errorlint
+    - errcheck
     - revive
-
+    - funlen
+    - loggercheck
+    - maintidx
+    - errname
+    - gosec
+    - rowserrcheck
+    - contextcheck
+    - gocyclo
+    - musttag
+    - nakedret
+    - predeclared
+    - sloglint
+    - usetesting
+    - gocognit
+    - nestif
+    - wrapcheck
+    - nolintlint
+    - gocritic
+    - testifylint
+    - zerologlint
+    - copyloopvar
+    - cyclop
+    - errchkjson
+    - interfacebloat
+    - perfsprint
+    - gochecksumtype
+    - nilnil
 formatters:
   enable:
     - gofmt
     - goimports
-
-linters-settings:
-  errcheck:
-    check-type-assertions: true
-    check-blank: true
-  govet:
-    enable-all: true
-  revive:
-    rules:
-      - name: blank-imports
-      - name: context-as-argument
-      - name: context-keys-type
-      - name: dot-imports
-      - name: error-return
-      - name: error-strings
-      - name: error-naming
-      - name: exported
-      - name: if-return
-      - name: increment-decrement
-      - name: var-naming
-      - name: var-declaration
-      - name: package-comments
-      - name: range
-      - name: receiver-naming
-      - name: time-naming
-      - name: unexported-return
-      - name: indent-error-flow
-      - name: errorf
-      - name: empty-block
-      - name: superfluous-else
-      - name: unused-parameter
-      - name: unreachable-code
-      - name: redefines-builtin-id
-
-issues:
-  exclude-rules:
-    - path: _test\.go
-      linters:
-        - errcheck
-        - revive
-    - path: internal/tests/
-      linters:
-        - errcheck
-        - revive
-  max-issues-per-linter: 0
-  max-same-issues: 0
-  new: false
+    - golines
+issues: {}
