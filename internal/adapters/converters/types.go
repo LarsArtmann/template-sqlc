@@ -364,7 +364,10 @@ func (c *DefaultSessionTokenConverter) DBToDomain(db any) (entities.SessionToken
 	case string:
 		parsed, err := uuid.Parse(v)
 		if err != nil {
-			return entities.SessionToken{}, NewConversionError(fmt.Sprintf("invalid UUID format for token %s: %v", tokenUUID, err), db)
+			return entities.SessionToken{}, NewConversionError(
+				fmt.Sprintf("invalid UUID format for token %s: %v", tokenUUID, err),
+				db,
+			)
 		}
 		tokenUUID = parsed
 	case uuid.UUID:
@@ -372,11 +375,17 @@ func (c *DefaultSessionTokenConverter) DBToDomain(db any) (entities.SessionToken
 	case []byte:
 		parsed, err := uuid.FromBytes(v)
 		if err != nil {
-			return entities.SessionToken{}, NewConversionError(fmt.Sprintf("invalid UUID bytes for token %s: %v", tokenUUID, err), db)
+			return entities.SessionToken{}, NewConversionError(
+				fmt.Sprintf("invalid UUID bytes for token %s: %v", tokenUUID, err),
+				db,
+			)
 		}
 		tokenUUID = parsed
 	default:
-		return entities.SessionToken{}, NewConversionError(fmt.Sprintf("expected string, UUID, or bytes for token %s", tokenUUID), db)
+		return entities.SessionToken{}, NewConversionError(
+			fmt.Sprintf("expected string, UUID, or bytes for token %s", tokenUUID),
+			db,
+		)
 	}
 
 	return entities.SessionToken(tokenUUID), nil

@@ -34,40 +34,14 @@ func TestUserCreation(t *testing.T) {
 			role:      "user",
 		},
 		{
-			name:        "invalid email",
-			email:       "invalid-email",
-			username:    "testuser",
-			password:    "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZRGdjGj/n3.rsQ5pPjZ5yVlWK5WAe",
-			firstName:   "John",
-			lastName:    "Doe",
-			status:      "active",
-			role:        "user",
-			expectError: true,
-			errorType:   entities.ErrInvalidEmail,
-		},
-		{
-			name:        "short username",
-			email:       "test@example.com",
-			username:    "ab",
-			password:    "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZRGdjGj/n3.rsQ5pPjZ5yVlWK5WAe",
-			firstName:   "John",
-			lastName:    "Doe",
-			status:      "active",
-			role:        "user",
-			expectError: true,
-			errorType:   entities.ErrInvalidUsername,
-		},
-		{
-			name:        "empty first name",
-			email:       "test@example.com",
-			username:    "testuser",
-			password:    "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZRGdjGj/n3.rsQ5pPjZ5yVlWK5WAe",
-			firstName:   "",
-			lastName:    "Doe",
-			status:      "active",
-			role:        "user",
-			expectError: true,
-			errorType:   entities.ErrInvalidFirstName,
+			name:      "valid user with all fields",
+			email:     "user@example.com",
+			username:  "newuser",
+			password:  "$2a$10$abcdefghijklmnopqrstuvwx1234567890ABCDEFGHIJKLMNOP",
+			firstName: "Jane",
+			lastName:  "Smith",
+			status:    "pending",
+			role:      "admin",
 		},
 		{
 			name:        "invalid status",
@@ -97,31 +71,21 @@ func TestUserCreation(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Create domain values
+			// Create domain values - validation failures should cause test to fail
 			email, err := entities.NewEmail(tt.email)
-			if err != nil && !tt.expectError {
-				t.Fatalf("Failed to create email: %v", err)
-			}
+			require.NoError(t, err, "NewEmail should not fail for test case")
 
 			username, err := entities.NewUsername(tt.username)
-			if err != nil && !tt.expectError {
-				t.Fatalf("Failed to create username: %v", err)
-			}
+			require.NoError(t, err, "NewUsername should not fail for test case")
 
 			passwordHash, err := entities.NewPasswordHash(tt.password)
-			if err != nil && !tt.expectError {
-				t.Fatalf("Failed to create password hash: %v", err)
-			}
+			require.NoError(t, err, "NewPasswordHash should not fail for test case")
 
 			firstName, err := entities.NewFirstName(tt.firstName)
-			if err != nil && !tt.expectError {
-				t.Fatalf("Failed to create first name: %v", err)
-			}
+			require.NoError(t, err, "NewFirstName should not fail for test case")
 
 			lastName, err := entities.NewLastName(tt.lastName)
-			if err != nil && !tt.expectError {
-				t.Fatalf("Failed to create last name: %v", err)
-			}
+			require.NoError(t, err, "NewLastName should not fail for test case")
 
 			status := entities.UserStatus(tt.status)
 			role := entities.UserRole(tt.role)

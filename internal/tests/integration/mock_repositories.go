@@ -33,11 +33,16 @@ func (m *MockUserRepository) Create(ctx context.Context, user *entities.User) er
 	userID := m.idCounter
 	m.idCounter++
 
+	// Set the ID on the user entity so it can be retrieved later
+	user.SetID(userID)
 	m.users[userID] = user
 	return nil
 }
 
-func (m *MockUserRepository) GetByID(ctx context.Context, id entities.UserID) (*entities.User, error) {
+func (m *MockUserRepository) GetByID(
+	ctx context.Context,
+	id entities.UserID,
+) (*entities.User, error) {
 	user, ok := m.users[id]
 	if !ok {
 		return nil, entities.ErrUserNotFound
@@ -49,7 +54,10 @@ func (m *MockUserRepository) SetPasswordVerification(email, password string) {
 	m.passwordVerifications[email] = password
 }
 
-func (m *MockUserRepository) GetByUUID(ctx context.Context, uuid entities.UuID) (*entities.User, error) {
+func (m *MockUserRepository) GetByUUID(
+	ctx context.Context,
+	uuid entities.UuID,
+) (*entities.User, error) {
 	for _, user := range m.users {
 		if user.UUID().String() == string(uuid) {
 			return user, nil
@@ -58,7 +66,10 @@ func (m *MockUserRepository) GetByUUID(ctx context.Context, uuid entities.UuID) 
 	return nil, entities.ErrUserNotFound
 }
 
-func (m *MockUserRepository) GetByEmail(ctx context.Context, email entities.Email) (*entities.User, error) {
+func (m *MockUserRepository) GetByEmail(
+	ctx context.Context,
+	email entities.Email,
+) (*entities.User, error) {
 	for _, user := range m.users {
 		if user.Email() == email {
 			return user, nil
@@ -67,7 +78,10 @@ func (m *MockUserRepository) GetByEmail(ctx context.Context, email entities.Emai
 	return nil, entities.ErrUserNotFound
 }
 
-func (m *MockUserRepository) GetByUsername(ctx context.Context, username entities.Username) (*entities.User, error) {
+func (m *MockUserRepository) GetByUsername(
+	ctx context.Context,
+	username entities.Username,
+) (*entities.User, error) {
 	for _, user := range m.users {
 		if user.Username() == username {
 			return user, nil
@@ -85,7 +99,11 @@ func (m *MockUserRepository) Delete(ctx context.Context, id entities.UserID) err
 	return nil
 }
 
-func (m *MockUserRepository) List(ctx context.Context, status entities.UserStatus, limit, offset int) ([]*entities.User, error) {
+func (m *MockUserRepository) List(
+	ctx context.Context,
+	status entities.UserStatus,
+	limit, offset int,
+) ([]*entities.User, error) {
 	result := make([]*entities.User, 0)
 	for _, user := range m.users {
 		if user.Status() == status {
@@ -95,15 +113,27 @@ func (m *MockUserRepository) List(ctx context.Context, status entities.UserStatu
 	return result, nil
 }
 
-func (m *MockUserRepository) Search(ctx context.Context, query string, status entities.UserStatus, limit int) ([]*entities.User, error) {
+func (m *MockUserRepository) Search(
+	ctx context.Context,
+	query string,
+	status entities.UserStatus,
+	limit int,
+) ([]*entities.User, error) {
 	return []*entities.User{}, nil
 }
 
-func (m *MockUserRepository) SearchByTags(ctx context.Context, tags []string, status entities.UserStatus, limit, offset int) ([]*entities.User, error) {
+func (m *MockUserRepository) SearchByTags(
+	ctx context.Context,
+	tags []string,
+	status entities.UserStatus,
+	limit, offset int,
+) ([]*entities.User, error) {
 	return []*entities.User{}, nil
 }
 
-func (m *MockUserRepository) CountByStatus(ctx context.Context) (map[entities.UserStatus]int64, error) {
+func (m *MockUserRepository) CountByStatus(
+	ctx context.Context,
+) (map[entities.UserStatus]int64, error) {
 	counts := make(map[entities.UserStatus]int64)
 	for _, user := range m.users {
 		counts[user.Status()]++
@@ -122,7 +152,11 @@ func (m *MockUserRepository) GetStats(ctx context.Context) (*entities.UserStats,
 	return stats, nil
 }
 
-func (m *MockUserRepository) VerifyCredentials(ctx context.Context, email entities.Email, password entities.PasswordHash) (*entities.User, error) {
+func (m *MockUserRepository) VerifyCredentials(
+	ctx context.Context,
+	email entities.Email,
+	password entities.PasswordHash,
+) (*entities.User, error) {
 	expectedPassword := m.passwordVerifications[email.String()]
 	if expectedPassword != password.String() {
 		return nil, entities.ErrInvalidCredentials
@@ -135,7 +169,11 @@ func (m *MockUserRepository) VerifyCredentials(ctx context.Context, email entiti
 	return user, nil
 }
 
-func (m *MockUserRepository) UpdatePassword(ctx context.Context, id entities.UserID, password entities.PasswordHash) error {
+func (m *MockUserRepository) UpdatePassword(
+	ctx context.Context,
+	id entities.UserID,
+	password entities.PasswordHash,
+) error {
 	return nil
 }
 
@@ -143,7 +181,11 @@ func (m *MockUserRepository) MarkVerified(ctx context.Context, id entities.UserI
 	return nil
 }
 
-func (m *MockUserRepository) ChangeStatus(ctx context.Context, id entities.UserID, status entities.UserStatus) error {
+func (m *MockUserRepository) ChangeStatus(
+	ctx context.Context,
+	id entities.UserID,
+	status entities.UserStatus,
+) error {
 	return nil
 }
 
@@ -159,7 +201,11 @@ func (m *MockUserRepository) Suspend(ctx context.Context, id entities.UserID) er
 	return nil
 }
 
-func (m *MockUserRepository) ChangeRole(ctx context.Context, id entities.UserID, role entities.UserRole) error {
+func (m *MockUserRepository) ChangeRole(
+	ctx context.Context,
+	id entities.UserID,
+	role entities.UserRole,
+) error {
 	return nil
 }
 
@@ -177,7 +223,10 @@ func (m *MockSessionRepository) Create(ctx context.Context, session *entities.Us
 	return nil
 }
 
-func (m *MockSessionRepository) GetByToken(ctx context.Context, token entities.SessionToken) (*entities.UserSession, error) {
+func (m *MockSessionRepository) GetByToken(
+	ctx context.Context,
+	token entities.SessionToken,
+) (*entities.UserSession, error) {
 	for _, session := range m.sessions {
 		if session.Token() == token {
 			return session, nil
@@ -186,7 +235,11 @@ func (m *MockSessionRepository) GetByToken(ctx context.Context, token entities.S
 	return nil, entities.ErrSessionNotFound
 }
 
-func (m *MockSessionRepository) GetByUserID(ctx context.Context, userID entities.UserID, activeOnly bool) ([]*entities.UserSession, error) {
+func (m *MockSessionRepository) GetByUserID(
+	ctx context.Context,
+	userID entities.UserID,
+	activeOnly bool,
+) ([]*entities.UserSession, error) {
 	result := make([]*entities.UserSession, 0)
 	for _, session := range m.sessions {
 		if session.UserID() == userID {
@@ -207,11 +260,17 @@ func (m *MockSessionRepository) Delete(ctx context.Context, id entities.SessionI
 	return nil
 }
 
-func (m *MockSessionRepository) DeactivateByToken(ctx context.Context, token entities.SessionToken) error {
+func (m *MockSessionRepository) DeactivateByToken(
+	ctx context.Context,
+	token entities.SessionToken,
+) error {
 	return nil
 }
 
-func (m *MockSessionRepository) DeactivateByUserID(ctx context.Context, userID entities.UserID) error {
+func (m *MockSessionRepository) DeactivateByUserID(
+	ctx context.Context,
+	userID entities.UserID,
+) error {
 	return nil
 }
 
@@ -219,7 +278,10 @@ func (m *MockSessionRepository) CleanupExpired(ctx context.Context) (int64, erro
 	return 0, nil
 }
 
-func (m *MockSessionRepository) GetActiveSessions(ctx context.Context, userID entities.UserID) (int64, error) {
+func (m *MockSessionRepository) GetActiveSessions(
+	ctx context.Context,
+	userID entities.UserID,
+) (int64, error) {
 	count := int64(0)
 	for _, session := range m.sessions {
 		if session.UserID() == userID && session.IsActive() {
@@ -229,7 +291,9 @@ func (m *MockSessionRepository) GetActiveSessions(ctx context.Context, userID en
 	return count, nil
 }
 
-func (m *MockSessionRepository) GetSessionStats(ctx context.Context) (*entities.SessionStats, error) {
+func (m *MockSessionRepository) GetSessionStats(
+	ctx context.Context,
+) (*entities.SessionStats, error) {
 	stats := &entities.SessionStats{}
 	for _, session := range m.sessions {
 		stats.TotalSessions++

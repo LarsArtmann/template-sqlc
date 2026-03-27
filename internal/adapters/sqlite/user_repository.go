@@ -67,7 +67,10 @@ func (r *SQLiteUserRepository) Create(ctx context.Context, user *entities.User) 
 }
 
 // GetByID retrieves a user by ID from SQLite
-func (r *SQLiteUserRepository) GetByID(ctx context.Context, id entities.UserID) (*entities.User, error) {
+func (r *SQLiteUserRepository) GetByID(
+	ctx context.Context,
+	id entities.UserID,
+) (*entities.User, error) {
 	// This would use the actual generated sqlc code
 	// Example:
 	// sqliteUser, err := r.queries.GetUserByID(ctx, int64(id))
@@ -83,19 +86,28 @@ func (r *SQLiteUserRepository) GetByID(ctx context.Context, id entities.UserID) 
 }
 
 // GetByUUID retrieves a user by UUID from SQLite
-func (r *SQLiteUserRepository) GetByUUID(ctx context.Context, uuid entities.UuID) (*entities.User, error) {
+func (r *SQLiteUserRepository) GetByUUID(
+	ctx context.Context,
+	uuid entities.UuID,
+) (*entities.User, error) {
 	// Similar implementation for UUID lookup
 	panic("implement me: use actual sqlc generated code")
 }
 
 // GetByEmail retrieves a user by email from SQLite
-func (r *SQLiteUserRepository) GetByEmail(ctx context.Context, email entities.Email) (*entities.User, error) {
+func (r *SQLiteUserRepository) GetByEmail(
+	ctx context.Context,
+	email entities.Email,
+) (*entities.User, error) {
 	// Similar implementation for email lookup
 	panic("implement me: use actual sqlc generated code")
 }
 
 // GetByUsername retrieves a user by username from SQLite
-func (r *SQLiteUserRepository) GetByUsername(ctx context.Context, username entities.Username) (*entities.User, error) {
+func (r *SQLiteUserRepository) GetByUsername(
+	ctx context.Context,
+	username entities.Username,
+) (*entities.User, error) {
 	// Similar implementation for username lookup
 	panic("implement me: use actual sqlc generated code")
 }
@@ -125,7 +137,11 @@ func (r *SQLiteUserRepository) Delete(ctx context.Context, id entities.UserID) e
 }
 
 // List retrieves users with pagination from SQLite
-func (r *SQLiteUserRepository) List(ctx context.Context, status entities.UserStatus, limit, offset int) ([]*entities.User, error) {
+func (r *SQLiteUserRepository) List(
+	ctx context.Context,
+	status entities.UserStatus,
+	limit, offset int,
+) ([]*entities.User, error) {
 	// Validate pagination parameters
 	if limit <= 0 || limit > 1000 {
 		return nil, errors.NewValidationError("limit", "must be between 1 and 1000")
@@ -139,7 +155,12 @@ func (r *SQLiteUserRepository) List(ctx context.Context, status entities.UserSta
 }
 
 // Search searches users by query in SQLite
-func (r *SQLiteUserRepository) Search(ctx context.Context, query string, status entities.UserStatus, limit int) ([]*entities.User, error) {
+func (r *SQLiteUserRepository) Search(
+	ctx context.Context,
+	query string,
+	status entities.UserStatus,
+	limit int,
+) ([]*entities.User, error) {
 	// Validate search query
 	if err := entities.ValidateSearchQuery(query, limit); err != nil {
 		return nil, err
@@ -150,7 +171,12 @@ func (r *SQLiteUserRepository) Search(ctx context.Context, query string, status 
 }
 
 // SearchByTags searches users by tags in SQLite
-func (r *SQLiteUserRepository) SearchByTags(ctx context.Context, tags []string, status entities.UserStatus, limit, offset int) ([]*entities.User, error) {
+func (r *SQLiteUserRepository) SearchByTags(
+	ctx context.Context,
+	tags []string,
+	status entities.UserStatus,
+	limit, offset int,
+) ([]*entities.User, error) {
 	// Validate tags
 	if len(tags) == 0 {
 		return nil, errors.NewValidationError("tags", "cannot be empty")
@@ -164,7 +190,9 @@ func (r *SQLiteUserRepository) SearchByTags(ctx context.Context, tags []string, 
 }
 
 // CountByStatus counts users by status in SQLite
-func (r *SQLiteUserRepository) CountByStatus(ctx context.Context) (map[entities.UserStatus]int64, error) {
+func (r *SQLiteUserRepository) CountByStatus(
+	ctx context.Context,
+) (map[entities.UserStatus]int64, error) {
 	// Query counts by status
 	panic("implement me: use actual sqlc generated code")
 }
@@ -176,13 +204,21 @@ func (r *SQLiteUserRepository) GetStats(ctx context.Context) (*entities.UserStat
 }
 
 // VerifyCredentials verifies user credentials in SQLite
-func (r *SQLiteUserRepository) VerifyCredentials(ctx context.Context, email entities.Email, password entities.PasswordHash) (*entities.User, error) {
+func (r *SQLiteUserRepository) VerifyCredentials(
+	ctx context.Context,
+	email entities.Email,
+	password entities.PasswordHash,
+) (*entities.User, error) {
 	// Query user by email and verify password
 	panic("implement me: use actual sqlc generated code")
 }
 
 // UpdatePassword updates user password in SQLite
-func (r *SQLiteUserRepository) UpdatePassword(ctx context.Context, id entities.UserID, password entities.PasswordHash) error {
+func (r *SQLiteUserRepository) UpdatePassword(
+	ctx context.Context,
+	id entities.UserID,
+	password entities.PasswordHash,
+) error {
 	// Update password
 	panic("implement me: use actual sqlc generated code")
 }
@@ -194,7 +230,11 @@ func (r *SQLiteUserRepository) MarkVerified(ctx context.Context, id entities.Use
 }
 
 // ChangeStatus changes user status in SQLite
-func (r *SQLiteUserRepository) ChangeStatus(ctx context.Context, id entities.UserID, status entities.UserStatus) error {
+func (r *SQLiteUserRepository) ChangeStatus(
+	ctx context.Context,
+	id entities.UserID,
+	status entities.UserStatus,
+) error {
 	// Validate status
 	if !status.IsValid() {
 		return errors.NewValidationError("status", "invalid user status")
@@ -220,7 +260,11 @@ func (r *SQLiteUserRepository) Suspend(ctx context.Context, id entities.UserID) 
 }
 
 // ChangeRole changes user role in SQLite
-func (r *SQLiteUserRepository) ChangeRole(ctx context.Context, id entities.UserID, role entities.UserRole) error {
+func (r *SQLiteUserRepository) ChangeRole(
+	ctx context.Context,
+	id entities.UserID,
+	role entities.UserRole,
+) error {
 	// Validate role
 	if !role.IsValid() {
 		return errors.NewValidationError("role", "invalid user role")
@@ -240,12 +284,12 @@ func (r *SQLiteUserRepository) handleError(err error, operation string) error {
 
 	// Check for common error types
 	switch {
-	case err == sql.ErrNoRows:
+	case errors.Is(err, sql.ErrNoRows):
 		return entities.ErrUserNotFound
 	case isUniqueConstraintError(err):
 		return entities.ErrUserAlreadyExists
 	default:
-		return errors.NewDatabaseError(fmt.Sprintf("%s failed", operation), err)
+		return errors.NewDatabaseError(operation+" failed", err)
 	}
 }
 

@@ -43,7 +43,10 @@ func NewUserService(
 }
 
 // CreateUser creates a new user with business logic validation
-func (s *UserService) CreateUser(ctx context.Context, req *CreateUserRequest) (*entities.User, error) {
+func (s *UserService) CreateUser(
+	ctx context.Context,
+	req *CreateUserRequest,
+) (*entities.User, error) {
 	// Validate request
 	if err := s.validator.ValidateUserCreate(
 		req.Email,
@@ -142,7 +145,10 @@ func (s *UserService) GetUser(ctx context.Context, userID entities.UserID) (*ent
 }
 
 // UpdateUser updates a user with business logic validation
-func (s *UserService) UpdateUser(ctx context.Context, req *UpdateUserRequest) (*entities.User, error) {
+func (s *UserService) UpdateUser(
+	ctx context.Context,
+	req *UpdateUserRequest,
+) (*entities.User, error) {
 	user, err := s.userRepo.GetByID(ctx, req.UserID)
 	if err != nil {
 		return nil, fmt.Errorf("user not found: %w", err)
@@ -169,7 +175,10 @@ func (s *UserService) UpdateUser(ctx context.Context, req *UpdateUserRequest) (*
 }
 
 // applyProfileUpdates applies profile field updates and returns changes map
-func (s *UserService) applyProfileUpdates(user *entities.User, req *UpdateUserRequest) map[string]any {
+func (s *UserService) applyProfileUpdates(
+	user *entities.User,
+	req *UpdateUserRequest,
+) map[string]any {
 	changes := make(map[string]any)
 
 	if req.FirstName != nil {
@@ -220,7 +229,10 @@ func (s *UserService) applyProfileUpdates(user *entities.User, req *UpdateUserRe
 }
 
 // AuthenticateUser authenticates a user with email and password
-func (s *UserService) AuthenticateUser(ctx context.Context, email, password, ipAddress, userAgent string) (*entities.UserSession, error) {
+func (s *UserService) AuthenticateUser(
+	ctx context.Context,
+	email, password, ipAddress, userAgent string,
+) (*entities.UserSession, error) {
 	// Validate email
 	emailEntity, err := entities.NewEmail(email)
 	if err != nil {
@@ -280,7 +292,10 @@ func (s *UserService) AuthenticateUser(ctx context.Context, email, password, ipA
 }
 
 // VerifySession validates a session token and returns associated user
-func (s *UserService) VerifySession(ctx context.Context, token string) (*entities.UserSession, *entities.User, error) {
+func (s *UserService) VerifySession(
+	ctx context.Context,
+	token string,
+) (*entities.UserSession, *entities.User, error) {
 	// Parse token
 	tokenUUID, err := uuid.Parse(token)
 	if err != nil {
@@ -339,7 +354,12 @@ func (s *UserService) Logout(ctx context.Context, token string) error {
 }
 
 // ChangeUserRole changes a user's role with validation and event publishing
-func (s *UserService) ChangeUserRole(ctx context.Context, userID entities.UserID, newRole entities.UserRole, changedBy string) (*entities.User, error) {
+func (s *UserService) ChangeUserRole(
+	ctx context.Context,
+	userID entities.UserID,
+	newRole entities.UserRole,
+	changedBy string,
+) (*entities.User, error) {
 	// Get user
 	user, err := s.userRepo.GetByID(ctx, userID)
 	if err != nil {

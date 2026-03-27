@@ -1,6 +1,7 @@
 package entities
 
 import (
+	"errors"
 	"fmt"
 )
 
@@ -107,7 +108,7 @@ func NewAuthenticationError(message string) *AuthenticationError {
 }
 
 func (e *AuthenticationError) Error() string {
-	return fmt.Sprintf("authentication error: %s", e.Message)
+	return "authentication error: " + e.Message
 }
 
 // AuthorizationError represents an authorization failure
@@ -122,7 +123,7 @@ func NewAuthorizationError(message string) *AuthorizationError {
 }
 
 func (e *AuthorizationError) Error() string {
-	return fmt.Sprintf("authorization error: %s", e.Message)
+	return "authorization error: " + e.Message
 }
 
 // InternalError represents an internal server error
@@ -142,7 +143,7 @@ func (e *InternalError) Error() string {
 	if e.Cause != nil {
 		return fmt.Sprintf("internal error: %s: %v", e.Message, e.Cause)
 	}
-	return fmt.Sprintf("internal error: %s", e.Message)
+	return "internal error: " + e.Message
 }
 
 func (e *InternalError) Unwrap() error {
@@ -154,8 +155,8 @@ func IsValidationError(err error) bool {
 	if err == nil {
 		return false
 	}
-	_, ok := err.(*ValidationError)
-	return ok
+	var ve *ValidationError
+	return errors.As(err, &ve)
 }
 
 // IsNotFoundError checks if an error is a NotFoundError
@@ -163,8 +164,8 @@ func IsNotFoundError(err error) bool {
 	if err == nil {
 		return false
 	}
-	_, ok := err.(*NotFoundError)
-	return ok
+	var ne *NotFoundError
+	return errors.As(err, &ne)
 }
 
 // IsConflictError checks if an error is a ConflictError
@@ -172,8 +173,8 @@ func IsConflictError(err error) bool {
 	if err == nil {
 		return false
 	}
-	_, ok := err.(*ConflictError)
-	return ok
+	var ce *ConflictError
+	return errors.As(err, &ce)
 }
 
 // IsAuthenticationError checks if an error is an AuthenticationError
@@ -181,8 +182,8 @@ func IsAuthenticationError(err error) bool {
 	if err == nil {
 		return false
 	}
-	_, ok := err.(*AuthenticationError)
-	return ok
+	var ae *AuthenticationError
+	return errors.As(err, &ae)
 }
 
 // IsUnauthorizedError checks if an error is an AuthorizationError
@@ -190,8 +191,8 @@ func IsUnauthorizedError(err error) bool {
 	if err == nil {
 		return false
 	}
-	_, ok := err.(*AuthorizationError)
-	return ok
+	var aze *AuthorizationError
+	return errors.As(err, &aze)
 }
 
 // IsInternalError checks if an error is an InternalError
@@ -199,6 +200,6 @@ func IsInternalError(err error) bool {
 	if err == nil {
 		return false
 	}
-	_, ok := err.(*InternalError)
-	return ok
+	var ie *InternalError
+	return errors.As(err, &ie)
 }

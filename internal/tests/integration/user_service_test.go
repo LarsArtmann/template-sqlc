@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
 	"github.com/LarsArtmann/template-sqlc/internal/domain/entities"
@@ -89,25 +88,25 @@ func (s *UserServiceIntegrationTestSuite) TestCreateUser() {
 	}
 
 	user, err := s.userService.CreateUser(s.ctx, req)
-	require.NoError(s.T(), err)
-	require.NotNil(s.T(), user)
+	s.Require().NoError(err)
+	s.Require().NotNil(user)
 
-	assert.Equal(s.T(), entities.Email("test@example.com"), user.Email())
-	assert.Equal(s.T(), entities.Username("testuser"), user.Username())
-	assert.Equal(s.T(), entities.FirstName("John"), user.FirstName())
-	assert.Equal(s.T(), entities.LastName("Doe"), user.LastName())
-	assert.Equal(s.T(), entities.UserStatusActive, user.Status())
-	assert.Equal(s.T(), entities.UserRoleUser, user.Role())
-	assert.False(s.T(), user.IsVerified())
-	assert.Contains(s.T(), user.Tags(), "developer")
-	assert.Contains(s.T(), user.Tags(), "golang")
+	s.Equal(entities.Email("test@example.com"), user.Email())
+	s.Equal(entities.Username("testuser"), user.Username())
+	s.Equal(entities.FirstName("John"), user.FirstName())
+	s.Equal(entities.LastName("Doe"), user.LastName())
+	s.Equal(entities.UserStatusActive, user.Status())
+	s.Equal(entities.UserRoleUser, user.Role())
+	s.False(user.IsVerified())
+	s.Contains(user.Tags(), "developer")
+	s.Contains(user.Tags(), "golang")
 
 	// Check that event was published
 	userEvents := s.eventPublisher.Events()
-	require.Len(s.T(), userEvents, 1)
+	s.Require().Len(userEvents, 1)
 
 	userCreatedEvent := userEvents[0]
-	assert.Equal(s.T(), events.EventUserCreated, userCreatedEvent.Type)
+	s.Equal(events.EventUserCreated, userCreatedEvent.Type)
 }
 
 func (s *UserServiceIntegrationTestSuite) TestCreateUserDuplicateEmail() {
@@ -123,7 +122,7 @@ func (s *UserServiceIntegrationTestSuite) TestCreateUserDuplicateEmail() {
 	}
 
 	_, err := s.userService.CreateUser(s.ctx, req1)
-	require.NoError(s.T(), err)
+	s.Require().NoError(err)
 
 	// Try to create second user with same email
 	req2 := &services.CreateUserRequest{
@@ -137,10 +136,10 @@ func (s *UserServiceIntegrationTestSuite) TestCreateUserDuplicateEmail() {
 	}
 
 	user, err := s.userService.CreateUser(s.ctx, req2)
-	assert.Error(s.T(), err)
-	assert.True(s.T(), entities.IsNotFoundError(err) ||
+	s.Error(err)
+	s.True(entities.IsNotFoundError(err) ||
 		assert.IsType(s.T(), entities.ErrUserAlreadyExists, err))
-	assert.Nil(s.T(), user)
+	s.Nil(user)
 }
 
 func (s *UserServiceIntegrationTestSuite) TestGetUser() {
@@ -156,16 +155,16 @@ func (s *UserServiceIntegrationTestSuite) TestGetUser() {
 	}
 
 	createdUser, err := s.userService.CreateUser(s.ctx, req)
-	require.NoError(s.T(), err)
+	s.Require().NoError(err)
 
 	// Get the user
 	retrievedUser, err := s.userService.GetUser(s.ctx, createdUser.ID())
-	require.NoError(s.T(), err)
-	require.NotNil(s.T(), retrievedUser)
+	s.Require().NoError(err)
+	s.Require().NotNil(retrievedUser)
 
-	assert.Equal(s.T(), createdUser.ID(), retrievedUser.ID())
-	assert.Equal(s.T(), createdUser.Email(), retrievedUser.Email())
-	assert.Equal(s.T(), createdUser.Username(), retrievedUser.Username())
+	s.Equal(createdUser.ID(), retrievedUser.ID())
+	s.Equal(createdUser.Email(), retrievedUser.Email())
+	s.Equal(createdUser.Username(), retrievedUser.Username())
 }
 
 func (s *UserServiceIntegrationTestSuite) TestUpdateUser() {
@@ -181,7 +180,7 @@ func (s *UserServiceIntegrationTestSuite) TestUpdateUser() {
 	}
 
 	user, err := s.userService.CreateUser(s.ctx, createReq)
-	require.NoError(s.T(), err)
+	s.Require().NoError(err)
 
 	// Update user
 	newFirstName := "Jane"
@@ -192,15 +191,15 @@ func (s *UserServiceIntegrationTestSuite) TestUpdateUser() {
 	}
 
 	updatedUser, err := s.userService.UpdateUser(s.ctx, updateReq)
-	require.NoError(s.T(), err)
-	assert.Equal(s.T(), entities.FirstName(newFirstName), updatedUser.FirstName())
+	s.Require().NoError(err)
+	s.Equal(entities.FirstName(newFirstName), updatedUser.FirstName())
 
 	// Check that event was published
 	userEvents := s.eventPublisher.Events()
-	assert.Len(s.T(), userEvents, 2) // Create + Update
+	s.Len(userEvents, 2) // Create + Update
 
 	updateEvent := userEvents[1]
-	assert.Equal(s.T(), events.EventUserUpdated, updateEvent.Type)
+	s.Equal(events.EventUserUpdated, updateEvent.Type)
 }
 
 func (s *UserServiceIntegrationTestSuite) TestAuthenticateUser() {
@@ -216,7 +215,7 @@ func (s *UserServiceIntegrationTestSuite) TestAuthenticateUser() {
 	}
 
 	user, err := s.userService.CreateUser(s.ctx, req)
-	require.NoError(s.T(), err)
+	s.Require().NoError(err)
 
 	// Mock the password verification
 	// In a real implementation, this would be handled by the repository
@@ -232,14 +231,14 @@ func (s *UserServiceIntegrationTestSuite) TestAuthenticateUser() {
 		"test-user-agent")
 
 	if err == nil {
-		require.NotNil(s.T(), session)
-		assert.Equal(s.T(), user.ID(), session.UserID())
-		assert.True(s.T(), session.IsActive())
+		s.Require().NotNil(session)
+		s.Equal(user.ID(), session.UserID())
+		s.True(session.IsActive())
 
 		// Check that login event was published
 		userEvents := s.eventPublisher.Events()
 		loginEvent := userEvents[len(userEvents)-1] // Should be the last event
-		assert.Equal(s.T(), events.EventUserLogin, loginEvent.Type)
+		s.Equal(events.EventUserLogin, loginEvent.Type)
 	}
 }
 
@@ -251,15 +250,15 @@ func (s *UserServiceIntegrationTestSuite) TestAuthenticateUserInvalidCredentials
 		"127.0.0.1",
 		"test-user-agent")
 
-	assert.Error(s.T(), err)
-	assert.Nil(s.T(), session)
-	assert.True(s.T(), entities.IsUnauthorizedError(err))
+	s.Error(err)
+	s.Nil(session)
+	s.True(entities.IsAuthenticationError(err))
 
 	// Check that failed login event was published
 	userEvents := s.eventPublisher.Events()
 	if len(userEvents) > 0 {
 		loginFailEvent := userEvents[len(userEvents)-1]
-		assert.Equal(s.T(), events.EventUserLoginFail, loginFailEvent.Type)
+		s.Equal(events.EventUserLoginFail, loginFailEvent.Type)
 	}
 }
 
@@ -276,17 +275,22 @@ func (s *UserServiceIntegrationTestSuite) TestChangeUserRole() {
 	}
 
 	user, err := s.userService.CreateUser(s.ctx, req)
-	require.NoError(s.T(), err)
+	s.Require().NoError(err)
 
 	// Change user role
-	updatedUser, err := s.userService.ChangeUserRole(s.ctx, user.ID(), entities.UserRoleAdmin, "system")
-	require.NoError(s.T(), err)
-	assert.Equal(s.T(), entities.UserRoleAdmin, updatedUser.Role())
+	updatedUser, err := s.userService.ChangeUserRole(
+		s.ctx,
+		user.ID(),
+		entities.UserRoleAdmin,
+		"system",
+	)
+	s.Require().NoError(err)
+	s.Equal(entities.UserRoleAdmin, updatedUser.Role())
 
 	// Check that role change event was published
 	userEvents := s.eventPublisher.Events()
 	roleChangeEvent := userEvents[len(userEvents)-1]
-	assert.Equal(s.T(), events.EventRoleChanged, roleChangeEvent.Type)
+	s.Equal(events.EventRoleChanged, roleChangeEvent.Type)
 }
 
 func (s *UserServiceIntegrationTestSuite) TestGetUserStats() {
@@ -313,16 +317,16 @@ func (s *UserServiceIntegrationTestSuite) TestGetUserStats() {
 		}
 
 		_, err := s.userService.CreateUser(s.ctx, req)
-		require.NoError(s.T(), err)
+		s.Require().NoError(err)
 	}
 
 	// Get stats
 	stats, err := s.userService.GetUserStats(s.ctx)
-	require.NoError(s.T(), err)
-	require.NotNil(s.T(), stats)
+	s.Require().NoError(err)
+	s.Require().NotNil(stats)
 
-	assert.Greater(s.T(), stats.TotalUsers, int64(0))
-	assert.Greater(s.T(), stats.ActiveUsers, int64(0))
+	assert.Positive(s.T(), stats.TotalUsers)
+	assert.Positive(s.T(), stats.ActiveUsers)
 }
 
 // Test suite runner

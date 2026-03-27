@@ -69,7 +69,10 @@ func (r *PostgresUserRepository) Create(ctx context.Context, user *entities.User
 }
 
 // GetByID retrieves a user by ID from PostgreSQL
-func (r *PostgresUserRepository) GetByID(ctx context.Context, id entities.UserID) (*entities.User, error) {
+func (r *PostgresUserRepository) GetByID(
+	ctx context.Context,
+	id entities.UserID,
+) (*entities.User, error) {
 	// This would use actual generated sqlc code for PostgreSQL
 	// Example:
 	// postgresUser, err := r.queries.GetUserByID(ctx, int64(id))
@@ -85,19 +88,28 @@ func (r *PostgresUserRepository) GetByID(ctx context.Context, id entities.UserID
 }
 
 // GetByUUID retrieves a user by UUID from PostgreSQL
-func (r *PostgresUserRepository) GetByUUID(ctx context.Context, uuid entities.UuID) (*entities.User, error) {
+func (r *PostgresUserRepository) GetByUUID(
+	ctx context.Context,
+	uuid entities.UuID,
+) (*entities.User, error) {
 	// Query using UUID type
 	panic("implement me: use actual sqlc generated code for PostgreSQL")
 }
 
 // GetByEmail retrieves a user by email from PostgreSQL
-func (r *PostgresUserRepository) GetByEmail(ctx context.Context, email entities.Email) (*entities.User, error) {
+func (r *PostgresUserRepository) GetByEmail(
+	ctx context.Context,
+	email entities.Email,
+) (*entities.User, error) {
 	// Query using case-insensitive search (CITEXT)
 	panic("implement me: use actual sqlc generated code for PostgreSQL")
 }
 
 // GetByUsername retrieves a user by username from PostgreSQL
-func (r *PostgresUserRepository) GetByUsername(ctx context.Context, username entities.Username) (*entities.User, error) {
+func (r *PostgresUserRepository) GetByUsername(
+	ctx context.Context,
+	username entities.Username,
+) (*entities.User, error) {
 	// Query using case-insensitive search (CITEXT)
 	panic("implement me: use actual sqlc generated code for PostgreSQL")
 }
@@ -121,7 +133,11 @@ func (r *PostgresUserRepository) Delete(ctx context.Context, id entities.UserID)
 }
 
 // List retrieves users with pagination from PostgreSQL
-func (r *PostgresUserRepository) List(ctx context.Context, status entities.UserStatus, limit, offset int) ([]*entities.User, error) {
+func (r *PostgresUserRepository) List(
+	ctx context.Context,
+	status entities.UserStatus,
+	limit, offset int,
+) ([]*entities.User, error) {
 	// Validate pagination parameters
 	if limit <= 0 || limit > 1000 {
 		return nil, errors.NewValidationError("limit", "must be between 1 and 1000")
@@ -135,7 +151,12 @@ func (r *PostgresUserRepository) List(ctx context.Context, status entities.UserS
 }
 
 // Search searches users by query in PostgreSQL using FTS
-func (r *PostgresUserRepository) Search(ctx context.Context, query string, status entities.UserStatus, limit int) ([]*entities.User, error) {
+func (r *PostgresUserRepository) Search(
+	ctx context.Context,
+	query string,
+	status entities.UserStatus,
+	limit int,
+) ([]*entities.User, error) {
 	// Validate search query
 	if err := entities.ValidateSearchQuery(query, limit); err != nil {
 		return nil, err
@@ -146,7 +167,12 @@ func (r *PostgresUserRepository) Search(ctx context.Context, query string, statu
 }
 
 // SearchByTags searches users by tags in PostgreSQL using GIN index
-func (r *PostgresUserRepository) SearchByTags(ctx context.Context, tags []string, status entities.UserStatus, limit, offset int) ([]*entities.User, error) {
+func (r *PostgresUserRepository) SearchByTags(
+	ctx context.Context,
+	tags []string,
+	status entities.UserStatus,
+	limit, offset int,
+) ([]*entities.User, error) {
 	// Validate tags
 	if len(tags) == 0 {
 		return nil, errors.NewValidationError("tags", "cannot be empty")
@@ -160,7 +186,9 @@ func (r *PostgresUserRepository) SearchByTags(ctx context.Context, tags []string
 }
 
 // CountByStatus counts users by status in PostgreSQL
-func (r *PostgresUserRepository) CountByStatus(ctx context.Context) (map[entities.UserStatus]int64, error) {
+func (r *PostgresUserRepository) CountByStatus(
+	ctx context.Context,
+) (map[entities.UserStatus]int64, error) {
 	// Query counts by status using PostgreSQL's GROUP BY
 	panic("implement me: use actual sqlc generated code for PostgreSQL")
 }
@@ -172,13 +200,21 @@ func (r *PostgresUserRepository) GetStats(ctx context.Context) (*entities.UserSt
 }
 
 // VerifyCredentials verifies user credentials in PostgreSQL
-func (r *PostgresUserRepository) VerifyCredentials(ctx context.Context, email entities.Email, password entities.PasswordHash) (*entities.User, error) {
+func (r *PostgresUserRepository) VerifyCredentials(
+	ctx context.Context,
+	email entities.Email,
+	password entities.PasswordHash,
+) (*entities.User, error) {
 	// Query user by email and verify password
 	panic("implement me: use actual sqlc generated code for PostgreSQL")
 }
 
 // UpdatePassword updates user password in PostgreSQL
-func (r *PostgresUserRepository) UpdatePassword(ctx context.Context, id entities.UserID, password entities.PasswordHash) error {
+func (r *PostgresUserRepository) UpdatePassword(
+	ctx context.Context,
+	id entities.UserID,
+	password entities.PasswordHash,
+) error {
 	// Update password
 	panic("implement me: use actual sqlc generated code for PostgreSQL")
 }
@@ -190,7 +226,11 @@ func (r *PostgresUserRepository) MarkVerified(ctx context.Context, id entities.U
 }
 
 // ChangeStatus changes user status in PostgreSQL
-func (r *PostgresUserRepository) ChangeStatus(ctx context.Context, id entities.UserID, status entities.UserStatus) error {
+func (r *PostgresUserRepository) ChangeStatus(
+	ctx context.Context,
+	id entities.UserID,
+	status entities.UserStatus,
+) error {
 	// Validate status
 	if !status.IsValid() {
 		return errors.NewValidationError("status", "invalid user status")
@@ -216,7 +256,11 @@ func (r *PostgresUserRepository) Suspend(ctx context.Context, id entities.UserID
 }
 
 // ChangeRole changes user role in PostgreSQL
-func (r *PostgresUserRepository) ChangeRole(ctx context.Context, id entities.UserID, role entities.UserRole) error {
+func (r *PostgresUserRepository) ChangeRole(
+	ctx context.Context,
+	id entities.UserID,
+	role entities.UserRole,
+) error {
 	// Validate role
 	if !role.IsValid() {
 		return errors.NewValidationError("role", "invalid user role")
@@ -236,7 +280,7 @@ func (r *PostgresUserRepository) handlePostgresError(err error, operation string
 
 	// Check for common PostgreSQL error types
 	switch {
-	case err == sql.ErrNoRows:
+	case errors.Is(err, sql.ErrNoRows):
 		return entities.ErrUserNotFound
 	case isUniqueViolationError(err):
 		return entities.ErrUserAlreadyExists
@@ -245,7 +289,7 @@ func (r *PostgresUserRepository) handlePostgresError(err error, operation string
 	case isCheckViolationError(err):
 		return errors.NewValidationError("check_constraint", "check constraint violated")
 	default:
-		return errors.NewDatabaseError(fmt.Sprintf("%s failed", operation), err)
+		return errors.NewDatabaseError(operation+" failed", err)
 	}
 }
 

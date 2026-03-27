@@ -19,16 +19,34 @@ type UserRepository interface {
 	Delete(ctx context.Context, id entities.UserID) error
 
 	// List and search operations
-	List(ctx context.Context, status entities.UserStatus, limit, offset int) ([]*entities.User, error)
-	Search(ctx context.Context, query string, status entities.UserStatus, limit int) ([]*entities.User, error)
-	SearchByTags(ctx context.Context, tags []string, status entities.UserStatus, limit, offset int) ([]*entities.User, error)
+	List(
+		ctx context.Context,
+		status entities.UserStatus,
+		limit, offset int,
+	) ([]*entities.User, error)
+	Search(
+		ctx context.Context,
+		query string,
+		status entities.UserStatus,
+		limit int,
+	) ([]*entities.User, error)
+	SearchByTags(
+		ctx context.Context,
+		tags []string,
+		status entities.UserStatus,
+		limit, offset int,
+	) ([]*entities.User, error)
 
 	// Aggregate operations
 	CountByStatus(ctx context.Context) (map[entities.UserStatus]int64, error)
 	GetStats(ctx context.Context) (*entities.UserStats, error)
 
 	// Authentication operations
-	VerifyCredentials(ctx context.Context, email entities.Email, password entities.PasswordHash) (*entities.User, error)
+	VerifyCredentials(
+		ctx context.Context,
+		email entities.Email,
+		password entities.PasswordHash,
+	) (*entities.User, error)
 	UpdatePassword(ctx context.Context, id entities.UserID, password entities.PasswordHash) error
 	MarkVerified(ctx context.Context, id entities.UserID) error
 
@@ -47,7 +65,11 @@ type SessionRepository interface {
 	// CRUD operations
 	Create(ctx context.Context, session *entities.UserSession) error
 	GetByToken(ctx context.Context, token entities.SessionToken) (*entities.UserSession, error)
-	GetByUserID(ctx context.Context, userID entities.UserID, activeOnly bool) ([]*entities.UserSession, error)
+	GetByUserID(
+		ctx context.Context,
+		userID entities.UserID,
+		activeOnly bool,
+	) ([]*entities.UserSession, error)
 	Update(ctx context.Context, session *entities.UserSession) error
 	Delete(ctx context.Context, id entities.SessionID) error
 

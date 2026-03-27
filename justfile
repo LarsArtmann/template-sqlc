@@ -117,18 +117,10 @@ docs: # Generate documentation
 
 # Release targets
 version: # Show version information
-    echo "📋 Version information:"
-    if command -v sqlc >/dev/null 2>&1; then
-        sqlc version
-    else
-        echo "sqlc: not installed"
-    fi
-    if command -v yq >/dev/null 2>&1; then
-        echo "yq: $(yq --version)"
-    else
-        echo "yq: not installed"
-    fi
-    echo "Template version: $(git describe --tags --always --dirty 2>/dev/null || echo 'unknown')"
+	echo "📋 Version information:"
+	@if command -v sqlc >/dev/null 2>&1; then sqlc version; else echo "sqlc: not installed"; fi
+	@if command -v yq >/dev/null 2>&1; then yq --version; else echo "yq: not installed"; fi
+	@echo "Template version: $$(git describe --tags --always --dirty 2>/dev/null || echo 'unknown')"
 
 # Security targets
 security-audit: # Audit configuration for security issues

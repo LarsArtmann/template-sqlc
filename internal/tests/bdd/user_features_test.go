@@ -2,7 +2,10 @@ package bdd
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/cucumber/godog"
@@ -70,11 +73,17 @@ func (s *UserFeaturesTestSuite) InitializeContext(ctx *godog.ScenarioContext) {
 	ctx.Then(`^the user should be created successfully$`, s.userShouldBeCreatedSuccessfully)
 	ctx.Then(`^the user should have ID (\d+)$`, s.userShouldHaveID)
 	ctx.Then(`^I should receive a validation error$`, s.shouldReceiveValidationError)
-	ctx.Then(`^I should receive a "user already exists" error$`, s.shouldReceiveUserAlreadyExistsError)
+	ctx.Then(
+		`^I should receive a "user already exists" error$`,
+		s.shouldReceiveUserAlreadyExistsError,
+	)
 	ctx.Then(`^the authentication should succeed$`, s.authenticationShouldSucceed)
 	ctx.Then(`^the authentication should fail$`, s.authenticationShouldFail)
 	ctx.Then(`^I should receive a "user not found" error$`, s.shouldReceiveUserNotFoundError)
-	ctx.Then(`^I should receive a "invalid credentials" error$`, s.shouldReceiveInvalidCredentialsError)
+	ctx.Then(
+		`^I should receive a "invalid credentials" error$`,
+		s.shouldReceiveInvalidCredentialsError,
+	)
 	ctx.Then(`^the session should be created$`, s.sessionShouldBeCreated)
 	ctx.Then(`^the user profile should be updated$`, s.userProfileShouldBeUpdated)
 	ctx.Then(`^the user role should be changed to "([^"]*)"$`, s.userRoleShouldBeChanged)
@@ -83,7 +92,10 @@ func (s *UserFeaturesTestSuite) InitializeContext(ctx *godog.ScenarioContext) {
 	ctx.Then(`^a user created event should be published$`, s.userCreatedEventShouldBePublished)
 	ctx.Then(`^a user updated event should be published$`, s.userUpdatedEventShouldBePublished)
 	ctx.Then(`^a user login event should be published$`, s.userLoginEventShouldBePublished)
-	ctx.Then(`^a user login failed event should be published$`, s.userLoginFailEventShouldBePublished)
+	ctx.Then(
+		`^a user login failed event should be published$`,
+		s.userLoginFailEventShouldBePublished,
+	)
 	ctx.Then(`^a role changed event should be published$`, s.roleChangedEventShouldBePublished)
 }
 
@@ -207,7 +219,7 @@ func (s *UserFeaturesTestSuite) createUserWithUsername(username string) error {
 
 func (s *UserFeaturesTestSuite) authenticateWithCredentials() error {
 	if s.currentUser == nil {
-		return fmt.Errorf("no current user to authenticate")
+		return errors.New("no current user to authenticate")
 	}
 
 	session, err := s.userService.AuthenticateUser(
@@ -226,7 +238,7 @@ func (s *UserFeaturesTestSuite) authenticateWithCredentials() error {
 
 func (s *UserFeaturesTestSuite) updateUserProfile() error {
 	if s.currentUser == nil {
-		return fmt.Errorf("no current user to update")
+		return errors.New("no current user to update")
 	}
 
 	newFirstName := "Updated"
@@ -245,7 +257,7 @@ func (s *UserFeaturesTestSuite) updateUserProfile() error {
 
 func (s *UserFeaturesTestSuite) changeUserRole(role string) error {
 	if s.currentUser == nil {
-		return fmt.Errorf("no current user for role change")
+		return errors.New("no current user for role change")
 	}
 
 	userRole := entities.UserRole(role)
@@ -264,7 +276,7 @@ func (s *UserFeaturesTestSuite) changeUserRole(role string) error {
 
 func (s *UserFeaturesTestSuite) verifyUserAccount() error {
 	if s.currentUser == nil {
-		return fmt.Errorf("no current user to verify")
+		return errors.New("no current user to verify")
 	}
 
 	err := s.userRepo.MarkVerified(context.Background(), s.currentUser.ID())
@@ -279,7 +291,7 @@ func (s *UserFeaturesTestSuite) verifyUserAccount() error {
 
 func (s *UserFeaturesTestSuite) deactivateUserAccount() error {
 	if s.currentUser == nil {
-		return fmt.Errorf("no current user to deactivate")
+		return errors.New("no current user to deactivate")
 	}
 
 	err := s.userRepo.Deactivate(context.Background(), s.currentUser.ID())
@@ -303,17 +315,17 @@ func (s *UserFeaturesTestSuite) getUserStatistics() error {
 
 func (s *UserFeaturesTestSuite) userShouldBeCreatedSuccessfully() error {
 	if s.lastError != nil {
-		return fmt.Errorf("expected user to be created successfully, got error: %v", s.lastError)
+		return fmt.Errorf("expected user to be created successfully, got error: %w", s.lastError)
 	}
 	if s.currentUser == nil {
-		return fmt.Errorf("expected user to be created, but got nil")
+		return errors.New("expected user to be created, but got nil")
 	}
 	return nil
 }
 
 func (s *UserFeaturesTestSuite) userShouldHaveID(expectedIDStr string) error {
 	if s.currentUser == nil {
-		return fmt.Errorf("no current user")
+		return errors.New("no current user")
 	}
 
 	if s.currentUser.ID().String() != expectedIDStr {
@@ -325,12 +337,12 @@ func (s *UserFeaturesTestSuite) userShouldHaveID(expectedIDStr string) error {
 
 func (s *UserFeaturesTestSuite) shouldReceiveValidationError() error {
 	if s.lastError == nil {
-		return fmt.Errorf("expected validation error, got nil")
+		return errors.New("expected validation error, got nil")
 	}
 
 	// Check if it's a validation error type
 	if !entities.IsValidationError(s.lastError) {
-		return fmt.Errorf("expected validation error, got: %v", s.lastError)
+		return fmt.Errorf("expected validation error, got: %w", s.lastError)
 	}
 
 	return nil
@@ -338,12 +350,13 @@ func (s *UserFeaturesTestSuite) shouldReceiveValidationError() error {
 
 func (s *UserFeaturesTestSuite) shouldReceiveUserAlreadyExistsError() error {
 	if s.lastError == nil {
-		return fmt.Errorf("expected user already exists error, got nil")
+		return errors.New("expected user already exists error, got nil")
 	}
 
 	// Check if it's a conflict error
-	if !entities.IsNotFoundError(s.lastError) && s.lastError != entities.ErrUserAlreadyExists {
-		return fmt.Errorf("expected user already exists error, got: %v", s.lastError)
+	if !entities.IsNotFoundError(s.lastError) &&
+		!errors.Is(s.lastError, entities.ErrUserAlreadyExists) {
+		return fmt.Errorf("expected user already exists error, got: %w", s.lastError)
 	}
 
 	return nil
@@ -351,93 +364,103 @@ func (s *UserFeaturesTestSuite) shouldReceiveUserAlreadyExistsError() error {
 
 func (s *UserFeaturesTestSuite) authenticationShouldSucceed() error {
 	if s.lastError != nil {
-		return fmt.Errorf("expected authentication to succeed, got error: %v", s.lastError)
+		return fmt.Errorf("expected authentication to succeed, got error: %w", s.lastError)
 	}
 	if s.currentSession == nil {
-		return fmt.Errorf("expected session to be created, but got nil")
+		return errors.New("expected session to be created, but got nil")
 	}
 	return nil
 }
 
 func (s *UserFeaturesTestSuite) authenticationShouldFail() error {
 	if s.lastError == nil {
-		return fmt.Errorf("expected authentication to fail, got nil")
+		return errors.New("expected authentication to fail, got nil")
 	}
 	if !entities.IsUnauthorizedError(s.lastError) {
-		return fmt.Errorf("expected unauthorized error, got: %v", s.lastError)
+		return fmt.Errorf("expected unauthorized error, got: %w", s.lastError)
 	}
 	return nil
 }
 
 func (s *UserFeaturesTestSuite) shouldReceiveUserNotFoundError() error {
 	if s.lastError == nil {
-		return fmt.Errorf("expected user not found error, got nil")
+		return errors.New("expected user not found error, got nil")
 	}
-	if s.lastError != entities.ErrUserNotFound {
-		return fmt.Errorf("expected user not found error, got: %v", s.lastError)
+	if !errors.Is(s.lastError, entities.ErrUserNotFound) {
+		return fmt.Errorf("expected user not found error, got: %w", s.lastError)
 	}
 	return nil
 }
 
 func (s *UserFeaturesTestSuite) shouldReceiveInvalidCredentialsError() error {
 	if s.lastError == nil {
-		return fmt.Errorf("expected invalid credentials error, got nil")
+		return errors.New("expected invalid credentials error, got nil")
 	}
 	if !entities.IsUnauthorizedError(s.lastError) {
-		return fmt.Errorf("expected invalid credentials error, got: %v", s.lastError)
+		return fmt.Errorf("expected invalid credentials error, got: %w", s.lastError)
 	}
 	return nil
 }
 
 func (s *UserFeaturesTestSuite) sessionShouldBeCreated() error {
 	if s.currentSession == nil {
-		return fmt.Errorf("expected session to be created, but got nil")
+		return errors.New("expected session to be created, but got nil")
 	}
 	return nil
 }
 
 func (s *UserFeaturesTestSuite) userProfileShouldBeUpdated() error {
 	if s.lastError != nil {
-		return fmt.Errorf("expected profile update to succeed, got error: %v", s.lastError)
+		return fmt.Errorf("expected profile update to succeed, got error: %w", s.lastError)
 	}
 	if s.currentUser == nil {
-		return fmt.Errorf("expected user to be updated, but got nil")
+		return errors.New("expected user to be updated, but got nil")
 	}
 	if s.currentUser.FirstName().String() != "Updated" {
-		return fmt.Errorf("expected first name to be 'Updated', got '%s'", s.currentUser.FirstName().String())
+		return fmt.Errorf(
+			"expected first name to be 'Updated', got '%s'",
+			s.currentUser.FirstName().String(),
+		)
 	}
 	return nil
 }
 
 func (s *UserFeaturesTestSuite) userRoleShouldBeChanged(expectedRole string) error {
 	if s.lastError != nil {
-		return fmt.Errorf("expected role change to succeed, got error: %v", s.lastError)
+		return fmt.Errorf("expected role change to succeed, got error: %w", s.lastError)
 	}
 	if s.currentUser == nil {
-		return fmt.Errorf("expected user role to be changed, but got nil")
+		return errors.New("expected user role to be changed, but got nil")
 	}
 	if s.currentUser.Role().String() != expectedRole {
-		return fmt.Errorf("expected user role to be '%s', got '%s'", expectedRole, s.currentUser.Role().String())
+		return fmt.Errorf(
+			"expected user role to be '%s', got '%s'",
+			expectedRole,
+			s.currentUser.Role().String(),
+		)
 	}
 	return nil
 }
 
 func (s *UserFeaturesTestSuite) userAccountShouldBeVerified() error {
 	if s.currentUser == nil {
-		return fmt.Errorf("expected user to be verified, but got nil")
+		return errors.New("expected user to be verified, but got nil")
 	}
 	if !s.currentUser.IsVerified() {
-		return fmt.Errorf("expected user to be verified, but it's not")
+		return errors.New("expected user to be verified, but it's not")
 	}
 	return nil
 }
 
 func (s *UserFeaturesTestSuite) userAccountShouldBeDeactivated() error {
 	if s.currentUser == nil {
-		return fmt.Errorf("expected user to be deactivated, but got nil")
+		return errors.New("expected user to be deactivated, but got nil")
 	}
 	if s.currentUser.Status() != entities.UserStatusInactive {
-		return fmt.Errorf("expected user status to be 'inactive', got '%s'", s.currentUser.Status().String())
+		return fmt.Errorf(
+			"expected user status to be 'inactive', got '%s'",
+			s.currentUser.Status().String(),
+		)
 	}
 	return nil
 }
@@ -445,7 +468,7 @@ func (s *UserFeaturesTestSuite) userAccountShouldBeDeactivated() error {
 func (s *UserFeaturesTestSuite) userCreatedEventShouldBePublished() error {
 	userEvents := s.eventPublisher.Events()
 	if len(userEvents) == 0 {
-		return fmt.Errorf("expected events to be published, got none")
+		return errors.New("expected events to be published, got none")
 	}
 
 	found := false
@@ -457,7 +480,10 @@ func (s *UserFeaturesTestSuite) userCreatedEventShouldBePublished() error {
 	}
 
 	if !found {
-		return fmt.Errorf("expected user created event to be published, but wasn't found in %v events", len(userEvents))
+		return fmt.Errorf(
+			"expected user created event to be published, but wasn't found in %v events",
+			len(userEvents),
+		)
 	}
 
 	return nil
@@ -475,7 +501,7 @@ func (s *UserFeaturesTestSuite) userUpdatedEventShouldBePublished() error {
 	}
 
 	if !found {
-		return fmt.Errorf("expected user updated event to be published, but wasn't found")
+		return errors.New("expected user updated event to be published, but wasn't found")
 	}
 
 	return nil
@@ -493,7 +519,7 @@ func (s *UserFeaturesTestSuite) userLoginEventShouldBePublished() error {
 	}
 
 	if !found {
-		return fmt.Errorf("expected user login event to be published, but wasn't found")
+		return errors.New("expected user login event to be published, but wasn't found")
 	}
 
 	return nil
@@ -511,7 +537,7 @@ func (s *UserFeaturesTestSuite) userLoginFailEventShouldBePublished() error {
 	}
 
 	if !found {
-		return fmt.Errorf("expected user login fail event to be published, but wasn't found")
+		return errors.New("expected user login fail event to be published, but wasn't found")
 	}
 
 	return nil
@@ -529,7 +555,7 @@ func (s *UserFeaturesTestSuite) roleChangedEventShouldBePublished() error {
 	}
 
 	if !found {
-		return fmt.Errorf("expected role changed event to be published, but wasn't found")
+		return errors.New("expected role changed event to be published, but wasn't found")
 	}
 
 	return nil
@@ -537,6 +563,13 @@ func (s *UserFeaturesTestSuite) roleChangedEventShouldBePublished() error {
 
 // Test runner
 func TestUserFeatures(t *testing.T) {
+	// Get the absolute path to the feature files
+	wd, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("Failed to get working directory: %v", err)
+	}
+	featurePath := filepath.Join(wd, "..", "..", "..", "test", "features", "user")
+
 	suite := godog.TestSuite{
 		ScenarioInitializer: func(ctx *godog.ScenarioContext) {
 			features := &UserFeaturesTestSuite{}
@@ -544,7 +577,7 @@ func TestUserFeatures(t *testing.T) {
 		},
 		Options: &godog.Options{
 			Format: "pretty",
-			Paths:  []string{"test/features/user"},
+			Paths:  []string{featurePath},
 		},
 	}
 

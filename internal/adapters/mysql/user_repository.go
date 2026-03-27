@@ -69,7 +69,10 @@ func (r *MySQLUserRepository) Create(ctx context.Context, user *entities.User) e
 }
 
 // GetByID retrieves a user by ID from MySQL
-func (r *MySQLUserRepository) GetByID(ctx context.Context, id entities.UserID) (*entities.User, error) {
+func (r *MySQLUserRepository) GetByID(
+	ctx context.Context,
+	id entities.UserID,
+) (*entities.User, error) {
 	// This would use actual generated sqlc code for MySQL
 	// Example:
 	// mysqlUser, err := r.queries.GetUserByID(ctx, int64(id))
@@ -85,19 +88,28 @@ func (r *MySQLUserRepository) GetByID(ctx context.Context, id entities.UserID) (
 }
 
 // GetByUUID retrieves a user by UUID from MySQL
-func (r *MySQLUserRepository) GetByUUID(ctx context.Context, uuid entities.UuID) (*entities.User, error) {
+func (r *MySQLUserRepository) GetByUUID(
+	ctx context.Context,
+	uuid entities.UuID,
+) (*entities.User, error) {
 	// Query using UUID
 	panic("implement me: use actual sqlc generated code for MySQL")
 }
 
 // GetByEmail retrieves a user by email from MySQL
-func (r *MySQLUserRepository) GetByEmail(ctx context.Context, email entities.Email) (*entities.User, error) {
+func (r *MySQLUserRepository) GetByEmail(
+	ctx context.Context,
+	email entities.Email,
+) (*entities.User, error) {
 	// Query using case-insensitive search (COLLATE utf8mb4_unicode_ci)
 	panic("implement me: use actual sqlc generated code for MySQL")
 }
 
 // GetByUsername retrieves a user by username from MySQL
-func (r *MySQLUserRepository) GetByUsername(ctx context.Context, username entities.Username) (*entities.User, error) {
+func (r *MySQLUserRepository) GetByUsername(
+	ctx context.Context,
+	username entities.Username,
+) (*entities.User, error) {
 	// Query using case-insensitive search
 	panic("implement me: use actual sqlc generated code for MySQL")
 }
@@ -121,7 +133,11 @@ func (r *MySQLUserRepository) Delete(ctx context.Context, id entities.UserID) er
 }
 
 // List retrieves users with pagination from MySQL
-func (r *MySQLUserRepository) List(ctx context.Context, status entities.UserStatus, limit, offset int) ([]*entities.User, error) {
+func (r *MySQLUserRepository) List(
+	ctx context.Context,
+	status entities.UserStatus,
+	limit, offset int,
+) ([]*entities.User, error) {
 	// Validate pagination parameters
 	if limit <= 0 || limit > 1000 {
 		return nil, errors.NewValidationError("limit", "must be between 1 and 1000")
@@ -135,7 +151,12 @@ func (r *MySQLUserRepository) List(ctx context.Context, status entities.UserStat
 }
 
 // Search searches users by query in MySQL using FULLTEXT
-func (r *MySQLUserRepository) Search(ctx context.Context, query string, status entities.UserStatus, limit int) ([]*entities.User, error) {
+func (r *MySQLUserRepository) Search(
+	ctx context.Context,
+	query string,
+	status entities.UserStatus,
+	limit int,
+) ([]*entities.User, error) {
 	// Validate search query
 	if len(query) == 0 {
 		return nil, errors.NewValidationError("query", "cannot be empty")
@@ -152,7 +173,12 @@ func (r *MySQLUserRepository) Search(ctx context.Context, query string, status e
 }
 
 // SearchByTags searches users by tags in MySQL using JSON operations
-func (r *MySQLUserRepository) SearchByTags(ctx context.Context, tags []string, status entities.UserStatus, limit, offset int) ([]*entities.User, error) {
+func (r *MySQLUserRepository) SearchByTags(
+	ctx context.Context,
+	tags []string,
+	status entities.UserStatus,
+	limit, offset int,
+) ([]*entities.User, error) {
 	// Validate tags
 	if len(tags) == 0 {
 		return nil, errors.NewValidationError("tags", "cannot be empty")
@@ -166,7 +192,9 @@ func (r *MySQLUserRepository) SearchByTags(ctx context.Context, tags []string, s
 }
 
 // CountByStatus counts users by status in MySQL
-func (r *MySQLUserRepository) CountByStatus(ctx context.Context) (map[entities.UserStatus]int64, error) {
+func (r *MySQLUserRepository) CountByStatus(
+	ctx context.Context,
+) (map[entities.UserStatus]int64, error) {
 	// Query counts by status using MySQL's GROUP BY
 	panic("implement me: use actual sqlc generated code for MySQL")
 }
@@ -178,13 +206,21 @@ func (r *MySQLUserRepository) GetStats(ctx context.Context) (*entities.UserStats
 }
 
 // VerifyCredentials verifies user credentials in MySQL
-func (r *MySQLUserRepository) VerifyCredentials(ctx context.Context, email entities.Email, password entities.PasswordHash) (*entities.User, error) {
+func (r *MySQLUserRepository) VerifyCredentials(
+	ctx context.Context,
+	email entities.Email,
+	password entities.PasswordHash,
+) (*entities.User, error) {
 	// Query user by email and verify password
 	panic("implement me: use actual sqlc generated code for MySQL")
 }
 
 // UpdatePassword updates user password in MySQL
-func (r *MySQLUserRepository) UpdatePassword(ctx context.Context, id entities.UserID, password entities.PasswordHash) error {
+func (r *MySQLUserRepository) UpdatePassword(
+	ctx context.Context,
+	id entities.UserID,
+	password entities.PasswordHash,
+) error {
 	// Update password
 	panic("implement me: use actual sqlc generated code for MySQL")
 }
@@ -196,7 +232,11 @@ func (r *MySQLUserRepository) MarkVerified(ctx context.Context, id entities.User
 }
 
 // ChangeStatus changes user status in MySQL
-func (r *MySQLUserRepository) ChangeStatus(ctx context.Context, id entities.UserID, status entities.UserStatus) error {
+func (r *MySQLUserRepository) ChangeStatus(
+	ctx context.Context,
+	id entities.UserID,
+	status entities.UserStatus,
+) error {
 	// Validate status
 	if !status.IsValid() {
 		return errors.NewValidationError("status", "invalid user status")
@@ -222,7 +262,11 @@ func (r *MySQLUserRepository) Suspend(ctx context.Context, id entities.UserID) e
 }
 
 // ChangeRole changes user role in MySQL
-func (r *MySQLUserRepository) ChangeRole(ctx context.Context, id entities.UserID, role entities.UserRole) error {
+func (r *MySQLUserRepository) ChangeRole(
+	ctx context.Context,
+	id entities.UserID,
+	role entities.UserRole,
+) error {
 	// Validate role
 	if !role.IsValid() {
 		return errors.NewValidationError("role", "invalid user role")
@@ -242,7 +286,7 @@ func (r *MySQLUserRepository) handleMySQLError(err error, operation string) erro
 
 	// Check for common MySQL error types
 	switch {
-	case err == sql.ErrNoRows:
+	case errors.Is(err, sql.ErrNoRows):
 		return entities.ErrUserNotFound
 	case isUniqueConstraintError(err):
 		return entities.ErrUserAlreadyExists
@@ -251,13 +295,14 @@ func (r *MySQLUserRepository) handleMySQLError(err error, operation string) erro
 	case isCheckConstraintError(err):
 		return errors.NewValidationError("check_constraint", "check constraint violated")
 	default:
-		return errors.NewDatabaseError(fmt.Sprintf("%s failed", operation), err)
+		return errors.NewDatabaseError(operation+" failed", err)
 	}
 }
 
 // isUniqueConstraintError checks for MySQL unique constraint violation
 func isUniqueConstraintError(err error) bool {
-	if mysqlErr, ok := err.(*mysql.MySQLError); ok {
+	mysqlErr := &mysql.MySQLError{}
+	if errors.As(err, &mysqlErr) {
 		// MySQL error code 1062 for duplicate entry
 		return mysqlErr.Number == 1062
 	}
@@ -266,7 +311,8 @@ func isUniqueConstraintError(err error) bool {
 
 // isForeignKeyError checks for MySQL foreign key violation
 func isForeignKeyError(err error) bool {
-	if mysqlErr, ok := err.(*mysql.MySQLError); ok {
+	mysqlErr := &mysql.MySQLError{}
+	if errors.As(err, &mysqlErr) {
 		// MySQL error code 1452 for foreign key constraint
 		return mysqlErr.Number == 1452
 	}
@@ -275,7 +321,8 @@ func isForeignKeyError(err error) bool {
 
 // isCheckConstraintError checks for MySQL check constraint violation
 func isCheckConstraintError(err error) bool {
-	if mysqlErr, ok := err.(*mysql.MySQLError); ok {
+	mysqlErr := &mysql.MySQLError{}
+	if errors.As(err, &mysqlErr) {
 		// MySQL error code 3819 for check constraint
 		return mysqlErr.Number == 3819
 	}

@@ -90,11 +90,24 @@ func (e Email) String() string { return string(e) }
 // Username represents a validated username
 type Username string
 
+var reservedUsernames = map[string]bool{
+	"admin": true, "root": true, "system": true, "moderator": true,
+}
+
+var usernameValidChars = regexp.MustCompile(`^[a-zA-Z0-9_-]+$`)
+
 func NewUsername(username string) (Username, error) {
+	username = strings.TrimSpace(username)
 	if len(username) < 3 || len(username) > 50 {
 		return "", ErrInvalidUsername
 	}
-	return Username(strings.TrimSpace(username)), nil
+	if !usernameValidChars.MatchString(username) {
+		return "", ErrInvalidUsername
+	}
+	if reservedUsernames[strings.ToLower(username)] {
+		return "", ErrInvalidUsername
+	}
+	return Username(username), nil
 }
 
 func (u Username) String() string { return string(u) }
@@ -326,6 +339,12 @@ func (u *User) RemoveTag(tag string) {
 			return
 		}
 	}
+}
+
+// SetID sets the user ID (used by repository after creation)
+// This is intentionally package-private to allow repository to set ID after creation
+func (u *User) SetID(id UserID) {
+	u.id = id
 }
 
 // UserStats represents user statistics

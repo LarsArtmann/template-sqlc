@@ -47,7 +47,10 @@ func (r *SQLiteSessionRepository) Create(ctx context.Context, session *entities.
 }
 
 // GetByToken retrieves a session by token from SQLite
-func (r *SQLiteSessionRepository) GetByToken(ctx context.Context, token entities.SessionToken) (*entities.UserSession, error) {
+func (r *SQLiteSessionRepository) GetByToken(
+	ctx context.Context,
+	token entities.SessionToken,
+) (*entities.UserSession, error) {
 	// Convert token to database format
 	_ = r.converters.SessionToken.DomainToDB(token)
 
@@ -65,7 +68,11 @@ func (r *SQLiteSessionRepository) GetByToken(ctx context.Context, token entities
 }
 
 // GetByUserID retrieves sessions by user ID from SQLite
-func (r *SQLiteSessionRepository) GetByUserID(ctx context.Context, userID entities.UserID, activeOnly bool) ([]*entities.UserSession, error) {
+func (r *SQLiteSessionRepository) GetByUserID(
+	ctx context.Context,
+	userID entities.UserID,
+	activeOnly bool,
+) ([]*entities.UserSession, error) {
 	// Query sessions by user ID
 	// sqliteSessions, err := r.queries.GetSessionsByUserID(ctx, int64(userID), activeOnly)
 	// if err != nil {
@@ -105,7 +112,10 @@ func (r *SQLiteSessionRepository) Delete(ctx context.Context, id entities.Sessio
 }
 
 // DeactivateByToken deactivates a session by token in SQLite
-func (r *SQLiteSessionRepository) DeactivateByToken(ctx context.Context, token entities.SessionToken) error {
+func (r *SQLiteSessionRepository) DeactivateByToken(
+	ctx context.Context,
+	token entities.SessionToken,
+) error {
 	// Convert token to database format
 	_ = r.converters.SessionToken.DomainToDB(token)
 
@@ -117,7 +127,10 @@ func (r *SQLiteSessionRepository) DeactivateByToken(ctx context.Context, token e
 }
 
 // DeactivateByUserID deactivates all sessions for a user in SQLite
-func (r *SQLiteSessionRepository) DeactivateByUserID(ctx context.Context, userID entities.UserID) error {
+func (r *SQLiteSessionRepository) DeactivateByUserID(
+	ctx context.Context,
+	userID entities.UserID,
+) error {
 	// Deactivate all user sessions
 	// _, err := r.queries.DeactivateSessionsByUserID(ctx, int64(userID))
 	// return errors.NewDatabaseError("failed to deactivate user sessions", err)
@@ -135,7 +148,10 @@ func (r *SQLiteSessionRepository) CleanupExpired(ctx context.Context) (int64, er
 }
 
 // GetActiveSessions returns count of active sessions for a user in SQLite
-func (r *SQLiteSessionRepository) GetActiveSessions(ctx context.Context, userID entities.UserID) (int64, error) {
+func (r *SQLiteSessionRepository) GetActiveSessions(
+	ctx context.Context,
+	userID entities.UserID,
+) (int64, error) {
 	// Count active sessions
 	// count, err := r.queries.GetActiveSessionCount(ctx, int64(userID))
 	// return count, errors.NewDatabaseError("failed to get active session count", err)
@@ -144,7 +160,9 @@ func (r *SQLiteSessionRepository) GetActiveSessions(ctx context.Context, userID 
 }
 
 // GetSessionStats returns session statistics from SQLite
-func (r *SQLiteSessionRepository) GetSessionStats(ctx context.Context) (*entities.SessionStats, error) {
+func (r *SQLiteSessionRepository) GetSessionStats(
+	ctx context.Context,
+) (*entities.SessionStats, error) {
 	// Query session statistics
 	panic("implement me: use actual sqlc generated code")
 }
@@ -158,12 +176,12 @@ func (r *SQLiteSessionRepository) handleSessionError(err error, operation string
 	}
 
 	switch {
-	case err == sql.ErrNoRows:
+	case errors.Is(err, sql.ErrNoRows):
 		return entities.ErrSessionNotFound
 	case isSessionUniqueConstraintError(err):
 		return entities.ErrUserAlreadyExists // or session-specific error
 	default:
-		return errors.NewDatabaseError(fmt.Sprintf("%s failed", operation), err)
+		return errors.NewDatabaseError(operation+" failed", err)
 	}
 }
 

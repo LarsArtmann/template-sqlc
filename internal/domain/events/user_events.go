@@ -102,7 +102,10 @@ func NewUserEvent(eventType EventType, userID entities.UserID, data any) *UserEv
 }
 
 // UserCreated creates a user created event
-func UserCreated(userID entities.UserID, email, username, firstName, lastName, role, status string) *UserEvent {
+func UserCreated(
+	userID entities.UserID,
+	email, username, firstName, lastName, role, status string,
+) *UserEvent {
 	data := UserCreatedEvent{
 		UserID:    userID,
 		Email:     email,
@@ -116,7 +119,11 @@ func UserCreated(userID entities.UserID, email, username, firstName, lastName, r
 }
 
 // UserUpdated creates a user updated event
-func UserUpdated(userID entities.UserID, changes map[string]any, updatedBy entities.UserID) *UserEvent {
+func UserUpdated(
+	userID entities.UserID,
+	changes map[string]any,
+	updatedBy entities.UserID,
+) *UserEvent {
 	data := UserUpdatedEvent{
 		UserID:    userID,
 		Changes:   changes,
@@ -160,7 +167,11 @@ func UserVerified(userID entities.UserID, method string) *UserEvent {
 }
 
 // RoleChanged creates a role changed event
-func RoleChanged(userID entities.UserID, oldRole, newRole string, changedBy entities.UserID) *UserEvent {
+func RoleChanged(
+	userID entities.UserID,
+	oldRole, newRole string,
+	changedBy entities.UserID,
+) *UserEvent {
 	data := RoleChangedEvent{
 		UserID:    userID,
 		OldRole:   oldRole,
