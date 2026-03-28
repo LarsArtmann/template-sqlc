@@ -3,6 +3,7 @@ package sqlite
 import (
 	"context"
 	"database/sql"
+	stderrors "errors"
 	"fmt"
 
 	"github.com/LarsArtmann/template-sqlc/internal/adapters/converters"
@@ -176,7 +177,7 @@ func (r *SQLiteSessionRepository) handleSessionError(err error, operation string
 	}
 
 	switch {
-	case errors.Is(err, sql.ErrNoRows):
+	case stderrors.Is(err, sql.ErrNoRows):
 		return entities.ErrSessionNotFound
 	case isSessionUniqueConstraintError(err):
 		return entities.ErrUserAlreadyExists // or session-specific error

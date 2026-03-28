@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"database/sql"
+	stderrors "errors"
 	"fmt"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -280,7 +281,7 @@ func (r *PostgresUserRepository) handlePostgresError(err error, operation string
 
 	// Check for common PostgreSQL error types
 	switch {
-	case errors.Is(err, sql.ErrNoRows):
+	case stderrors.Is(err, sql.ErrNoRows):
 		return entities.ErrUserNotFound
 	case isUniqueViolationError(err):
 		return entities.ErrUserAlreadyExists

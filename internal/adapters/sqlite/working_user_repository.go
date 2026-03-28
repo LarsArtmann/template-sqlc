@@ -3,6 +3,7 @@ package sqlite
 import (
 	"context"
 	"database/sql"
+	stderrors "errors"
 	"fmt"
 
 	"github.com/LarsArtmann/template-sqlc/internal/adapters/converters"
@@ -92,7 +93,7 @@ func (r *WorkingSQLiteUserRepository) Create(ctx context.Context, user *entities
 	}
 
 	if rows == 0 {
-		return errors.NewDatabaseError("no rows affected", errors.New("user creation failed"))
+		return errors.NewDatabaseError("no rows affected", stderrors.New("user creation failed"))
 	}
 
 	return nil
@@ -228,13 +229,13 @@ func (r *WorkingSQLiteUserRepository) CountByStatus(
 	ctx context.Context,
 ) (map[entities.UserStatus]int64, error) {
 	// Implementation with GROUP BY
-	return nil, errors.New("implementation in progress - count users by status")
+	return nil, stderrors.New("implementation in progress - count users by status")
 }
 
 // GetStats retrieves user statistics from SQLite
 func (r *WorkingSQLiteUserRepository) GetStats(ctx context.Context) (*entities.UserStats, error) {
 	// Implementation with aggregate functions
-	return nil, errors.New("implementation in progress - get user stats")
+	return nil, stderrors.New("implementation in progress - get user stats")
 }
 
 // VerifyCredentials verifies user credentials in SQLite

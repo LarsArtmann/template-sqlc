@@ -82,4 +82,83 @@ formatters:
     - gofmt
     - goimports
     - golines
-issues: {}
+issues:
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - std-error-handling
+      - common-false-positives
+      - legacy
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+    rules:
+      - linters:
+          - exhaustruct
+        source: "^\\s*(return &|prometheus\\.|mysql\\.|entities\\.|services\\.|bdd\\.|godog\\.|flags\\.|unit\\.|sqlite\\.|monitoring\\.|integration\\.)"
+      - linters:
+          - exhaustruct
+        source: "^\\s*promhttp\\."
+      - linters:
+          - exhaustruct
+        source: "^\\s*&mysql\\."
+      - linters:
+          - exhaustruct
+        source: "^\\s*&entities\\..*\\{\\s*\\}"
+      - linters:
+          - exhaustruct
+        source: "^\\s*&services\\..*\\{\\s*\\}"
+      - linters:
+          - exhaustruct
+        source: "^\\s*&bdd\\..*\\{\\s*\\}"
+      - linters:
+          - exhaustruct
+        source: "^\\s*&godog\\..*\\{\\s*\\}"
+      - linters:
+          - exhaustruct
+        source: "^\\s*flags\\..*\\{\\s*\\}"
+      - linters:
+          - exhaustruct
+        source: "^\\s*unit\\.<anonymous>"
+      - linters:
+          - exhaustruct
+        source: "^\\s*return &.*\\{"
+      - linters:
+          - exhaustruct
+        path: _test\\.go
+      - linters:
+          - paralleltest
+        path: _test\\.go
+      - linters:
+          - wrapcheck
+        path: internal/domain/
+      - linters:
+          - wrapcheck
+        path: internal/tests/
+      - linters:
+          - unused
+        path: internal/adapters/
+      - linters:
+          - revive
+        path: pkg/errors/errors.go
+linters-settings:
+  exhaustruct:
+    exclude:
+      - "^github.com/go-sql-driver/mysql\\.MySQLError$"
+      - "^github.com/prometheus/client_golang/prometheus\\."
+      - "^database/sql\\."
+  cyclop:
+    max-complexity: 15
+  gocyclo:
+    min-complexity: 15
+  gocognit:
+    min-complexity: 20
+  funlen:
+    lines: 100
+    statements: 60
+  wrapcheck:
+    ignorePackageGlobs:
+      - github.com/LarsArtmann/template-sqlc/internal/domain/*
+      - github.com/LarsArtmann/template-sqlc/pkg/*

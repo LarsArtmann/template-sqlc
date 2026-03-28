@@ -58,14 +58,65 @@ func (s *UserService) CreateUser(
 	}
 
 	// Check if user already exists
-	if _, err := s.userRepo.GetByEmail(ctx, entities.Email(req.Email)); err == nil {
-		return nil, entities.ErrUserAlreadyExists
-	}
-	if _, err := s.userRepo.GetByUsername(ctx, entities.Username(req.Username)); err == nil {
-		return nil, entities.ErrUserAlreadyExists
+	if err := s.checkUserNotExists(ctx, req.Email, req.Username); err != nil {
+		return nil, err
 	}
 
 	// Create domain entities
+	domainEntities, err := s.createDomainEntities(req)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create user entity
+	user, err := entities.NewUser(
+		domainEntities.Email,
+		domainEntities.Username,
+		domainEntities.PasswordHash,
+		domainEntities.FirstName,
+		domainEntities.LastName,
+		entities.UserStatus(req.Status),
+		entities.UserRole(req.Role),
+		entities.NewUserMetadata(),
+		req.Tags,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create user: %w", err)
+	}
+
+	// Persist user
+	if err := s.userRepo.Create(ctx, user); err != nil {
+		return nil, fmt.Errorf("failed to save user: %w", err)
+	}
+
+	// Publish event (non-blocking)
+	s.publishUserCreatedEvent(user, domainEntities)
+
+	return user, nil
+}
+
+// checkUserNotExists verifies user doesn't already exist
+func (s *UserService) checkUserNotExists(ctx context.Context, email, username string) error {
+	if _, err := s.userRepo.GetByEmail(ctx, entities.Email(email)); err == nil {
+		return entities.ErrUserAlreadyExists
+	}
+	if _, err := s.userRepo.GetByUsername(ctx, entities.Username(username)); err == nil {
+		return entities.ErrUserAlreadyExists
+	}
+	return nil
+}
+
+// domainEntities holds created domain value objects
+type domainEntities struct {
+	Email        entities.Email
+	Username     entities.Username
+	FirstName    entities.FirstName
+	LastName     entities.LastName
+	PasswordHash entities.PasswordHash
+}
+
+// createDomainEntities creates domain value objects from request
+func (s *UserService) createDomainEntities(req *CreateUserRequest) (*domainEntities, error) {
 	email, err := entities.NewEmail(req.Email)
 	if err != nil {
 		return nil, fmt.Errorf("invalid email: %w", err)
@@ -91,44 +142,29 @@ func (s *UserService) CreateUser(
 		return nil, fmt.Errorf("invalid password hash: %w", err)
 	}
 
-	// Create user entity
-	user, err := entities.NewUser(
-		email,
-		username,
-		passwordHash,
-		firstName,
-		lastName,
-		entities.UserStatus(req.Status),
-		entities.UserRole(req.Role),
-		entities.NewUserMetadata(),
-		req.Tags,
-	)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create user: %w", err)
-	}
+	return &domainEntities{
+		Email:        email,
+		Username:     username,
+		FirstName:    firstName,
+		LastName:     lastName,
+		PasswordHash: passwordHash,
+	}, nil
+}
 
-	// Persist user
-	if err := s.userRepo.Create(ctx, user); err != nil {
-		return nil, fmt.Errorf("failed to save user: %w", err)
-	}
-
-	// Publish event
+// publishUserCreatedEvent publishes user created event (non-blocking)
+func (s *UserService) publishUserCreatedEvent(user *entities.User, de *domainEntities) {
 	event := events.UserCreated(
 		user.ID(),
-		email.String(),
-		username.String(),
-		firstName.String(),
-		lastName.String(),
+		de.Email.String(),
+		de.Username.String(),
+		de.FirstName.String(),
+		de.LastName.String(),
 		user.Role().String(),
 		user.Status().String(),
 	)
 	if err := s.eventPub.Publish(event); err != nil {
-		// Log error but don't fail the operation
-		// In production, you'd use proper logging
 		fmt.Printf("warning: failed to publish event: %v\n", err)
 	}
-
-	return user, nil
 }
 
 // GetUser retrieves a user by ID with business logic checks
@@ -244,14 +280,14 @@ func (s *UserService) AuthenticateUser(
 	if err != nil {
 		// Publish failed login event
 		event := events.UserLoginFailed(entities.UserID(0), ipAddress, userAgent, "unknown")
-		s.eventPub.Publish(event)
+		_ = s.eventPub.Publish(event)
 		return nil, entities.ErrInvalidCredentials
 	}
 
 	// Check if user is active
 	if !user.IsActive() {
 		event := events.UserLoginFailed(user.ID(), ipAddress, userAgent, "inactive_account")
-		s.eventPub.Publish(event)
+		_ = s.eventPub.Publish(event)
 
 		if user.Status() == entities.UserStatusSuspended {
 			return nil, entities.ErrAccountSuspended

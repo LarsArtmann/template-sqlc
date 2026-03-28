@@ -1,5 +1,12 @@
 package converters
 
+// Database type constants for consistent database identification
+const (
+	DbTypeSQLite   = "sqlite"
+	DbTypePostgres = "postgres"
+	DbTypeMySQL    = "mysql"
+)
+
 import (
 	"fmt"
 	"time"

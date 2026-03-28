@@ -3,6 +3,7 @@ package mysql
 import (
 	"context"
 	"database/sql"
+	stderrors "errors"
 	"fmt"
 
 	"github.com/go-sql-driver/mysql"
@@ -286,7 +287,7 @@ func (r *MySQLUserRepository) handleMySQLError(err error, operation string) erro
 
 	// Check for common MySQL error types
 	switch {
-	case errors.Is(err, sql.ErrNoRows):
+	case stderrors.Is(err, sql.ErrNoRows):
 		return entities.ErrUserNotFound
 	case isUniqueConstraintError(err):
 		return entities.ErrUserAlreadyExists
@@ -302,7 +303,7 @@ func (r *MySQLUserRepository) handleMySQLError(err error, operation string) erro
 // isUniqueConstraintError checks for MySQL unique constraint violation
 func isUniqueConstraintError(err error) bool {
 	mysqlErr := &mysql.MySQLError{}
-	if errors.As(err, &mysqlErr) {
+	if stderrors.As(err, &mysqlErr) {
 		// MySQL error code 1062 for duplicate entry
 		return mysqlErr.Number == 1062
 	}
@@ -312,7 +313,7 @@ func isUniqueConstraintError(err error) bool {
 // isForeignKeyError checks for MySQL foreign key violation
 func isForeignKeyError(err error) bool {
 	mysqlErr := &mysql.MySQLError{}
-	if errors.As(err, &mysqlErr) {
+	if stderrors.As(err, &mysqlErr) {
 		// MySQL error code 1452 for foreign key constraint
 		return mysqlErr.Number == 1452
 	}
@@ -322,7 +323,7 @@ func isForeignKeyError(err error) bool {
 // isCheckConstraintError checks for MySQL check constraint violation
 func isCheckConstraintError(err error) bool {
 	mysqlErr := &mysql.MySQLError{}
-	if errors.As(err, &mysqlErr) {
+	if stderrors.As(err, &mysqlErr) {
 		// MySQL error code 3819 for check constraint
 		return mysqlErr.Number == 3819
 	}

@@ -298,7 +298,7 @@ func (s *UserFeaturesTestSuite) deactivateUserAccount() error {
 	s.lastError = err
 
 	if err == nil {
-		s.currentUser.ChangeStatus(entities.UserStatusInactive)
+		_ = s.currentUser.ChangeStatus(entities.UserStatusInactive)
 	}
 
 	return nil

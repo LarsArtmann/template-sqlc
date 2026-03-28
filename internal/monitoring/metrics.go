@@ -300,7 +300,7 @@ func (m *Metrics) StartServer(addr string) error {
 	mux := http.NewServeMux()
 	mux.Handle("/metrics", promhttp.HandlerFor(m.registry, promhttp.HandlerOpts{}))
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(`<html><head><title>sqlc Metrics</title></head>
+		_, _ = w.Write([]byte(`<html><head><title>sqlc Metrics</title></head>
 <body><h1>sqlc Metrics</h1>
 <p><a href="/metrics">Metrics</a></p>
 <p><a href="/health">Health Check</a></p>
@@ -308,7 +308,7 @@ func (m *Metrics) StartServer(addr string) error {
 	})
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("OK"))
+		_, _ = w.Write([]byte("OK"))
 	})
 
 	m.server = &http.Server{

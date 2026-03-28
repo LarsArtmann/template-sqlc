@@ -3,6 +3,7 @@ package sqlite
 import (
 	"context"
 	"database/sql"
+	stderrors "errors"
 	"fmt"
 
 	"github.com/LarsArtmann/template-sqlc/internal/adapters/converters"
@@ -284,7 +285,7 @@ func (r *SQLiteUserRepository) handleError(err error, operation string) error {
 
 	// Check for common error types
 	switch {
-	case errors.Is(err, sql.ErrNoRows):
+	case stderrors.Is(err, sql.ErrNoRows):
 		return entities.ErrUserNotFound
 	case isUniqueConstraintError(err):
 		return entities.ErrUserAlreadyExists

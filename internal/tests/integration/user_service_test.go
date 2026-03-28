@@ -325,8 +325,8 @@ func (s *UserServiceIntegrationTestSuite) TestGetUserStats() {
 	s.Require().NoError(err)
 	s.Require().NotNil(stats)
 
-	assert.Positive(s.T(), stats.TotalUsers)
-	assert.Positive(s.T(), stats.ActiveUsers)
+	s.Positive(stats.TotalUsers)
+	s.Positive(stats.ActiveUsers)
 }
 
 // Test suite runner

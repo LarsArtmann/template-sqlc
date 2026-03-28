@@ -70,7 +70,10 @@ func (cb *ConfigBuilder) loadBaseConfig() (map[string]interface{}, error) {
 }
 
 // buildDatabaseConfig builds configuration for a specific database
-func (cb *ConfigBuilder) buildDatabaseConfig(db string, baseConfig map[string]interface{}) (map[string]interface{}, error) {
+func (cb *ConfigBuilder) buildDatabaseConfig(
+	db string,
+	baseConfig map[string]interface{},
+) (map[string]interface{}, error) {
 	// Load database-specific configuration
 	dbPath := filepath.Join(cb.baseDir, "databases", fmt.Sprintf("%s.yaml", db))
 	data, err := os.ReadFile(dbPath)
