@@ -1,18 +1,18 @@
 package converters
 
-// Database type constants for consistent database identification
-const (
-	DbTypeSQLite   = "sqlite"
-	DbTypePostgres = "postgres"
-	DbTypeMySQL    = "mysql"
-)
-
 import (
 	"fmt"
 	"time"
 
 	"github.com/LarsArtmann/template-sqlc/internal/domain/entities"
 	"github.com/google/uuid"
+)
+
+// Database type constants for consistent database identification
+const (
+	DbTypeSQLite   = "sqlite"
+	DbTypePostgres = "postgres"
+	DbTypeMySQL    = "mysql"
 )
 
 // TypeConverter handles database-specific type conversions

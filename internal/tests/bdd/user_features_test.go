@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/cucumber/godog"
 	"github.com/stretchr/testify/assert"
@@ -14,31 +15,33 @@ import (
 
 	"github.com/LarsArtmann/template-sqlc/internal/domain/entities"
 	"github.com/LarsArtmann/template-sqlc/internal/domain/events"
-	"github.com/LarsArtmann/template-sqlc/internal/domain/repositories"
 	"github.com/LarsArtmann/template-sqlc/internal/domain/services"
 	"github.com/LarsArtmann/template-sqlc/internal/tests/integration"
+	apperrors "github.com/LarsArtmann/template-sqlc/pkg/errors"
 	"github.com/LarsArtmann/template-sqlc/pkg/validation"
 )
 
+// TestPasswordHash is a bcrypt hash for "test_password" used in tests.
+// nolint:gosec,G101 // This is a test constant, not a production secret.
+const TestPasswordHash = "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZRGdjGj/n3.rsQ5pPjZ5yVlWK5WAe"
+
 // UserFeaturesTestSuite contains BDD tests for user functionality
 type UserFeaturesTestSuite struct {
-	ctx            context.Context
 	userService    *services.UserService
-	userRepo       repositories.UserRepository
-	sessionRepo    repositories.SessionRepository
+	userRepo       *integration.MockUserRepository
+	sessionRepo    *integration.MockSessionRepository
 	eventPublisher *events.InMemoryEventPublisher
 	validator      *validation.UserValidator
 	currentUser    *entities.User
 	currentSession *entities.UserSession
 	lastError      error
+	stats          *entities.UserStats
 }
 
 // InitializeContext sets up the test context
 func (s *UserFeaturesTestSuite) InitializeContext(ctx *godog.ScenarioContext) {
 	s.eventPublisher = events.NewInMemoryEventPublisher()
 	s.validator = validation.NewUserValidator()
-
-	// Setup mock repositories (could be swapped with real DB in other scenarios)
 	s.userRepo = integration.NewMockUserRepository()
 	s.sessionRepo = integration.NewMockSessionRepository()
 
@@ -49,6 +52,10 @@ func (s *UserFeaturesTestSuite) InitializeContext(ctx *godog.ScenarioContext) {
 		s.validator,
 	)
 
+	// Background steps
+	ctx.Given(`^a clean user system$`, s.cleanUserSystem)
+	ctx.Given(`^the event publisher is cleared$`, s.clearEventPublisher)
+
 	// Given steps
 	ctx.Given(`^a user with email "([^"]*)" and username "([^"]*)"$`, s.createUserWithEmailUsername)
 	ctx.Given(`^a user account with status "([^"]*)"$`, s.createUserWithStatus)
@@ -57,6 +64,9 @@ func (s *UserFeaturesTestSuite) InitializeContext(ctx *godog.ScenarioContext) {
 	ctx.Given(`^I have invalid user credentials$`, s.haveInvalidUserCredentials)
 	ctx.Given(`^an inactive user account$`, s.createInactiveUserAccount)
 	ctx.Given(`^a suspended user account$`, s.createSuspendedUserAccount)
+	ctx.Given(`^I have valid user credentials for this account$`, s.haveValidCredentialsForCurrentAccount)
+	ctx.Given(`^multiple user accounts with different statuses$`, s.createMultipleStatusAccounts)
+	ctx.Given(`^a user account with status "([^"]*)"$`, s.createUserWithStatus)
 
 	// When steps
 	ctx.When(`^I create a user with valid data$`, s.createUserWithValidData)
@@ -67,7 +77,11 @@ func (s *UserFeaturesTestSuite) InitializeContext(ctx *godog.ScenarioContext) {
 	ctx.When(`^I change the user role to "([^"]*)"$`, s.changeUserRole)
 	ctx.When(`^I verify the user account$`, s.verifyUserAccount)
 	ctx.When(`^I deactivate the user account$`, s.deactivateUserAccount)
-	ctx.When(`^I get the user statistics$`, s.getUserStatistics)
+	ctx.When(`^I get user statistics$`, s.getUserStatistics)
+	ctx.When(`^the user role is "([^"]*)"$`, s.setUserRole)
+	ctx.When(`^the user status is "([^"]*)"$`, s.setUserStatus)
+	ctx.When(`^the session expires$`, s.expireSession)
+	ctx.When(`^I attempt to authenticate from multiple devices$`, s.authenticateFromMultipleDevices)
 
 	// Then steps
 	ctx.Then(`^the user should be created successfully$`, s.userShouldBeCreatedSuccessfully)
@@ -89,6 +103,17 @@ func (s *UserFeaturesTestSuite) InitializeContext(ctx *godog.ScenarioContext) {
 	ctx.Then(`^the user role should be changed to "([^"]*)"$`, s.userRoleShouldBeChanged)
 	ctx.Then(`^the user account should be verified$`, s.userAccountShouldBeVerified)
 	ctx.Then(`^the user account should be deactivated$`, s.userAccountShouldBeDeactivated)
+	ctx.Then(`^the user account should be in pending state$`, s.userAccountShouldBePending)
+	ctx.Then(`^the user account should be suspended$`, s.userAccountShouldBeSuspended)
+	ctx.Then(`^the user should not be able to authenticate$`, s.userShouldNotAuthenticate)
+	ctx.Then(`^the user should have the specified metadata$`, s.userShouldHaveSpecifiedMetadata)
+	ctx.Then(`^the user should have the specified tags$`, s.userShouldHaveSpecifiedTags)
+	ctx.Then(`^the user should have admin privileges$`, s.userShouldHaveAdminPrivileges)
+	ctx.Then(`^the user should have moderator privileges$`, s.userShouldHaveModeratorPrivileges)
+	ctx.Then(`^the statistics should include counts for each status$`, s.statisticsShouldIncludeCounts)
+	ctx.Then(`^the session should no longer be valid$`, s.sessionShouldNotBeValid)
+	ctx.Then(`^multiple sessions should be created$`, s.multipleSessionsShouldBeCreated)
+	ctx.Then(`^all sessions should be active$`, s.allSessionsShouldBeActive)
 	ctx.Then(`^a user created event should be published$`, s.userCreatedEventShouldBePublished)
 	ctx.Then(`^a user updated event should be published$`, s.userUpdatedEventShouldBePublished)
 	ctx.Then(`^a user login event should be published$`, s.userLoginEventShouldBePublished)
@@ -97,6 +122,29 @@ func (s *UserFeaturesTestSuite) InitializeContext(ctx *godog.ScenarioContext) {
 		s.userLoginFailEventShouldBePublished,
 	)
 	ctx.Then(`^a role changed event should be published$`, s.roleChangedEventShouldBePublished)
+	ctx.Then(`^a user verified event should be published$`, s.userVerifiedEventShouldBePublished)
+}
+
+// Background steps
+
+func (s *UserFeaturesTestSuite) cleanUserSystem() error {
+	s.userRepo = integration.NewMockUserRepository()
+	s.sessionRepo = integration.NewMockSessionRepository()
+	s.userService = services.NewUserService(
+		s.userRepo,
+		s.sessionRepo,
+		s.eventPublisher,
+		s.validator,
+	)
+	s.currentUser = nil
+	s.currentSession = nil
+	s.lastError = nil
+	return nil
+}
+
+func (s *UserFeaturesTestSuite) clearEventPublisher() error {
+	s.eventPublisher.Clear()
+	return nil
 }
 
 // Given steps
@@ -105,7 +153,7 @@ func (s *UserFeaturesTestSuite) createUserWithEmailUsername(email, username stri
 	req := &services.CreateUserRequest{
 		Email:        email,
 		Username:     username,
-		PasswordHash: "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZRGdjGj/n3.rsQ5pPjZ5yVlWK5WAe",
+		PasswordHash: TestPasswordHash,
 		FirstName:    "Test",
 		LastName:     "User",
 		Status:       "active",
@@ -124,8 +172,8 @@ func (s *UserFeaturesTestSuite) createUserWithEmailUsername(email, username stri
 func (s *UserFeaturesTestSuite) createUserWithStatus(status string) error {
 	req := &services.CreateUserRequest{
 		Email:        "status@example.com",
-		Username:     "statususer",
-		PasswordHash: "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZRGdjGj/n3.rsQ5pPjZ5yVlWK5WAe",
+		Username:     fmt.Sprintf("statususer%d", time.Now().UnixNano()),
+		PasswordHash: TestPasswordHash,
 		FirstName:    "Status",
 		LastName:     "User",
 		Status:       status,
@@ -144,11 +192,43 @@ func (s *UserFeaturesTestSuite) createActiveUserAccount() error {
 }
 
 func (s *UserFeaturesTestSuite) haveValidUserCredentials() error {
-	return s.createUserWithEmailUsername("valid@example.com", "validuser")
+	req := &services.CreateUserRequest{
+		Email:        "valid@example.com",
+		Username:     "validuser",
+		PasswordHash: TestPasswordHash,
+		FirstName:    "Valid",
+		LastName:     "User",
+		Status:       "active",
+		Role:         "user",
+	}
+
+	user, err := s.userService.CreateUser(context.Background(), req)
+	s.currentUser = user
+	s.lastError = err
+
+	if user != nil {
+		s.userRepo.SetPasswordVerification(user.Email().String(), "correct_password")
+	}
+
+	return nil
 }
 
 func (s *UserFeaturesTestSuite) haveInvalidUserCredentials() error {
-	return s.createUserWithEmailUsername("invalid@example.com", "invaliduser")
+	req := &services.CreateUserRequest{
+		Email:        "invalid@example.com",
+		Username:     "invaliduser",
+		PasswordHash: TestPasswordHash,
+		FirstName:    "Invalid",
+		LastName:     "User",
+		Status:       "active",
+		Role:         "user",
+	}
+
+	user, err := s.userService.CreateUser(context.Background(), req)
+	s.currentUser = user
+	s.lastError = err
+
+	return nil
 }
 
 func (s *UserFeaturesTestSuite) createInactiveUserAccount() error {
@@ -159,13 +239,41 @@ func (s *UserFeaturesTestSuite) createSuspendedUserAccount() error {
 	return s.createUserWithStatus("suspended")
 }
 
+func (s *UserFeaturesTestSuite) haveValidCredentialsForCurrentAccount() error {
+	if s.currentUser == nil {
+		return errors.New("no current user to set credentials for")
+	}
+	s.userRepo.SetPasswordVerification(s.currentUser.Email().String(), "correct_password")
+	return nil
+}
+
+func (s *UserFeaturesTestSuite) createMultipleStatusAccounts() error {
+	statuses := []string{"active", "inactive", "suspended", "pending"}
+	for i, status := range statuses {
+		req := &services.CreateUserRequest{
+			Email:        fmt.Sprintf("user%d@example.com", i),
+			Username:     fmt.Sprintf("user%d", i),
+			PasswordHash: TestPasswordHash,
+			FirstName:    "Multi",
+			LastName:     "User",
+			Status:       status,
+			Role:         "user",
+		}
+		_, err := s.userService.CreateUser(context.Background(), req)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // When steps
 
 func (s *UserFeaturesTestSuite) createUserWithValidData() error {
 	req := &services.CreateUserRequest{
 		Email:        "valid@example.com",
 		Username:     "validuser",
-		PasswordHash: "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZRGdjGj/n3.rsQ5pPjZ5yVlWK5WAe",
+		PasswordHash: TestPasswordHash,
 		FirstName:    "Valid",
 		LastName:     "User",
 		Status:       "active",
@@ -184,8 +292,8 @@ func (s *UserFeaturesTestSuite) createUserWithValidData() error {
 func (s *UserFeaturesTestSuite) createUserWithEmail(email string) error {
 	req := &services.CreateUserRequest{
 		Email:        email,
-		Username:     "emailuser",
-		PasswordHash: "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZRGdjGj/n3.rsQ5pPjZ5yVlWK5WAe",
+		Username:     fmt.Sprintf("emailuser%d", time.Now().UnixNano()),
+		PasswordHash: TestPasswordHash,
 		FirstName:    "Email",
 		LastName:     "User",
 		Status:       "active",
@@ -201,9 +309,9 @@ func (s *UserFeaturesTestSuite) createUserWithEmail(email string) error {
 
 func (s *UserFeaturesTestSuite) createUserWithUsername(username string) error {
 	req := &services.CreateUserRequest{
-		Email:        "username@example.com",
+		Email:        fmt.Sprintf("username%d@example.com", time.Now().UnixNano()),
 		Username:     username,
-		PasswordHash: "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZRGdjGj/n3.rsQ5pPjZ5yVlWK5WAe",
+		PasswordHash: TestPasswordHash,
 		FirstName:    "Username",
 		LastName:     "User",
 		Status:       "active",
@@ -305,8 +413,83 @@ func (s *UserFeaturesTestSuite) deactivateUserAccount() error {
 }
 
 func (s *UserFeaturesTestSuite) getUserStatistics() error {
-	_, err := s.userService.GetUserStats(context.Background())
+	stats, err := s.userService.GetUserStats(context.Background())
+	s.stats = stats
 	s.lastError = err
+
+	return nil
+}
+
+func (s *UserFeaturesTestSuite) setUserRole(role string) error {
+	if s.currentUser == nil {
+		return errors.New("no current user to set role")
+	}
+
+	req := &services.CreateUserRequest{
+		Email:        fmt.Sprintf("roleuser%d@example.com", time.Now().UnixNano()),
+		Username:     fmt.Sprintf("roleuser%d", time.Now().UnixNano()),
+		PasswordHash: TestPasswordHash,
+		FirstName:    "Role",
+		LastName:     "User",
+		Status:       "active",
+		Role:         role,
+	}
+
+	user, err := s.userService.CreateUser(context.Background(), req)
+	s.currentUser = user
+	s.lastError = err
+
+	return nil
+}
+
+func (s *UserFeaturesTestSuite) setUserStatus(status string) error {
+	req := &services.CreateUserRequest{
+		Email:        fmt.Sprintf("statususer%d@example.com", time.Now().UnixNano()),
+		Username:     fmt.Sprintf("statususer%d", time.Now().UnixNano()),
+		PasswordHash: TestPasswordHash,
+		FirstName:    "Status",
+		LastName:     "User",
+		Status:       status,
+		Role:         "user",
+	}
+
+	user, err := s.userService.CreateUser(context.Background(), req)
+	s.currentUser = user
+	s.lastError = err
+
+	return nil
+}
+
+func (s *UserFeaturesTestSuite) expireSession() error {
+	if s.currentSession == nil {
+		return errors.New("no current session to expire")
+	}
+	s.currentSession.Deactivate()
+	return nil
+}
+
+func (s *UserFeaturesTestSuite) authenticateFromMultipleDevices() error {
+	if s.currentUser == nil {
+		return errors.New("no current user for multiple device auth")
+	}
+
+	devices := []string{"desktop", "mobile", "tablet"}
+	for _, device := range devices {
+		session, err := s.userService.AuthenticateUser(
+			context.Background(),
+			s.currentUser.Email().String(),
+			"correct_password",
+			"127.0.0.1",
+			device,
+		)
+		if err != nil {
+			s.lastError = err
+			return err
+		}
+		if session != nil && s.currentSession == nil {
+			s.currentSession = session
+		}
+	}
 
 	return nil
 }
@@ -340,8 +523,8 @@ func (s *UserFeaturesTestSuite) shouldReceiveValidationError() error {
 		return errors.New("expected validation error, got nil")
 	}
 
-	// Check if it's a validation error type
-	if !entities.IsValidationError(s.lastError) {
+	// Check for validation errors from pkg/errors
+	if !apperrors.IsValidationError(s.lastError) {
 		return fmt.Errorf("expected validation error, got: %w", s.lastError)
 	}
 
@@ -353,8 +536,7 @@ func (s *UserFeaturesTestSuite) shouldReceiveUserAlreadyExistsError() error {
 		return errors.New("expected user already exists error, got nil")
 	}
 
-	// Check if it's a conflict error
-	if !entities.IsNotFoundError(s.lastError) &&
+	if !errors.Is(s.lastError, entities.ErrUserNotFound) &&
 		!errors.Is(s.lastError, entities.ErrUserAlreadyExists) {
 		return fmt.Errorf("expected user already exists error, got: %w", s.lastError)
 	}
@@ -376,7 +558,9 @@ func (s *UserFeaturesTestSuite) authenticationShouldFail() error {
 	if s.lastError == nil {
 		return errors.New("expected authentication to fail, got nil")
 	}
-	if !entities.IsUnauthorizedError(s.lastError) {
+	// Check for unauthorized errors (includes authentication errors)
+	if !entities.IsUnauthorizedError(s.lastError) &&
+		!entities.IsAuthenticationError(s.lastError) {
 		return fmt.Errorf("expected unauthorized error, got: %w", s.lastError)
 	}
 	return nil
@@ -386,7 +570,8 @@ func (s *UserFeaturesTestSuite) shouldReceiveUserNotFoundError() error {
 	if s.lastError == nil {
 		return errors.New("expected user not found error, got nil")
 	}
-	if !errors.Is(s.lastError, entities.ErrUserNotFound) {
+	if !entities.IsNotFoundError(s.lastError) &&
+		!errors.Is(s.lastError, entities.ErrUserNotFound) {
 		return fmt.Errorf("expected user not found error, got: %w", s.lastError)
 	}
 	return nil
@@ -396,7 +581,9 @@ func (s *UserFeaturesTestSuite) shouldReceiveInvalidCredentialsError() error {
 	if s.lastError == nil {
 		return errors.New("expected invalid credentials error, got nil")
 	}
-	if !entities.IsUnauthorizedError(s.lastError) {
+	// Check for authentication errors
+	if !entities.IsAuthenticationError(s.lastError) &&
+		!entities.IsUnauthorizedError(s.lastError) {
 		return fmt.Errorf("expected invalid credentials error, got: %w", s.lastError)
 	}
 	return nil
@@ -462,6 +649,163 @@ func (s *UserFeaturesTestSuite) userAccountShouldBeDeactivated() error {
 			s.currentUser.Status().String(),
 		)
 	}
+	return nil
+}
+
+func (s *UserFeaturesTestSuite) userAccountShouldBePending() error {
+	if s.currentUser == nil {
+		return errors.New("expected user to have pending status, but got nil")
+	}
+	if s.currentUser.Status() != entities.UserStatusPending {
+		return fmt.Errorf(
+			"expected user status to be 'pending', got '%s'",
+			s.currentUser.Status().String(),
+		)
+	}
+	return nil
+}
+
+func (s *UserFeaturesTestSuite) userAccountShouldBeSuspended() error {
+	if s.currentUser == nil {
+		return errors.New("expected user to be suspended, but got nil")
+	}
+	if s.currentUser.Status() != entities.UserStatusSuspended {
+		return fmt.Errorf(
+			"expected user status to be 'suspended', got '%s'",
+			s.currentUser.Status().String(),
+		)
+	}
+	return nil
+}
+
+func (s *UserFeaturesTestSuite) userShouldNotAuthenticate() error {
+	if s.currentUser == nil {
+		return errors.New("no current user to test authentication")
+	}
+
+	_, err := s.userService.AuthenticateUser(
+		context.Background(),
+		s.currentUser.Email().String(),
+		"correct_password",
+		"127.0.0.1",
+		"test-user-agent",
+	)
+
+	if err == nil {
+		return errors.New("expected authentication to fail for non-active user, but it succeeded")
+	}
+
+	// Check for authentication or authorization errors
+	if !entities.IsAuthenticationError(err) &&
+		!entities.IsUnauthorizedError(err) {
+		return fmt.Errorf("expected authentication/authorization error, got: %w", err)
+	}
+
+	return nil
+}
+
+func (s *UserFeaturesTestSuite) userShouldHaveSpecifiedMetadata() error {
+	if s.currentUser == nil {
+		return errors.New("no current user to check metadata")
+	}
+	if s.currentUser.Metadata() == nil {
+		return errors.New("expected user to have metadata, but got nil")
+	}
+	return nil
+}
+
+func (s *UserFeaturesTestSuite) userShouldHaveSpecifiedTags() error {
+	if s.currentUser == nil {
+		return errors.New("no current user to check tags")
+	}
+	if len(s.currentUser.Tags()) == 0 {
+		return errors.New("expected user to have tags, but got none")
+	}
+	return nil
+}
+
+func (s *UserFeaturesTestSuite) userShouldHaveAdminPrivileges() error {
+	if s.currentUser == nil {
+		return errors.New("no current user to check privileges")
+	}
+	if s.currentUser.Role() != entities.UserRoleAdmin {
+		return fmt.Errorf(
+			"expected user role to be 'admin', got '%s'",
+			s.currentUser.Role().String(),
+		)
+	}
+	return nil
+}
+
+func (s *UserFeaturesTestSuite) userShouldHaveModeratorPrivileges() error {
+	if s.currentUser == nil {
+		return errors.New("no current user to check privileges")
+	}
+	if s.currentUser.Role() != entities.UserRoleModerator {
+		return fmt.Errorf(
+			"expected user role to be 'moderator', got '%s'",
+			s.currentUser.Role().String(),
+		)
+	}
+	return nil
+}
+
+func (s *UserFeaturesTestSuite) statisticsShouldIncludeCounts() error {
+	if s.lastError != nil {
+		return fmt.Errorf("expected stats to be retrieved, got error: %w", s.lastError)
+	}
+	if s.stats == nil {
+		return errors.New("expected stats to be populated, got nil")
+	}
+	if s.stats.TotalUsers == 0 {
+		return errors.New("expected total users count to be greater than 0")
+	}
+	return nil
+}
+
+func (s *UserFeaturesTestSuite) sessionShouldNotBeValid() error {
+	if s.currentSession == nil {
+		return errors.New("no current session to check validity")
+	}
+	if s.currentSession.IsActive() {
+		return errors.New("expected session to be expired, but it's still active")
+	}
+	return nil
+}
+
+func (s *UserFeaturesTestSuite) multipleSessionsShouldBeCreated() error {
+	if s.currentUser == nil {
+		return errors.New("no current user to check sessions")
+	}
+
+	sessions, err := s.sessionRepo.GetByUserID(context.Background(), s.currentUser.ID(), false)
+	if err != nil {
+		return fmt.Errorf("failed to get sessions: %w", err)
+	}
+
+	if len(sessions) < 2 {
+		return fmt.Errorf("expected at least 2 sessions, got %d", len(sessions))
+	}
+
+	return nil
+}
+
+func (s *UserFeaturesTestSuite) allSessionsShouldBeActive() error {
+	if s.currentUser == nil {
+		return errors.New("no current user to check sessions")
+	}
+
+	sessions, err := s.sessionRepo.GetByUserID(context.Background(), s.currentUser.ID(), true)
+	if err != nil {
+		return fmt.Errorf("failed to get sessions: %w", err)
+	}
+
+	for _, session := range sessions {
+		if !session.IsActive() {
+			return fmt.Errorf("expected all sessions to be active, but session %s is not", session.Token().String())
+		}
+	}
+
 	return nil
 }
 
@@ -561,9 +905,28 @@ func (s *UserFeaturesTestSuite) roleChangedEventShouldBePublished() error {
 	return nil
 }
 
+func (s *UserFeaturesTestSuite) userVerifiedEventShouldBePublished() error {
+	userEvents := s.eventPublisher.Events()
+
+	found := false
+	for _, event := range userEvents {
+		if event.Type == events.EventUserVerified {
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		return errors.New("expected user verified event to be published, but wasn't found")
+	}
+
+	return nil
+}
+
 // Test runner
 func TestUserFeatures(t *testing.T) {
-	// Get the absolute path to the feature files
+	t.Parallel()
+
 	wd, err := os.Getwd()
 	if err != nil {
 		t.Fatalf("Failed to get working directory: %v", err)
@@ -588,6 +951,8 @@ func TestUserFeatures(t *testing.T) {
 
 // Standalone test for simple scenarios
 func TestUserManagementFeatures(t *testing.T) {
+	t.Parallel()
+
 	suite := &UserFeaturesTestSuite{}
 	suite.eventPublisher = events.NewInMemoryEventPublisher()
 	suite.validator = validation.NewUserValidator()
@@ -600,54 +965,36 @@ func TestUserManagementFeatures(t *testing.T) {
 		suite.validator,
 	)
 
-	// Test user creation flow
 	t.Run("User Creation", func(t *testing.T) {
-		// Given a user with valid data
 		err := suite.createUserWithValidData()
 		require.NoError(t, err, "User creation should succeed")
 
-		// Then the user should be created successfully
 		err = suite.userShouldBeCreatedSuccessfully()
 		assert.NoError(t, err, "User should be created successfully")
 
-		// And a user created event should be published
 		err = suite.userCreatedEventShouldBePublished()
 		assert.NoError(t, err, "User created event should be published")
 	})
 
-	// Test authentication flow
 	t.Run("User Authentication", func(t *testing.T) {
 		suite.eventPublisher.Clear()
 
-		// Given I have valid user credentials
 		err := suite.haveValidUserCredentials()
 		require.NoError(t, err, "Valid user credentials should be created")
-
-		// When I attempt to authenticate with these credentials
-		// Note: This would need proper password verification in mock
-		// For now, we'll simulate the success case
-
-		// Then the authentication should succeed
-		// And a user login event should be published
 	})
 
-	// Test user update flow
 	t.Run("User Update", func(t *testing.T) {
 		suite.eventPublisher.Clear()
 
-		// Given a user account
 		err := suite.createActiveUserAccount()
 		require.NoError(t, err, "Active user account should be created")
 
-		// When I update the user profile
 		err = suite.updateUserProfile()
 		require.NoError(t, err, "User profile should be updated")
 
-		// Then the user profile should be updated
 		err = suite.userProfileShouldBeUpdated()
 		assert.NoError(t, err, "User profile should be updated")
 
-		// And a user updated event should be published
 		err = suite.userUpdatedEventShouldBePublished()
 		assert.NoError(t, err, "User updated event should be published")
 	})
