@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/prometheus/client_golang/prometheus"          // DEPRECATED: prefer go.opentelemetry.io/otel
+	"github.com/prometheus/client_golang/prometheus/promhttp" // DEPRECATED: prefer go.opentelemetry.io/otel
 )
 
 // Metrics collects and exposes sqlc-related metrics
