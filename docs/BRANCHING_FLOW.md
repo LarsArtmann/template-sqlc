@@ -16,10 +16,10 @@ This document outlines the branching strategy, git workflow, and development pro
 
 ### Current State
 
-| Branch | Purpose | Protection |
-|--------|---------|------------|
-| `master` | Main development branch | ✅ Protected |
-| `main` | Alias for master (CI configured) | ✅ Protected |
+| Branch   | Purpose                          | Protection   |
+| -------- | -------------------------------- | ------------ |
+| `master` | Main development branch          | ✅ Protected |
+| `main`   | Alias for master (CI configured) | ✅ Protected |
 
 ### Branch Naming Convention
 
@@ -75,6 +75,7 @@ git push origin feat/your-feature-name
 ```
 
 **Example:**
+
 ```
 feat(user): add email validation to user creation
 
@@ -87,15 +88,15 @@ Closes #123
 
 ### Types
 
-| Type | Description |
-|------|-------------|
-| `feat` | New feature |
-| `fix` | Bug fix |
-| `docs` | Documentation changes |
-| `style` | Formatting, missing semicolons, etc. |
-| `refactor` | Code refactoring |
-| `test` | Adding tests |
-| `chore` | Maintenance |
+| Type       | Description                          |
+| ---------- | ------------------------------------ |
+| `feat`     | New feature                          |
+| `fix`      | Bug fix                              |
+| `docs`     | Documentation changes                |
+| `style`    | Formatting, missing semicolons, etc. |
+| `refactor` | Code refactoring                     |
+| `test`     | Adding tests                         |
+| `chore`    | Maintenance                          |
 
 ---
 
@@ -106,13 +107,16 @@ Closes #123
 **File:** `.github/workflows/validate.yml`
 
 **Triggers:**
+
 - Push to `master` or `main`
 - Pull requests to `master` or `main`
 
 **Jobs:**
+
 1. **validate** - Matrix testing with sqlc versions 1.29.0 and latest
 
 **Steps:**
+
 ```yaml
 - Checkout code
 - Install sqlc
@@ -122,11 +126,11 @@ Closes #123
 
 ### Validation Scripts
 
-| Script | Purpose |
-|--------|---------|
+| Script                       | Purpose                      |
+| ---------------------------- | ---------------------------- |
 | `scripts/validate-config.sh` | Validates sqlc configuration |
-| `scripts/build-config.sh` | Builds modular configuration |
-| `scripts/migrate-config.sh` | Migrates configurations |
+| `scripts/build-config.sh`    | Builds modular configuration |
+| `scripts/migrate-config.sh`  | Migrates configurations      |
 
 ---
 
@@ -136,7 +140,7 @@ Closes #123
 
 ```bash
 just build          # Build the project
-just test            # Run tests  
+just test            # Run tests
 just lint           # Run golangci-lint
 just generate       # Run sqlc generate
 just validate       # Validate sqlc configuration
@@ -171,11 +175,11 @@ Before merging any PR, ensure:
 
 Each database has its own build tag:
 
-| Database | Build Tag | Path |
-|----------|-----------|------|
-| SQLite | `//go:build sqlite` | `internal/adapters/sqlite/` |
+| Database   | Build Tag             | Path                          |
+| ---------- | --------------------- | ----------------------------- |
+| SQLite     | `//go:build sqlite`   | `internal/adapters/sqlite/`   |
 | PostgreSQL | `//go:build postgres` | `internal/adapters/postgres/` |
-| MySQL | `//go:build mysql` | `internal/adapters/mysql/` |
+| MySQL      | `//go:build mysql`    | `internal/adapters/mysql/`    |
 
 ### Testing Specific Database
 
@@ -183,7 +187,7 @@ Each database has its own build tag:
 # SQLite
 go test -tags=sqlite ./...
 
-# PostgreSQL  
+# PostgreSQL
 go test -tags=postgres ./...
 
 # MySQL
@@ -247,13 +251,13 @@ go test -tags=bdd ./...
 
 ### Commit Types (Last 30)
 
-| Type | Count |
-|------|-------|
-| feat | 12 |
-| refactor | 5 |
-| chore | 4 |
-| docs | 4 |
-| fix | 1 |
+| Type     | Count |
+| -------- | ----- |
+| feat     | 12    |
+| refactor | 5     |
+| chore    | 4     |
+| docs     | 4     |
+| fix      | 1     |
 
 ### Active Development Areas
 
@@ -268,25 +272,25 @@ go test -tags=bdd ./...
 
 ### Priority P0 (Critical)
 
-| Task | Status | Effort |
-|------|--------|--------|
-| Implement missing BDD steps | Pending | 2h |
-| Fix background steps | Pending | 30m |
-| Extract hardcoded test credentials | Pending | 15m |
+| Task                               | Status  | Effort |
+| ---------------------------------- | ------- | ------ |
+| Implement missing BDD steps        | Pending | 2h     |
+| Fix background steps               | Pending | 30m    |
+| Extract hardcoded test credentials | Pending | 15m    |
 
 ### Priority P1 (High)
 
-| Task | Status | Effort |
-|------|--------|--------|
-| Add t.Parallel() to tests | Pending | 5m |
-| Rewrite scenarios from user perspective | Pending | 4h |
-| Add edge case tests | Pending | 3h |
+| Task                                    | Status  | Effort |
+| --------------------------------------- | ------- | ------ |
+| Add t.Parallel() to tests               | Pending | 5m     |
+| Rewrite scenarios from user perspective | Pending | 4h     |
+| Add edge case tests                     | Pending | 3h     |
 
 ### Priority P2 (Medium)
 
-| Task | Status | Effort |
-|------|--------|--------|
-| Evaluate Ginkgo migration | Pending | 1h |
+| Task                      | Status  | Effort |
+| ------------------------- | ------- | ------ |
+| Evaluate Ginkgo migration | Pending | 1h     |
 
 ---
 

@@ -22,7 +22,8 @@ import (
 )
 
 // TestPasswordHash is a bcrypt hash for "test_password" used in tests.
-// nolint:gosec,G101 // This is a test constant, not a production secret.
+//
+//nolint:gosec,G101 // This is a test constant, not a production secret.
 const TestPasswordHash = "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZRGdjGj/n3.rsQ5pPjZ5yVlWK5WAe"
 
 // UserFeaturesTestSuite contains BDD tests for user functionality
@@ -64,7 +65,10 @@ func (s *UserFeaturesTestSuite) InitializeContext(ctx *godog.ScenarioContext) {
 	ctx.Given(`^I have invalid user credentials$`, s.haveInvalidUserCredentials)
 	ctx.Given(`^an inactive user account$`, s.createInactiveUserAccount)
 	ctx.Given(`^a suspended user account$`, s.createSuspendedUserAccount)
-	ctx.Given(`^I have valid user credentials for this account$`, s.haveValidCredentialsForCurrentAccount)
+	ctx.Given(
+		`^I have valid user credentials for this account$`,
+		s.haveValidCredentialsForCurrentAccount,
+	)
 	ctx.Given(`^multiple user accounts with different statuses$`, s.createMultipleStatusAccounts)
 	ctx.Given(`^a user account with status "([^"]*)"$`, s.createUserWithStatus)
 
@@ -110,7 +114,10 @@ func (s *UserFeaturesTestSuite) InitializeContext(ctx *godog.ScenarioContext) {
 	ctx.Then(`^the user should have the specified tags$`, s.userShouldHaveSpecifiedTags)
 	ctx.Then(`^the user should have admin privileges$`, s.userShouldHaveAdminPrivileges)
 	ctx.Then(`^the user should have moderator privileges$`, s.userShouldHaveModeratorPrivileges)
-	ctx.Then(`^the statistics should include counts for each status$`, s.statisticsShouldIncludeCounts)
+	ctx.Then(
+		`^the statistics should include counts for each status$`,
+		s.statisticsShouldIncludeCounts,
+	)
 	ctx.Then(`^the session should no longer be valid$`, s.sessionShouldNotBeValid)
 	ctx.Then(`^multiple sessions should be created$`, s.multipleSessionsShouldBeCreated)
 	ctx.Then(`^all sessions should be active$`, s.allSessionsShouldBeActive)
@@ -802,7 +809,10 @@ func (s *UserFeaturesTestSuite) allSessionsShouldBeActive() error {
 
 	for _, session := range sessions {
 		if !session.IsActive() {
-			return fmt.Errorf("expected all sessions to be active, but session %s is not", session.Token().String())
+			return fmt.Errorf(
+				"expected all sessions to be active, but session %s is not",
+				session.Token().String(),
+			)
 		}
 	}
 

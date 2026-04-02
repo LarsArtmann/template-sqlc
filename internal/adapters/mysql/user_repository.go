@@ -10,6 +10,7 @@ import (
 
 	"github.com/LarsArtmann/template-sqlc/internal/adapters/converters"
 	"github.com/LarsArtmann/template-sqlc/internal/adapters/mappers"
+	"github.com/LarsArtmann/template-sqlc/internal/adapters/validation"
 	"github.com/LarsArtmann/template-sqlc/internal/domain/entities"
 	"github.com/LarsArtmann/template-sqlc/internal/domain/repositories"
 	"github.com/LarsArtmann/template-sqlc/pkg/errors"
@@ -139,12 +140,8 @@ func (r *MySQLUserRepository) List(
 	status entities.UserStatus,
 	limit, offset int,
 ) ([]*entities.User, error) {
-	// Validate pagination parameters
-	if limit <= 0 || limit > 1000 {
-		return nil, errors.NewValidationError("limit", "must be between 1 and 1000")
-	}
-	if offset < 0 {
-		return nil, errors.NewValidationError("offset", "must be non-negative")
+	if err := validation.ValidatePagination(limit, offset); err != nil {
+		return nil, err
 	}
 
 	// Query database
@@ -180,12 +177,8 @@ func (r *MySQLUserRepository) SearchByTags(
 	status entities.UserStatus,
 	limit, offset int,
 ) ([]*entities.User, error) {
-	// Validate tags
-	if len(tags) == 0 {
-		return nil, errors.NewValidationError("tags", "cannot be empty")
-	}
-	if len(tags) > 10 {
-		return nil, errors.NewValidationError("tags", "cannot exceed 10 tags")
+	if err := validation.ValidateTags(tags); err != nil {
+		return nil, err
 	}
 
 	// Use MySQL's JSON_CONTAINS or JSON_SEARCH functions

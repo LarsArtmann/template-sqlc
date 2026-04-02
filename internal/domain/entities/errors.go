@@ -62,16 +62,24 @@ func (e *ValidationError) Error() string {
 	return fmt.Sprintf("validation error on field '%s': %s", e.Field, e.Message)
 }
 
-// NotFoundError represents a resource not found error
-type NotFoundError struct {
+// ResourceError represents a resource-level error with resource and message
+type ResourceError struct {
 	Resource string `json:"resource"`
 	Message  string `json:"message"`
 }
 
+func (e *ResourceError) Error() string {
+	return fmt.Sprintf("%s: %s", e.Resource, e.Message)
+}
+
+// NotFoundError represents a resource not found error
+type NotFoundError struct {
+	ResourceError
+}
+
 func NewNotFoundError(resource, message string) *NotFoundError {
 	return &NotFoundError{
-		Resource: resource,
-		Message:  message,
+		ResourceError{Resource: resource, Message: message},
 	}
 }
 
@@ -81,14 +89,12 @@ func (e *NotFoundError) Error() string {
 
 // ConflictError represents a resource conflict error
 type ConflictError struct {
-	Resource string `json:"resource"`
-	Message  string `json:"message"`
+	ResourceError
 }
 
 func NewConflictError(resource, message string) *ConflictError {
 	return &ConflictError{
-		Resource: resource,
-		Message:  message,
+		ResourceError{Resource: resource, Message: message},
 	}
 }
 
