@@ -2,7 +2,6 @@
 package validation
 
 import (
-	"github.com/LarsArtmann/template-sqlc/internal/domain/entities"
 	"github.com/LarsArtmann/template-sqlc/pkg/errors"
 )
 
@@ -42,18 +41,15 @@ func ValidateSearchQuery(query string, limit int) error {
 	return nil
 }
 
-// ValidateStatus validates user status
-func ValidateStatus(status entities.UserStatus) error {
-	if !status.IsValid() {
-		return errors.NewValidationError("status", "invalid user status")
-	}
-	return nil
+// Validatable is an interface for entities that can validate themselves
+type Validatable interface {
+	IsValid() bool
 }
 
-// ValidateRole validates user role
-func ValidateRole(role entities.UserRole) error {
-	if !role.IsValid() {
-		return errors.NewValidationError("role", "invalid user role")
+// Validate validates an entity using its IsValid method
+func Validate[T interface{ IsValid() bool }](entity T, fieldName, invalidMessage string) error {
+	if !entity.IsValid() {
+		return errors.NewValidationError(fieldName, invalidMessage)
 	}
 	return nil
 }

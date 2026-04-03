@@ -36,5 +36,19 @@
     "reason": "These are not duplicates. The diff shows comparison of unrelated code sections. `NewConversionError` (types.go:224) has signature `(message string, value any)` and creates a `ConversionError`, while `NewInternalError` (errors.go:145) has signature `(message string, cause error)` and creates an `InternalError`. Different types, different semantics, different packages.\n\n```json\n{\"strategy\": \"false_positive\", \"files_modified\": [], \"new_abstraction\": \"\", \"confidence\": 1.0}\n```\nINFO Running in non-interactive mode\nINFO Overriding large model for non-interactive run provider=minimax model=MiniMax-M2.7-highspeed\nINFO Using provider default small model provider=minimax model=MiniMax-M2.7\nINFO Created session for non-interactive run session_id=c3829d8c-4da7-4ae0-a389-050cb2dddeda\nERRO Language server stderr command=golangci-lint-langserver\n  output=\n  │ 2026/04/03 21:36:47 golangci-lint-langserver: connections opened\n\nERRO Failed to enqueue PostHog event event=\"app exited\" props=\"[app duration pretty 34s app duration in seconds 34]\" error=\"the client was already closed\"\nERRO Failed to flush PostHog events error=\"the client was already closed\"",
     "marked_at": "2026-04-03T21:37:16.530911+02:00",
     "marked_by": "auto-deduplicate"
+  },
+  {
+    "fingerprint": "3d8a74c5bcb9ab5b57a3bf635b35e17b46b9f00634c3ed5e659be70919548aa8",
+    "files": [
+      "/Users/larsartmann/projects/template-sqlc/internal/adapters/mysql/user_repository.go",
+      "/Users/larsartmann/projects/template-sqlc/internal/adapters/postgres/user_repository.go",
+      "/Users/larsartmann/projects/template-sqlc/internal/adapters/sqlite/user_repository.go",
+      "/Users/larsartmann/projects/template-sqlc/internal/adapters/sqlite/working_user_repository.go",
+      "/Users/larsartmann/projects/template-sqlc/internal/domain/repositories/user_repository.go",
+      "/Users/larsartmann/projects/template-sqlc/internal/tests/integration/mock_repositories.go"
+    ],
+    "reason": "These are interface method signatures and their implementations required by Go's type system. The method signature `VerifyCredentials(ctx context.Context, email entities.Email, password entities.PasswordHash) (*entities.User, error)` appears in 6 places because:\n\n1. **Domain interface** (`user_repository.go:45-49`): Required interface definition\n2. **MySQL/PostgreSQL/SQLite adapters**: Required implementations of the interface contract - each will use different SQL queries when fully implemented\n3. **WorkingSQLiteUserRepository**: A separate implementation with intentionally different behavior (returns error instead of panic)\n4. **MockUserRepository**: Test mock with entirely different in-memory logic\n\nThe \"duplication\" is structural coincidence - Go requires matching signatures for interface compliance. Each adapter will have different SQL implementations when fleshed out, and the mock has completely different authentication logic (in-memory map lookup vs SQL queries).\n\n```json\n{\"strategy\": \"false_positive\",\n \"files_modified\": [],\n \"new_abstraction\": null,\n \"confidence\": 1.0}\n```\nINFO Running in non-interactive mode\nINFO Overriding large model for non-interactive run provider=minimax model=MiniMax-M2.7-highspeed\nINFO Using provider default small model provider=minimax model=MiniMax-M2.7\nINFO Created session for non-interactive run session_id=d7f42f93-2b0d-456d-affc-b4884018cb6a\nERRO Language server stderr command=golangci-lint-langserver\n  output=\n  │ 2026/04/03 21:41:40 golangci-lint-langserver: connections opened\n\nERRO Failed to enqueue PostHog event event=\"app exited\" props=\"[app duration pretty 36s app duration in seconds 36]\" error=\"the client was already closed\"\nERRO Failed to flush PostHog events error=\"the client was already closed\"",
+    "marked_at": "2026-04-03T21:42:05.548449+02:00",
+    "marked_by": "auto-deduplicate"
   }
 ]

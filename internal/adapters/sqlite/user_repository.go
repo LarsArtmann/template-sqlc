@@ -247,7 +247,7 @@ func (r *SQLiteUserRepository) validateAndUpdateStatus(
 	status entities.UserStatus,
 	updateFn func() error,
 ) error {
-	if err := validation.ValidateStatus(status); err != nil {
+	if err := validation.Validate(status, "status", "invalid user status"); err != nil {
 		return err
 	}
 	return updateFn()
@@ -260,7 +260,7 @@ func (r *SQLiteUserRepository) validateAndUpdateRole(
 	role entities.UserRole,
 	updateFn func() error,
 ) error {
-	if err := validation.ValidateRole(role); err != nil {
+	if err := validation.Validate(role, "role", "invalid user role"); err != nil {
 		return err
 	}
 	return updateFn()
