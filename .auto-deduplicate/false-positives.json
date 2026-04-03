@@ -17,5 +17,14 @@
     "reason": "These are mock repository implementations that already implement separate interfaces (`UserRepository` and `SessionRepository`). The `Update` methods are intentionally no-op stubs for testing, and `Delete` methods use standard Go map deletion patterns. Creating a shared interface would violate the existing repository contracts and add unnecessary abstraction to test code.\nINFO Running in non-interactive mode\nINFO Overriding large model for non-interactive run provider=minimax model=MiniMax-M2.7-highspeed\nINFO Using provider default small model provider=minimax model=MiniMax-M2.7\nINFO Created session for non-interactive run session_id=2f407485-fa0a-4844-8a61-6a7f37816935\nERRO Language server stderr command=golangci-lint-langserver\n  output=\n  │ 2026/04/03 21:26:36 golangci-lint-langserver: connections opened\n\nERRO Failed to enqueue PostHog event event=\"app exited\" props=\"[app duration pretty 30s app duration in seconds 30]\" error=\"the client was already closed\"\nERRO Failed to flush PostHog events error=\"the client was already closed\"",
     "marked_at": "2026-04-03T21:26:58.231027+02:00",
     "marked_by": "auto-deduplicate"
+  },
+  {
+    "fingerprint": "ec9a9aee9ae9562fe7b5c2e604dbb36983a7779cee95d0fd001fe912c96285e8",
+    "files": [
+      "/Users/larsartmann/projects/template-sqlc/internal/adapters/postgres/user_repository.go"
+    ],
+    "reason": "The `isUniqueViolationError` function is already properly extracted to `internal/adapters/postgres/error_helper.go:21`. The duplicate analysis was based on stale data - the code has already been refactored. There's only one `handlePostgresError` function at `user_repository.go:294` which properly uses the extracted helper functions from `error_helper.go`. Build succeeds with no issues.\n\n```json\n{\"strategy\": \"false_positive\", \"files_modified\": [], \"new_abstraction\": \"\", \"confidence\": 1.0}\n```\nINFO Running in non-interactive mode\nINFO Overriding large model for non-interactive run provider=minimax model=MiniMax-M2.7-highspeed\nINFO Using provider default small model provider=minimax model=MiniMax-M2.7\nINFO Created session for non-interactive run session_id=f7c12423-19a2-4aee-aa65-0ea0fe8aacd9\nERRO Language server stderr command=golangci-lint-langserver\n  output=\n  │ 2026/04/03 21:27:06 golangci-lint-langserver: connections opened\n\nERRO Failed to enqueue PostHog event event=\"app exited\" props=\"[app duration pretty 39s app duration in seconds 39]\" error=\"the client was already closed\"\nERRO Failed to flush PostHog events error=\"the client was already closed\"",
+    "marked_at": "2026-04-03T21:27:38.384884+02:00",
+    "marked_by": "auto-deduplicate"
   }
 ]
