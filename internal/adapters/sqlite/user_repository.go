@@ -236,8 +236,7 @@ func (r *SQLiteUserRepository) UpdatePassword(
 
 // MarkVerified marks user as verified in SQLite
 func (r *SQLiteUserRepository) MarkVerified(ctx context.Context, id entities.UserID) error {
-	// Mark user as verified
-	panic("implement me: use actual sqlc generated code")
+	return entities.StubNotImplemented("MarkVerified", "SQLite")
 }
 
 // validateAndUpdateStatus validates and updates user status

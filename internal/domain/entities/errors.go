@@ -66,10 +66,11 @@ func (e *ValidationError) Error() string {
 type ResourceError struct {
 	Resource string `json:"resource"`
 	Message  string `json:"message"`
+	Prefix   string
 }
 
 func (e *ResourceError) Error() string {
-	return fmt.Sprintf("%s: %s", e.Resource, e.Message)
+	return fmt.Sprintf("%s %s: %s", e.Resource, e.Prefix, e.Message)
 }
 
 // NotFoundError represents a resource not found error
@@ -79,12 +80,12 @@ type NotFoundError struct {
 
 func NewNotFoundError(resource, message string) *NotFoundError {
 	return &NotFoundError{
-		newResourceError(resource, message),
+		ResourceError{Resource: resource, Message: message, Prefix: "not found"},
 	}
 }
 
 func (e *NotFoundError) Error() string {
-	return fmt.Sprintf("%s not found: %s", e.Resource, e.Message)
+	return e.ResourceError.Error()
 }
 
 // ConflictError represents a resource conflict error
@@ -94,16 +95,16 @@ type ConflictError struct {
 
 func NewConflictError(resource, message string) *ConflictError {
 	return &ConflictError{
-		newResourceError(resource, message),
+		ResourceError{Resource: resource, Message: message, Prefix: "conflict"},
 	}
 }
 
 func (e *ConflictError) Error() string {
-	return fmt.Sprintf("%s conflict: %s", e.Resource, e.Message)
+	return e.ResourceError.Error()
 }
 
-func newResourceError(resource, message string) ResourceError {
-	return ResourceError{Resource: resource, Message: message}
+func newResourceError(resource, message string, prefix string) ResourceError {
+	return ResourceError{Resource: resource, Message: message, Prefix: prefix}
 }
 
 // AuthenticationError represents an authentication failure
@@ -202,4 +203,9 @@ func IsUnauthorizedError(err error) bool {
 func IsInternalError(err error) bool {
 	var ie *InternalError
 	return is(err, &ie)
+}
+
+// StubNotImplemented returns an error for stub implementations
+func StubNotImplemented(method, db string) error {
+	return fmt.Errorf("implement me: use actual sqlc generated code for %s", db)
 }

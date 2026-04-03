@@ -518,16 +518,29 @@ func (s *UserFeaturesTestSuite) expectSuccessfulOperationWithSession(check func(
 	return check()
 }
 
-func (s *UserFeaturesTestSuite) userShouldHaveID(expectedIDStr string) error {
+func (s *UserFeaturesTestSuite) requireCurrentUserStringProperty(
+	nilError string,
+	getProperty func() string,
+	expected string,
+	propertyName string,
+) error {
 	if s.currentUser == nil {
-		return errors.New("no current user")
+		return errors.New(nilError)
 	}
-
-	if s.currentUser.ID().String() != expectedIDStr {
-		return fmt.Errorf("expected user ID %s, got %s", expectedIDStr, s.currentUser.ID().String())
+	actual := getProperty()
+	if actual != expected {
+		return fmt.Errorf("expected user %s to be '%s', got '%s'", propertyName, expected, actual)
 	}
-
 	return nil
+}
+
+func (s *UserFeaturesTestSuite) userShouldHaveID(expectedIDStr string) error {
+	return s.requireCurrentUserStringProperty(
+		"no current user",
+		func() string { return s.currentUser.ID().String() },
+		expectedIDStr,
+		"ID",
+	)
 }
 
 func (s *UserFeaturesTestSuite) shouldReceiveValidationError() error {
@@ -622,17 +635,12 @@ func (s *UserFeaturesTestSuite) userRoleShouldBeChanged(expectedRole string) err
 	if s.lastError != nil {
 		return fmt.Errorf("expected role change to succeed, got error: %w", s.lastError)
 	}
-	if s.currentUser == nil {
-		return errors.New("expected user role to be changed, but got nil")
-	}
-	if s.currentUser.Role().String() != expectedRole {
-		return fmt.Errorf(
-			"expected user role to be '%s', got '%s'",
-			expectedRole,
-			s.currentUser.Role().String(),
-		)
-	}
-	return nil
+	return s.requireCurrentUserStringProperty(
+		"expected user role to be changed, but got nil",
+		func() string { return s.currentUser.Role().String() },
+		expectedRole,
+		"role",
+	)
 }
 
 func (s *UserFeaturesTestSuite) userAccountShouldBeVerified() error {

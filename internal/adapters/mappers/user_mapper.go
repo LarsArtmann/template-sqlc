@@ -18,57 +18,42 @@ func NewUserMapper() *UserMapper {
 
 // DomainUserFromSQLite converts SQLite model to domain entity
 func (m *UserMapper) DomainUserFromSQLite(sqliteUser any) (*entities.User, error) {
-	// This would be implemented based on actual generated SQLite types
-	// Example implementation - adapt to your actual generated types
-
-	// You would typically do something like:
-	// dbUser := sqliteUser.(sqlite.Users)
-	// return &entities.User{
-	//     id: entities.UserID(dbUser.ID),
-	//     // ... field mappings
-	// }, nil
-
-	panic("implement me: convert SQLite user to domain entity")
+	return m.DomainUser(sqliteUser)
 }
 
 // DomainUserFromPostgres converts PostgreSQL model to domain entity
 func (m *UserMapper) DomainUserFromPostgres(postgresUser any) (*entities.User, error) {
-	// Similar implementation for PostgreSQL types
-	panic("implement me: convert PostgreSQL user to domain entity")
+	return m.DomainUser(postgresUser)
 }
 
 // DomainUserFromMySQL converts MySQL model to domain entity
 func (m *UserMapper) DomainUserFromMySQL(mysqlUser any) (*entities.User, error) {
-	// Similar implementation for MySQL types
-	panic("implement me: convert MySQL user to domain entity")
+	return m.DomainUser(mysqlUser)
 }
 
 // SQLiteUserFromDomain converts domain entity to SQLite model
 func (m *UserMapper) SQLiteUserFromDomain(user *entities.User) (any, error) {
-	// Convert domain entity to SQLite-specific model
-	// This would be implemented based on your actual generated types
+	return unimplementedUserFromDomain("SQLite")
+}
 
-	// Example:
-	// return &sqlite.Users{
-	//     ID:           int64(user.ID()),
-	//     UUID:         user.UUID().String(),
-	//     Email:        user.Email().String(),
-	//     // ... field mappings
-	// }, nil
+// unimplementedUserFromDomain is a helper for stub implementations
+func unimplementedUserFromDomain(db string) (any, error) {
+	panic("implement me: convert domain entity to " + db + " user")
+}
 
-	panic("implement me: convert domain entity to SQLite user")
+// DomainUser is the common implementation for DomainUserFromXxx methods
+func (m *UserMapper) DomainUser(user any) (*entities.User, error) {
+	panic("implement me: convert user to domain entity")
 }
 
 // PostgresUserFromDomain converts domain entity to PostgreSQL model
 func (m *UserMapper) PostgresUserFromDomain(user *entities.User) (any, error) {
-	// Similar implementation for PostgreSQL
-	panic("implement me: convert domain entity to PostgreSQL user")
+	return unimplementedUserFromDomain("PostgreSQL")
 }
 
 // MySQLUserFromDomain converts domain entity to MySQL model
 func (m *UserMapper) MySQLUserFromDomain(user *entities.User) (any, error) {
-	// Similar implementation for MySQL
-	panic("implement me: convert domain entity to MySQL user")
+	return unimplementedUserFromDomain("MySQL")
 }
 
 // DomainSessionFromSQLite converts SQLite session to domain entity
@@ -93,14 +78,22 @@ func (m *UserMapper) SQLiteSessionFromDomain(session *entities.UserSession) (any
 
 // SQLiteUserFromDomain is a standalone function wrapper for backward compatibility
 func SQLiteUserFromDomain(user *entities.User) (any, error) {
-	m := &UserMapper{}
-	return m.SQLiteUserFromDomain(user)
+	return withMapper[*entities.User](user, func(m *UserMapper) (any, error) {
+		return m.SQLiteUserFromDomain(user)
+	})
 }
 
 // SQLiteSessionFromDomain is a standalone function wrapper for backward compatibility
 func SQLiteSessionFromDomain(session *entities.UserSession) (any, error) {
+	return withMapper[*entities.UserSession](session, func(m *UserMapper) (any, error) {
+		return m.SQLiteSessionFromDomain(session)
+	})
+}
+
+// withMapper executes a mapper function with a fresh UserMapper instance
+func withMapper[T any](entity T, fn func(*UserMapper) (any, error)) (any, error) {
 	m := &UserMapper{}
-	return m.SQLiteSessionFromDomain(session)
+	return fn(m)
 }
 
 // PostgresSessionFromDomain converts domain entity to PostgreSQL model

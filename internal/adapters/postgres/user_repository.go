@@ -221,8 +221,7 @@ func (r *PostgresUserRepository) UpdatePassword(
 
 // MarkVerified marks user as verified in PostgreSQL
 func (r *PostgresUserRepository) MarkVerified(ctx context.Context, id entities.UserID) error {
-	// Mark user as verified using PostgreSQL's UPDATE
-	panic("implement me: use actual sqlc generated code for PostgreSQL")
+	return entities.StubNotImplemented("MarkVerified", "PostgreSQL")
 }
 
 // validateAndUpdateStatus validates and updates user status

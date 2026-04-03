@@ -10,6 +10,28 @@ import (
 	"github.com/LarsArtmann/template-sqlc/internal/domain/entities"
 )
 
+// Validatable defines the IsValid method
+type Validatable interface {
+	IsValid() bool
+}
+
+// ValidatableTestCase is a test case for validatable types
+type ValidatableTestCase[T Validatable] struct {
+	Name     string
+	Value    T
+	Expected bool
+}
+
+// runValidatableTests runs validation tests for a validatable type
+func runValidatableTests[T Validatable](t *testing.T, tests []ValidatableTestCase[T]) {
+	t.Helper()
+	for _, tt := range tests {
+		t.Run(tt.Name, func(t *testing.T) {
+			assert.Equal(t, tt.Expected, tt.Value.IsValid())
+		})
+	}
+}
+
 // validUserTestCase creates a valid user test case with the given field values
 func validUserTestCase(name, email, username, password, firstName, lastName, status, role string) struct {
 	name        string
@@ -295,42 +317,22 @@ func TestPasswordHashValidation(t *testing.T) {
 }
 
 func TestUserStatusValidation(t *testing.T) {
-	tests := []struct {
-		name     string
-		status   entities.UserStatus
-		expected bool
-	}{
+	runValidatableTests(t, []ValidatableTestCase[entities.UserStatus]{
 		{"active status", entities.UserStatusActive, true},
 		{"inactive status", entities.UserStatusInactive, true},
 		{"suspended status", entities.UserStatusSuspended, true},
 		{"pending status", entities.UserStatusPending, true},
 		{"invalid status", entities.UserStatus("invalid"), false},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.expected, tt.status.IsValid())
-		})
-	}
+	})
 }
 
 func TestUserRoleValidation(t *testing.T) {
-	tests := []struct {
-		name     string
-		role     entities.UserRole
-		expected bool
-	}{
+	runValidatableTests(t, []ValidatableTestCase[entities.UserRole]{
 		{"user role", entities.UserRoleUser, true},
 		{"admin role", entities.UserRoleAdmin, true},
 		{"moderator role", entities.UserRoleModerator, true},
 		{"invalid role", entities.UserRole("invalid"), false},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.expected, tt.role.IsValid())
-		})
-	}
+	})
 }
 
 func TestUserMetadata(t *testing.T) {

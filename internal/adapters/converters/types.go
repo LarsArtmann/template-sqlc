@@ -18,58 +18,55 @@ const (
 // TypeConverter handles database-specific type conversions
 // This isolates domain entities from database-specific type handling
 
+// TypeConverter is a generic interface for domain <-> database type conversions
+type TypeConverter[Domain any, DB any] interface {
+	DomainToDB(domain Domain) DB
+	DBToDomain(db DB) (Domain, error)
+}
+
 // UUIDConverter handles UUID conversions between domain and database
 type UUIDConverter interface {
-	DomainToDB(domain uuid.UUID) any
-	DBToDomain(db any) (uuid.UUID, error)
+	TypeConverter[uuid.UUID, any]
 }
 
 // TimeConverter handles time conversions between domain and database
 type TimeConverter interface {
-	DomainToDB(domain time.Time) any
-	DBToDomain(db any) (time.Time, error)
+	TypeConverter[time.Time, any]
 }
 
 // BoolConverter handles boolean conversions between domain and database
 type BoolConverter interface {
-	DomainToDB(domain bool) any
-	DBToDomain(db any) (bool, error)
+	TypeConverter[bool, any]
 }
 
 // EmailConverter handles email conversions between domain and database
 type EmailConverter interface {
-	DomainToDB(domain entities.Email) string
-	DBToDomain(db string) (entities.Email, error)
+	TypeConverter[entities.Email, string]
 }
 
 // UsernameConverter handles username conversions between domain and database
 type UsernameConverter interface {
-	DomainToDB(domain entities.Username) string
-	DBToDomain(db string) (entities.Username, error)
+	TypeConverter[entities.Username, string]
 }
 
 // PasswordHashConverter handles password hash conversions between domain and database
 type PasswordHashConverter interface {
-	DomainToDB(domain entities.PasswordHash) string
-	DBToDomain(db string) (entities.PasswordHash, error)
+	TypeConverter[entities.PasswordHash, string]
 }
 
 // UserStatusConverter handles user status conversions between domain and database
 type UserStatusConverter interface {
-	DomainToDB(domain entities.UserStatus) string
-	DBToDomain(db string) (entities.UserStatus, error)
+	TypeConverter[entities.UserStatus, string]
 }
 
 // UserRoleConverter handles user role conversions between domain and database
 type UserRoleConverter interface {
-	DomainToDB(domain entities.UserRole) string
-	DBToDomain(db string) (entities.UserRole, error)
+	TypeConverter[entities.UserRole, string]
 }
 
 // SessionTokenConverter handles session token conversions between domain and database
 type SessionTokenConverter interface {
-	DomainToDB(domain entities.SessionToken) any
-	DBToDomain(db any) (entities.SessionToken, error)
+	TypeConverter[entities.SessionToken, any]
 }
 
 // Default implementations
@@ -272,7 +269,7 @@ func (c *DefaultEmailConverter) DomainToDB(domain entities.Email) string {
 }
 
 func (c *DefaultEmailConverter) DBToDomain(db string) (entities.Email, error) {
-	return entities.NewEmail(db)
+	return convertSimpleValue(db, entities.NewEmail)
 }
 
 // DefaultUsernameConverter handles username conversion
@@ -287,7 +284,7 @@ func (c *DefaultUsernameConverter) DomainToDB(domain entities.Username) string {
 }
 
 func (c *DefaultUsernameConverter) DBToDomain(db string) (entities.Username, error) {
-	return entities.NewUsername(db)
+	return convertSimpleValue(db, entities.NewUsername)
 }
 
 // DefaultPasswordHashConverter handles password hash conversion
@@ -302,7 +299,7 @@ func (c *DefaultPasswordHashConverter) DomainToDB(domain entities.PasswordHash) 
 }
 
 func (c *DefaultPasswordHashConverter) DBToDomain(db string) (entities.PasswordHash, error) {
-	return entities.NewPasswordHash(db)
+	return convertSimpleValue(db, entities.NewPasswordHash)
 }
 
 // DefaultUserStatusConverter handles user status conversion
@@ -332,6 +329,14 @@ func convertEnumString[T enum](db string, defaultVal T, typeName string) (T, err
 		return defaultVal, NewConversionError("invalid "+typeName, db)
 	}
 	return val, nil
+}
+
+// stringConstructor is a function type for simple string-to-value conversion
+type stringConstructor[T any] func(string) (T, error)
+
+// convertSimpleValue converts a database string using a simple constructor function
+func convertSimpleValue[T any](db string, constructor stringConstructor[T]) (T, error) {
+	return constructor(db)
 }
 
 // DefaultUserRoleConverter handles user role conversion

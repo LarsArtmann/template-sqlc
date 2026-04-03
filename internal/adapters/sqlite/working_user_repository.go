@@ -174,8 +174,7 @@ func (r *WorkingSQLiteUserRepository) Update(ctx context.Context, user *entities
 
 // Delete soft deletes a user from SQLite
 func (r *WorkingSQLiteUserRepository) Delete(ctx context.Context, id entities.UserID) error {
-	// Implementation with soft delete (UPDATE status)
-	return fmt.Errorf("implementation in progress - delete user ID %d", id)
+	return notImplemented("delete user", id)
 }
 
 // List retrieves users with pagination from SQLite
@@ -265,8 +264,7 @@ func (r *WorkingSQLiteUserRepository) UpdatePassword(
 
 // MarkVerified marks user as verified in SQLite
 func (r *WorkingSQLiteUserRepository) MarkVerified(ctx context.Context, id entities.UserID) error {
-	// Implementation with UPDATE is_verified
-	return fmt.Errorf("implementation in progress - mark user verified for ID %d", id)
+	return notImplemented("mark user verified", id)
 }
 
 // notImplemented returns an error indicating the method is not yet implemented

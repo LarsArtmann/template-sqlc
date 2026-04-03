@@ -105,8 +105,7 @@ func (r *SQLiteSessionRepository) Update(ctx context.Context, session *entities.
 
 // Delete removes a session from SQLite
 func (r *SQLiteSessionRepository) Delete(ctx context.Context, id entities.SessionID) error {
-	// Delete session
-	panic("implement me: use actual sqlc generated code")
+	return entities.StubNotImplemented("Delete", "SQLite")
 }
 
 // DeactivateByToken deactivates a session by token in SQLite
@@ -129,11 +128,7 @@ func (r *SQLiteSessionRepository) DeactivateByUserID(
 	ctx context.Context,
 	userID entities.UserID,
 ) error {
-	// Deactivate all user sessions
-	// _, err := r.queries.DeactivateSessionsByUserID(ctx, int64(userID))
-	// return errors.NewDatabaseError("failed to deactivate user sessions", err)
-
-	panic("implement me: use actual sqlc generated code")
+	return entities.StubNotImplemented("DeactivateByUserID", "SQLite")
 }
 
 // CleanupExpired removes expired sessions from SQLite

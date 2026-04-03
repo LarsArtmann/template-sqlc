@@ -228,8 +228,7 @@ func (r *MySQLUserRepository) UpdatePassword(
 
 // MarkVerified marks user as verified in MySQL
 func (r *MySQLUserRepository) MarkVerified(ctx context.Context, id entities.UserID) error {
-	// Mark user as verified using MySQL's UPDATE
-	panic("implement me: use actual sqlc generated code for MySQL")
+	return entities.StubNotImplemented("MarkVerified", "MySQL")
 }
 
 // validateAndUpdateStatus validates and updates user status
