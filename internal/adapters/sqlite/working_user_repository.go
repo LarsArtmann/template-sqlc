@@ -151,8 +151,7 @@ func (r *WorkingSQLiteUserRepository) GetByEmail(
 	ctx context.Context,
 	email entities.Email,
 ) (*entities.User, error) {
-	// Implementation following same pattern as GetByID
-	return nil, fmt.Errorf("implementation in progress - get by email %s", email.String())
+	return r.notImplementedGetBy("email", email.String())
 }
 
 // GetByUsername retrieves a user by username from SQLite
@@ -160,8 +159,11 @@ func (r *WorkingSQLiteUserRepository) GetByUsername(
 	ctx context.Context,
 	username entities.Username,
 ) (*entities.User, error) {
-	// Implementation following same pattern as GetByID
-	return nil, fmt.Errorf("implementation in progress - get by username %s", username.String())
+	return r.notImplementedGetBy("username", username.String())
+}
+
+func (r *WorkingSQLiteUserRepository) notImplementedGetBy(fieldName, value string) (*entities.User, error) {
+	return nil, fmt.Errorf("implementation in progress - get by %s %s", fieldName, value)
 }
 
 // Update updates an existing user in SQLite

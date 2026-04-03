@@ -128,11 +128,11 @@ func (p PasswordHash) String() string { return string(p) }
 type FirstName string
 
 func NewFirstName(name string) (FirstName, error) {
-	name = strings.TrimSpace(name)
-	if len(name) == 0 {
-		return "", ErrInvalidFirstName
+	validated, err := validateNonEmpty(name, ErrInvalidFirstName)
+	if err != nil {
+		return "", err
 	}
-	return FirstName(name), nil
+	return FirstName(validated), nil
 }
 
 func (f FirstName) String() string { return string(f) }
@@ -141,14 +141,23 @@ func (f FirstName) String() string { return string(f) }
 type LastName string
 
 func NewLastName(name string) (LastName, error) {
-	name = strings.TrimSpace(name)
-	if len(name) == 0 {
-		return "", ErrInvalidLastName
+	validated, err := validateNonEmpty(name, ErrInvalidLastName)
+	if err != nil {
+		return "", err
 	}
-	return LastName(name), nil
+	return LastName(validated), nil
 }
 
 func (l LastName) String() string { return string(l) }
+
+// validateNonEmpty trims whitespace and validates the string is not empty
+func validateNonEmpty(name string, emptyErr error) (string, error) {
+	name = strings.TrimSpace(name)
+	if len(name) == 0 {
+		return "", emptyErr
+	}
+	return name, nil
+}
 
 // UserStatus represents user account status
 type UserStatus string

@@ -317,11 +317,21 @@ func (c *DefaultUserStatusConverter) DomainToDB(domain entities.UserStatus) stri
 }
 
 func (c *DefaultUserStatusConverter) DBToDomain(db string) (entities.UserStatus, error) {
-	status := entities.UserStatus(db)
-	if !status.IsValid() {
-		return entities.UserStatusActive, NewConversionError("invalid user status", db)
+	return convertEnumString(db, entities.UserStatusActive, "user status")
+}
+
+// convertEnumString converts a string to an enum type with validation
+type enum interface {
+	~string
+	IsValid() bool
+}
+
+func convertEnumString[T enum](db string, defaultVal T, typeName string) (T, error) {
+	val := T(db)
+	if !val.IsValid() {
+		return defaultVal, NewConversionError("invalid "+typeName, db)
 	}
-	return status, nil
+	return val, nil
 }
 
 // DefaultUserRoleConverter handles user role conversion
@@ -336,11 +346,7 @@ func (c *DefaultUserRoleConverter) DomainToDB(domain entities.UserRole) string {
 }
 
 func (c *DefaultUserRoleConverter) DBToDomain(db string) (entities.UserRole, error) {
-	role := entities.UserRole(db)
-	if !role.IsValid() {
-		return entities.UserRoleUser, NewConversionError("invalid user role", db)
-	}
-	return role, nil
+	return convertEnumString(db, entities.UserRoleUser, "user role")
 }
 
 // DefaultSessionTokenConverter handles session token conversion

@@ -327,18 +327,22 @@ func (s *UserFeaturesTestSuite) createUserWithUsername(username string) error {
 	return nil
 }
 
-func (s *UserFeaturesTestSuite) authenticateWithCredentials() error {
-	if s.currentUser == nil {
-		return errors.New("no current user to authenticate")
-	}
-
-	session, err := s.userService.AuthenticateUser(
+func (s *UserFeaturesTestSuite) authenticateCurrentUser() (*entities.UserSession, error) {
+	return s.userService.AuthenticateUser(
 		context.Background(),
 		s.currentUser.Email().String(),
 		"correct_password",
 		"127.0.0.1",
 		"test-user-agent",
 	)
+}
+
+func (s *UserFeaturesTestSuite) authenticateWithCredentials() error {
+	if s.currentUser == nil {
+		return errors.New("no current user to authenticate")
+	}
+
+	session, err := s.authenticateCurrentUser()
 
 	s.currentSession = session
 	s.lastError = err
@@ -675,13 +679,7 @@ func (s *UserFeaturesTestSuite) userShouldNotAuthenticate() error {
 		return errors.New("no current user to test authentication")
 	}
 
-	_, err := s.userService.AuthenticateUser(
-		context.Background(),
-		s.currentUser.Email().String(),
-		"correct_password",
-		"127.0.0.1",
-		"test-user-agent",
-	)
+	_, err := s.authenticateCurrentUser()
 
 	if err == nil {
 		return errors.New("expected authentication to fail for non-active user, but it succeeded")

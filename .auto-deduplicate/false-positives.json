@@ -26,5 +26,15 @@
     "reason": "The `isUniqueViolationError` function is already properly extracted to `internal/adapters/postgres/error_helper.go:21`. The duplicate analysis was based on stale data - the code has already been refactored. There's only one `handlePostgresError` function at `user_repository.go:294` which properly uses the extracted helper functions from `error_helper.go`. Build succeeds with no issues.\n\n```json\n{\"strategy\": \"false_positive\", \"files_modified\": [], \"new_abstraction\": \"\", \"confidence\": 1.0}\n```\nINFO Running in non-interactive mode\nINFO Overriding large model for non-interactive run provider=minimax model=MiniMax-M2.7-highspeed\nINFO Using provider default small model provider=minimax model=MiniMax-M2.7\nINFO Created session for non-interactive run session_id=f7c12423-19a2-4aee-aa65-0ea0fe8aacd9\nERRO Language server stderr command=golangci-lint-langserver\n  output=\n  │ 2026/04/03 21:27:06 golangci-lint-langserver: connections opened\n\nERRO Failed to enqueue PostHog event event=\"app exited\" props=\"[app duration pretty 39s app duration in seconds 39]\" error=\"the client was already closed\"\nERRO Failed to flush PostHog events error=\"the client was already closed\"",
     "marked_at": "2026-04-03T21:27:38.384884+02:00",
     "marked_by": "auto-deduplicate"
+  },
+  {
+    "fingerprint": "9ae3a53154e9343c90f0210fab45461a05546ead466a3675f8760b6c233b2ce5",
+    "files": [
+      "/Users/larsartmann/projects/template-sqlc/internal/adapters/converters/types.go",
+      "/Users/larsartmann/projects/template-sqlc/internal/domain/entities/errors.go"
+    ],
+    "reason": "These are not duplicates. The diff shows comparison of unrelated code sections. `NewConversionError` (types.go:224) has signature `(message string, value any)` and creates a `ConversionError`, while `NewInternalError` (errors.go:145) has signature `(message string, cause error)` and creates an `InternalError`. Different types, different semantics, different packages.\n\n```json\n{\"strategy\": \"false_positive\", \"files_modified\": [], \"new_abstraction\": \"\", \"confidence\": 1.0}\n```\nINFO Running in non-interactive mode\nINFO Overriding large model for non-interactive run provider=minimax model=MiniMax-M2.7-highspeed\nINFO Using provider default small model provider=minimax model=MiniMax-M2.7\nINFO Created session for non-interactive run session_id=c3829d8c-4da7-4ae0-a389-050cb2dddeda\nERRO Language server stderr command=golangci-lint-langserver\n  output=\n  │ 2026/04/03 21:36:47 golangci-lint-langserver: connections opened\n\nERRO Failed to enqueue PostHog event event=\"app exited\" props=\"[app duration pretty 34s app duration in seconds 34]\" error=\"the client was already closed\"\nERRO Failed to flush PostHog events error=\"the client was already closed\"",
+    "marked_at": "2026-04-03T21:37:16.530911+02:00",
+    "marked_by": "auto-deduplicate"
   }
 ]
