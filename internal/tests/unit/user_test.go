@@ -10,6 +10,65 @@ import (
 	"github.com/LarsArtmann/template-sqlc/internal/domain/entities"
 )
 
+// validUserTestCase creates a valid user test case with the given field values
+func validUserTestCase(name, email, username, password, firstName, lastName, status, role string) struct {
+	name        string
+	email       string
+	username    string
+	password    string
+	firstName   string
+	lastName    string
+	status      string
+	role        string
+	expectError bool
+	errorType   error
+} {
+	return struct {
+		name        string
+		email       string
+		username    string
+		password    string
+		firstName   string
+		lastName    string
+		status      string
+		role        string
+		expectError bool
+		errorType   error
+	}{
+		name:        name,
+		email:       email,
+		username:    username,
+		password:    password,
+		firstName:   firstName,
+		lastName:    lastName,
+		status:      status,
+		role:        role,
+		expectError: false,
+	}
+}
+
+// valueObject is an interface for entities that have a String() method
+type valueObject interface {
+	String() string
+}
+
+// testEntityValidation is a helper function to test value object creation
+func testEntityValidation[T valueObject](
+	t *testing.T,
+	name string,
+	value string,
+	constructor func(string) (T, error),
+	expectedSuccess bool,
+) {
+	entity, err := constructor(value)
+	if expectedSuccess {
+		assert.NoError(t, err)
+		assert.Equal(t, value, entity.String())
+	} else {
+		assert.Error(t, err)
+	}
+}
+
 func TestUserCreation(t *testing.T) {
 	tests := []struct {
 		name        string
@@ -23,50 +82,28 @@ func TestUserCreation(t *testing.T) {
 		expectError bool
 		errorType   error
 	}{
-		{
-			name:      "valid user",
-			email:     "test@example.com",
-			username:  "testuser",
-			password:  "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZRGdjGj/n3.rsQ5pPjZ5yVlWK5WAe",
-			firstName: "John",
-			lastName:  "Doe",
-			status:    "active",
-			role:      "user",
-		},
-		{
-			name:      "valid user with all fields",
-			email:     "user@example.com",
-			username:  "newuser",
-			password:  "$2a$10$abcdefghijklmnopqrstuvwx1234567890ABCDEFGHIJKLMNOP",
-			firstName: "Jane",
-			lastName:  "Smith",
-			status:    "pending",
-			role:      "admin",
-		},
-		{
-			name:        "invalid status",
-			email:       "test@example.com",
-			username:    "testuser",
-			password:    "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZRGdjGj/n3.rsQ5pPjZ5yVlWK5WAe",
-			firstName:   "John",
-			lastName:    "Doe",
-			status:      "invalid",
-			role:        "user",
-			expectError: true,
-			errorType:   entities.ErrInvalidUserStatus,
-		},
-		{
-			name:        "invalid role",
-			email:       "test@example.com",
-			username:    "testuser",
-			password:    "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZRGdjGj/n3.rsQ5pPjZ5yVlWK5WAe",
-			firstName:   "John",
-			lastName:    "Doe",
-			status:      "active",
-			role:        "invalid",
-			expectError: true,
-			errorType:   entities.ErrInvalidUserRole,
-		},
+		validUserTestCase(
+			"valid user",
+			"test@example.com",
+			"testuser",
+			"$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZRGdjGj/n3.rsQ5pPjZ5yVlWK5WAe",
+			"John",
+			"Doe",
+			"active",
+			"user",
+		),
+		validUserTestCase(
+			"valid user with all fields",
+			"user@example.com",
+			"newuser",
+			"$2a$10$abcdefghijklmnopqrstuvwx1234567890ABCDEFGHIJKLMNOP",
+			"Jane",
+			"Smith",
+			"pending",
+			"admin",
+		),
+		generateInvalidStatusTestCase("invalid", entities.ErrInvalidUserStatus),
+		generateInvalidRoleTestCase("invalid", entities.ErrInvalidUserRole),
 	}
 
 	for _, tt := range tests {
@@ -206,13 +243,7 @@ func TestUserValidation(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			email, err := entities.NewEmail(tt.email)
-			if tt.expected {
-				assert.NoError(t, err)
-				assert.Equal(t, tt.email, email.String())
-			} else {
-				assert.Error(t, err)
-			}
+			testEntityValidation(t, tt.name, tt.email, entities.NewEmail, tt.expected)
 		})
 	}
 }
@@ -239,13 +270,7 @@ func TestUsernameValidation(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			username, err := entities.NewUsername(tt.username)
-			if tt.expected {
-				assert.NoError(t, err)
-				assert.Equal(t, tt.username, username.String())
-			} else {
-				assert.Error(t, err)
-			}
+			testEntityValidation(t, tt.name, tt.username, entities.NewUsername, tt.expected)
 		})
 	}
 }
@@ -264,13 +289,7 @@ func TestPasswordHashValidation(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			passwordHash, err := entities.NewPasswordHash(tt.password)
-			if tt.expected {
-				assert.NoError(t, err)
-				assert.Equal(t, tt.password, passwordHash.String())
-			} else {
-				assert.Error(t, err)
-			}
+			testEntityValidation(t, tt.name, tt.password, entities.NewPasswordHash, tt.expected)
 		})
 	}
 }
@@ -348,6 +367,62 @@ func TestUserID(t *testing.T) {
 
 	assert.Equal(t, int64(123), userID.Int64())
 	assert.Equal(t, "user:123", userID.String())
+}
+
+// generateInvalidStatusTestCase creates a test case for invalid status validation
+func generateInvalidStatusTestCase(invalidStatus string, expectedError error) struct {
+	name        string
+	email       string
+	username    string
+	password    string
+	firstName   string
+	lastName    string
+	status      string
+	role        string
+	expectError bool
+	errorType   error
+} {
+	base := validUserTestCase(
+		"invalid status",
+		"test@example.com",
+		"testuser",
+		"$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZRGdjGj/n3.rsQ5pPjZ5yVlWK5WAe",
+		"John",
+		"Doe",
+		invalidStatus,
+		"user",
+	)
+	base.expectError = true
+	base.errorType = expectedError
+	return base
+}
+
+// generateInvalidRoleTestCase creates a test case for invalid role validation
+func generateInvalidRoleTestCase(invalidRole string, expectedError error) struct {
+	name        string
+	email       string
+	username    string
+	password    string
+	firstName   string
+	lastName    string
+	status      string
+	role        string
+	expectError bool
+	errorType   error
+} {
+	base := validUserTestCase(
+		"invalid role",
+		"test@example.com",
+		"testuser",
+		"$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZRGdjGj/n3.rsQ5pPjZ5yVlWK5WAe",
+		"John",
+		"Doe",
+		"active",
+		invalidRole,
+	)
+	base.expectError = true
+	base.errorType = expectedError
+	return base
 }
 
 func BenchmarkUserCreation(b *testing.B) {

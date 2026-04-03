@@ -7,9 +7,9 @@ import (
 
 	"github.com/LarsArtmann/template-sqlc/internal/adapters/converters"
 	"github.com/LarsArtmann/template-sqlc/internal/adapters/mappers"
+	sqlitedb "github.com/LarsArtmann/template-sqlc/internal/db/sqlite"
 	"github.com/LarsArtmann/template-sqlc/internal/domain/entities"
 	"github.com/LarsArtmann/template-sqlc/internal/domain/repositories"
-	sqlitedb "github.com/LarsArtmann/template-sqlc/internal/db/sqlite"
 )
 
 // SQLiteSessionRepository implements SessionRepository for SQLite
@@ -33,10 +33,9 @@ func NewSQLiteSessionRepository(db *sql.DB) repositories.SessionRepository {
 
 // Create saves a new session to SQLite
 func (r *SQLiteSessionRepository) Create(ctx context.Context, session *entities.UserSession) error {
-	// Convert domain entity to SQLite model
-	_, err := mappers.SQLiteSessionFromDomain(session)
+	_, err := r.toSQLiteSession(session)
 	if err != nil {
-		return fmt.Errorf("failed to convert session: %w", err)
+		return err
 	}
 
 	// This would use actual generated sqlc code
@@ -95,10 +94,9 @@ func (r *SQLiteSessionRepository) GetByUserID(
 
 // Update updates a session in SQLite
 func (r *SQLiteSessionRepository) Update(ctx context.Context, session *entities.UserSession) error {
-	// Convert domain entity to SQLite model
-	_, err := mappers.SQLiteSessionFromDomain(session)
+	_, err := r.toSQLiteSession(session)
 	if err != nil {
-		return fmt.Errorf("failed to convert session: %w", err)
+		return err
 	}
 
 	// Update in database
@@ -168,6 +166,14 @@ func (r *SQLiteSessionRepository) GetSessionStats(
 }
 
 // Helper method
+
+func (r *SQLiteSessionRepository) toSQLiteSession(session *entities.UserSession) (any, error) {
+	sqliteSession, err := mappers.SQLiteSessionFromDomain(session)
+	if err != nil {
+		return nil, fmt.Errorf("failed to convert session: %w", err)
+	}
+	return sqliteSession, nil
+}
 
 func (r *SQLiteSessionRepository) handleSessionError(err error, operation string) error {
 	return sqlitedb.HandleDBError(err, operation, entities.ErrSessionNotFound, entities.ErrUserAlreadyExists, sqlitedb.IsSQLiteSessionTokenConstraintError)

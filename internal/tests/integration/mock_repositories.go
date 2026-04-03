@@ -22,6 +22,24 @@ func NewMockSessionRepository() *MockSessionRepository {
 	}
 }
 
+func findUserBy(m map[entities.UserID]*entities.User, match func(*entities.User) bool) (*entities.User, error) {
+	for _, user := range m {
+		if match(user) {
+			return user, nil
+		}
+	}
+	return nil, entities.ErrUserNotFound
+}
+
+func findSessionBy(m map[entities.SessionID]*entities.UserSession, match func(*entities.UserSession) bool) (*entities.UserSession, error) {
+	for _, session := range m {
+		if match(session) {
+			return session, nil
+		}
+	}
+	return nil, entities.ErrSessionNotFound
+}
+
 // MockUserRepository implements UserRepository for testing
 type MockUserRepository struct {
 	users                 map[entities.UserID]*entities.User
@@ -70,24 +88,18 @@ func (m *MockUserRepository) GetByEmail(
 	ctx context.Context,
 	email entities.Email,
 ) (*entities.User, error) {
-	for _, user := range m.users {
-		if user.Email() == email {
-			return user, nil
-		}
-	}
-	return nil, entities.ErrUserNotFound
+	return findUserBy(m.users, func(u *entities.User) bool {
+		return u.Email() == email
+	})
 }
 
 func (m *MockUserRepository) GetByUsername(
 	ctx context.Context,
 	username entities.Username,
 ) (*entities.User, error) {
-	for _, user := range m.users {
-		if user.Username() == username {
-			return user, nil
-		}
-	}
-	return nil, entities.ErrUserNotFound
+	return findUserBy(m.users, func(u *entities.User) bool {
+		return u.Username() == username
+	})
 }
 
 func (m *MockUserRepository) Update(ctx context.Context, user *entities.User) error {
@@ -227,12 +239,9 @@ func (m *MockSessionRepository) GetByToken(
 	ctx context.Context,
 	token entities.SessionToken,
 ) (*entities.UserSession, error) {
-	for _, session := range m.sessions {
-		if session.Token() == token {
-			return session, nil
-		}
-	}
-	return nil, entities.ErrSessionNotFound
+	return findSessionBy(m.sessions, func(s *entities.UserSession) bool {
+		return s.Token() == token
+	})
 }
 
 func (m *MockSessionRepository) GetByUserID(

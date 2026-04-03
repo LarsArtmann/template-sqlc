@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -198,18 +199,22 @@ func (s *UserFeaturesTestSuite) createActiveUserAccount() error {
 	return s.createUserWithStatus("active")
 }
 
-func (s *UserFeaturesTestSuite) haveValidUserCredentials() error {
+func (s *UserFeaturesTestSuite) createUserWithPrefix(prefix string) (*entities.User, error) {
 	req := &services.CreateUserRequest{
-		Email:        "valid@example.com",
-		Username:     "validuser",
+		Email:        prefix + "@example.com",
+		Username:     prefix,
 		PasswordHash: TestPasswordHash,
-		FirstName:    "Valid",
+		FirstName:    strings.Title(prefix),
 		LastName:     "User",
 		Status:       "active",
 		Role:         "user",
 	}
 
-	user, err := s.userService.CreateUser(context.Background(), req)
+	return s.userService.CreateUser(context.Background(), req)
+}
+
+func (s *UserFeaturesTestSuite) haveValidUserCredentials() error {
+	user, err := s.createUserWithPrefix("valid")
 	s.currentUser = user
 	s.lastError = err
 
@@ -221,17 +226,7 @@ func (s *UserFeaturesTestSuite) haveValidUserCredentials() error {
 }
 
 func (s *UserFeaturesTestSuite) haveInvalidUserCredentials() error {
-	req := &services.CreateUserRequest{
-		Email:        "invalid@example.com",
-		Username:     "invaliduser",
-		PasswordHash: TestPasswordHash,
-		FirstName:    "Invalid",
-		LastName:     "User",
-		Status:       "active",
-		Role:         "user",
-	}
-
-	user, err := s.userService.CreateUser(context.Background(), req)
+	user, err := s.createUserWithPrefix("invalid")
 	s.currentUser = user
 	s.lastError = err
 
@@ -504,13 +499,19 @@ func (s *UserFeaturesTestSuite) authenticateFromMultipleDevices() error {
 // Then steps
 
 func (s *UserFeaturesTestSuite) userShouldBeCreatedSuccessfully() error {
+	return s.expectSuccessfulOperationWithSession(func() error {
+		if s.currentUser == nil {
+			return errors.New("expected user to be created, but got nil")
+		}
+		return nil
+	}, "expected user to be created successfully")
+}
+
+func (s *UserFeaturesTestSuite) expectSuccessfulOperationWithSession(check func() error, msg string) error {
 	if s.lastError != nil {
-		return fmt.Errorf("expected user to be created successfully, got error: %w", s.lastError)
+		return fmt.Errorf("%s, got error: %w", msg, s.lastError)
 	}
-	if s.currentUser == nil {
-		return errors.New("expected user to be created, but got nil")
-	}
-	return nil
+	return check()
 }
 
 func (s *UserFeaturesTestSuite) userShouldHaveID(expectedIDStr string) error {
@@ -552,23 +553,25 @@ func (s *UserFeaturesTestSuite) shouldReceiveUserAlreadyExistsError() error {
 }
 
 func (s *UserFeaturesTestSuite) authenticationShouldSucceed() error {
-	if s.lastError != nil {
-		return fmt.Errorf("expected authentication to succeed, got error: %w", s.lastError)
-	}
-	if s.currentSession == nil {
-		return errors.New("expected session to be created, but got nil")
-	}
-	return nil
+	return s.expectSuccessfulOperationWithSession(func() error {
+		if s.currentSession == nil {
+			return errors.New("expected session to be created, but got nil")
+		}
+		return nil
+	}, "expected authentication to succeed")
 }
 
 func (s *UserFeaturesTestSuite) authenticationShouldFail() error {
+	return s.expectUnauthorizedOrAuthError("expected authentication to fail")
+}
+
+func (s *UserFeaturesTestSuite) expectUnauthorizedOrAuthError(msg string) error {
 	if s.lastError == nil {
-		return errors.New("expected authentication to fail, got nil")
+		return fmt.Errorf("%s, got nil", msg)
 	}
-	// Check for unauthorized errors (includes authentication errors)
 	if !entities.IsUnauthorizedError(s.lastError) &&
 		!entities.IsAuthenticationError(s.lastError) {
-		return fmt.Errorf("expected unauthorized error, got: %w", s.lastError)
+		return fmt.Errorf("%s, got: %w", msg, s.lastError)
 	}
 	return nil
 }
@@ -585,15 +588,7 @@ func (s *UserFeaturesTestSuite) shouldReceiveUserNotFoundError() error {
 }
 
 func (s *UserFeaturesTestSuite) shouldReceiveInvalidCredentialsError() error {
-	if s.lastError == nil {
-		return errors.New("expected invalid credentials error, got nil")
-	}
-	// Check for authentication errors
-	if !entities.IsAuthenticationError(s.lastError) &&
-		!entities.IsUnauthorizedError(s.lastError) {
-		return fmt.Errorf("expected invalid credentials error, got: %w", s.lastError)
-	}
-	return nil
+	return s.expectUnauthorizedOrAuthError("expected invalid credentials error")
 }
 
 func (s *UserFeaturesTestSuite) sessionShouldBeCreated() error {
@@ -646,43 +641,33 @@ func (s *UserFeaturesTestSuite) userAccountShouldBeVerified() error {
 	return nil
 }
 
-func (s *UserFeaturesTestSuite) userAccountShouldBeDeactivated() error {
+func (s *UserFeaturesTestSuite) userAccountShouldHaveStatus(
+	expectedStatus entities.UserStatus,
+	statusName string,
+) error {
 	if s.currentUser == nil {
-		return errors.New("expected user to be deactivated, but got nil")
+		return fmt.Errorf("expected user to be %s, but got nil", statusName)
 	}
-	if s.currentUser.Status() != entities.UserStatusInactive {
+	if s.currentUser.Status() != expectedStatus {
 		return fmt.Errorf(
-			"expected user status to be 'inactive', got '%s'",
+			"expected user status to be '%s', got '%s'",
+			statusName,
 			s.currentUser.Status().String(),
 		)
 	}
 	return nil
+}
+
+func (s *UserFeaturesTestSuite) userAccountShouldBeDeactivated() error {
+	return s.userAccountShouldHaveStatus(entities.UserStatusInactive, "inactive")
 }
 
 func (s *UserFeaturesTestSuite) userAccountShouldBePending() error {
-	if s.currentUser == nil {
-		return errors.New("expected user to have pending status, but got nil")
-	}
-	if s.currentUser.Status() != entities.UserStatusPending {
-		return fmt.Errorf(
-			"expected user status to be 'pending', got '%s'",
-			s.currentUser.Status().String(),
-		)
-	}
-	return nil
+	return s.userAccountShouldHaveStatus(entities.UserStatusPending, "pending")
 }
 
 func (s *UserFeaturesTestSuite) userAccountShouldBeSuspended() error {
-	if s.currentUser == nil {
-		return errors.New("expected user to be suspended, but got nil")
-	}
-	if s.currentUser.Status() != entities.UserStatusSuspended {
-		return fmt.Errorf(
-			"expected user status to be 'suspended', got '%s'",
-			s.currentUser.Status().String(),
-		)
-	}
-	return nil
+	return s.userAccountShouldHaveStatus(entities.UserStatusSuspended, "suspended")
 }
 
 func (s *UserFeaturesTestSuite) userShouldNotAuthenticate() error {

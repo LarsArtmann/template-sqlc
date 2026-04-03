@@ -21,19 +21,7 @@ import (
 type MySQLUserRepository struct {
 	db         *sql.DB
 	mapper     *mappers.UserMapper
-	converters *MySQLConverterSet
-}
-
-// MySQLConverterSet holds all type converters for MySQL
-type MySQLConverterSet struct {
-	UUID     converters.UUIDConverter
-	Time     converters.TimeConverter
-	Bool     converters.BoolConverter
-	Email    converters.EmailConverter
-	Username converters.UsernameConverter
-	Password converters.PasswordHashConverter
-	Status   converters.UserStatusConverter
-	Role     converters.UserRoleConverter
+	converters *converters.ConverterSet
 }
 
 // NewMySQLUserRepository creates a new MySQL user repository
@@ -41,8 +29,8 @@ func NewMySQLUserRepository(db *sql.DB) repositories.UserRepository {
 	return &MySQLUserRepository{
 		db:     db,
 		mapper: mappers.NewUserMapper(),
-		converters: &MySQLConverterSet{
-			UUID:     converters.NewMySQLUUIDConverter(),
+		converters: &converters.ConverterSet{
+			UUID:     converters.NewUUIDConverter("mysql"),
 			Time:     converters.NewTimeConverter("mysql"),
 			Bool:     converters.NewBoolConverter("mysql"),
 			Email:    converters.NewDefaultEmailConverter(),
@@ -54,12 +42,20 @@ func NewMySQLUserRepository(db *sql.DB) repositories.UserRepository {
 	}
 }
 
+// convertToModel converts a domain user to the database model and returns an error on failure
+func (r *MySQLUserRepository) convertToModel(user *entities.User) (interface{}, error) {
+	model, err := r.mapper.MySQLUserFromDomain(user)
+	if err != nil {
+		return nil, fmt.Errorf("failed to convert user %s: %w", user.ID(), err)
+	}
+	return model, nil
+}
+
 // Create saves a new user to MySQL
 func (r *MySQLUserRepository) Create(ctx context.Context, user *entities.User) error {
-	// Convert domain entity to MySQL model
-	_, err := r.mapper.MySQLUserFromDomain(user)
+	_, err := r.convertToModel(user)
 	if err != nil {
-		return fmt.Errorf("failed to convert user %s: %w", user.ID(), err)
+		return err
 	}
 
 	// This would use actual generated sqlc code for MySQL
@@ -130,10 +126,9 @@ func (r *MySQLUserRepository) getByUsername(ctx context.Context, username entiti
 
 // Update updates an existing user in MySQL
 func (r *MySQLUserRepository) Update(ctx context.Context, user *entities.User) error {
-	// Convert domain entity to MySQL model
-	_, err := r.mapper.MySQLUserFromDomain(user)
+	_, err := r.convertToModel(user)
 	if err != nil {
-		return fmt.Errorf("failed to convert user %s: %w", user.ID(), err)
+		return err
 	}
 
 	// Update in database

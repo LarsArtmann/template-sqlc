@@ -79,7 +79,7 @@ type NotFoundError struct {
 
 func NewNotFoundError(resource, message string) *NotFoundError {
 	return &NotFoundError{
-		ResourceError{Resource: resource, Message: message},
+		newResourceError(resource, message),
 	}
 }
 
@@ -94,12 +94,16 @@ type ConflictError struct {
 
 func NewConflictError(resource, message string) *ConflictError {
 	return &ConflictError{
-		ResourceError{Resource: resource, Message: message},
+		newResourceError(resource, message),
 	}
 }
 
 func (e *ConflictError) Error() string {
 	return fmt.Sprintf("%s conflict: %s", e.Resource, e.Message)
+}
+
+func newResourceError(resource, message string) ResourceError {
+	return ResourceError{Resource: resource, Message: message}
 }
 
 // AuthenticationError represents an authentication failure

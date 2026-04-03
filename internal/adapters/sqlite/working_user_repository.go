@@ -27,7 +27,7 @@ func NewWorkingSQLiteUserRepository(db *sql.DB) repositories.UserRepository {
 		db:     db,
 		mapper: mappers.UserMapper{},
 		converters: &ConverterSet{
-			UUID:     converters.NewSQLiteUUIDConverter(),
+			UUID:     converters.NewUUIDConverter("sqlite"),
 			Time:     converters.NewTimeConverter("sqlite"),
 			Bool:     converters.NewBoolConverter("sqlite"),
 			Email:    converters.NewDefaultEmailConverter(),
@@ -267,18 +267,18 @@ func (r *WorkingSQLiteUserRepository) MarkVerified(ctx context.Context, id entit
 	return fmt.Errorf("implementation in progress - mark user verified for ID %d", id)
 }
 
+// notImplemented returns an error indicating the method is not yet implemented
+func notImplemented(method string, id entities.UserID) error {
+	return fmt.Errorf("implementation in progress - %s for user ID %d", method, id)
+}
+
 // ChangeStatus changes user status in SQLite
 func (r *WorkingSQLiteUserRepository) ChangeStatus(
 	ctx context.Context,
 	id entities.UserID,
 	status entities.UserStatus,
 ) error {
-	// Implementation with UPDATE status
-	return fmt.Errorf(
-		"implementation in progress - change status to %s for user ID %d",
-		status.String(),
-		id,
-	)
+	return notImplemented("change status to "+status.String(), id)
 }
 
 // Activate activates a user in SQLite
@@ -302,10 +302,5 @@ func (r *WorkingSQLiteUserRepository) ChangeRole(
 	id entities.UserID,
 	role entities.UserRole,
 ) error {
-	// Implementation with UPDATE role
-	return fmt.Errorf(
-		"implementation in progress - change role to %s for user ID %d",
-		role.String(),
-		id,
-	)
+	return notImplemented("change role to "+role.String(), id)
 }

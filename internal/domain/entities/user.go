@@ -288,24 +288,36 @@ func (u *User) UpdateProfile(
 	return nil
 }
 
-// ChangeStatus updates user status with validation
-func (u *User) ChangeStatus(status UserStatus) error {
-	if !status.IsValid() {
-		return ErrInvalidUserStatus
+// changeField updates a field with validation and timestamp using generics
+func changeField[T any](u *User, value T, valid func(T) bool, errForInvalid func() error, apply func(*User, T)) error {
+	if !valid(value) {
+		return errForInvalid()
 	}
-	u.status = status
+	apply(u, value)
 	u.updatedAt = time.Now()
 	return nil
 }
 
+// ChangeStatus updates user status with validation
+func (u *User) ChangeStatus(status UserStatus) error {
+	return changeField(
+		u,
+		status,
+		func(s UserStatus) bool { return s.IsValid() },
+		func() error { return ErrInvalidUserStatus },
+		func(u *User, s UserStatus) { u.status = s },
+	)
+}
+
 // ChangeRole updates user role with validation
 func (u *User) ChangeRole(role UserRole) error {
-	if !role.IsValid() {
-		return ErrInvalidUserRole
-	}
-	u.role = role
-	u.updatedAt = time.Now()
-	return nil
+	return changeField(
+		u,
+		role,
+		func(r UserRole) bool { return r.IsValid() },
+		func() error { return ErrInvalidUserRole },
+		func(u *User, r UserRole) { u.role = r },
+	)
 }
 
 // Verify marks user as verified

@@ -18,8 +18,8 @@ validate-all db="": # Validate all database configurations
     if [ -z "$db" ]; then
         echo "🔍 Validating all database configurations..."
         for db in sqlite postgres mysql; do
-            echo "Validating $db configuration..."
-            sqlc -f sqlc.yaml -y sql/$db/queries -y sql/$db/schema compile || exit 1
+    echo "Validating $db configuration..."
+    sqlc -f sqlc.yaml -y sql/$db/queries -y sql/$db/schema compile || exit 1
         done
     else
         echo "🔍 Validating $db configuration..."

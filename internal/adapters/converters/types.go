@@ -249,23 +249,13 @@ func NewUUIDConverter(database string) UUIDConverter {
 }
 
 // NewTimeConverter creates time converter for specified database
-func NewTimeConverter(database string) TimeConverter {
-	switch database {
-	case "sqlite", "postgres", "mysql":
-		return NewSQLiteTimeConverter()
-	default:
-		return NewSQLiteTimeConverter()
-	}
+func NewTimeConverter(_ string) TimeConverter {
+	return NewSQLiteTimeConverter()
 }
 
 // NewBoolConverter creates boolean converter for specified database
-func NewBoolConverter(database string) BoolConverter {
-	switch database {
-	case "sqlite", "postgres", "mysql":
-		return NewSQLiteBoolConverter()
-	default:
-		return NewSQLiteBoolConverter()
-	}
+func NewBoolConverter(_ string) BoolConverter {
+	return NewSQLiteBoolConverter()
 }
 
 // Default converters
@@ -396,6 +386,18 @@ func (c *DefaultSessionTokenConverter) DBToDomain(db any) (entities.SessionToken
 	}
 
 	return entities.SessionToken(tokenUUID), nil
+}
+
+// ConverterSet holds all type converters for user repository operations
+type ConverterSet struct {
+	UUID     UUIDConverter
+	Time     TimeConverter
+	Bool     BoolConverter
+	Email    EmailConverter
+	Username UsernameConverter
+	Password PasswordHashConverter
+	Status   UserStatusConverter
+	Role     UserRoleConverter
 }
 
 // Helper functions

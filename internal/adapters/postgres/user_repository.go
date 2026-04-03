@@ -21,19 +21,7 @@ import (
 type PostgresUserRepository struct {
 	pool       *pgxpool.Pool
 	mapper     *mappers.UserMapper
-	converters *PostgresConverterSet
-}
-
-// PostgresConverterSet holds all type converters for PostgreSQL
-type PostgresConverterSet struct {
-	UUID     converters.UUIDConverter
-	Time     converters.TimeConverter
-	Bool     converters.BoolConverter
-	Email    converters.EmailConverter
-	Username converters.UsernameConverter
-	Password converters.PasswordHashConverter
-	Status   converters.UserStatusConverter
-	Role     converters.UserRoleConverter
+	converters *converters.ConverterSet
 }
 
 // NewPostgresUserRepository creates a new PostgreSQL user repository
@@ -41,7 +29,7 @@ func NewPostgresUserRepository(pool *pgxpool.Pool) repositories.UserRepository {
 	return &PostgresUserRepository{
 		pool:   pool,
 		mapper: mappers.NewUserMapper(),
-		converters: &PostgresConverterSet{
+		converters: &converters.ConverterSet{
 			UUID:     converters.NewUUIDConverter("postgres"),
 			Time:     converters.NewTimeConverter("postgres"),
 			Bool:     converters.NewBoolConverter("postgres"),
@@ -54,12 +42,20 @@ func NewPostgresUserRepository(pool *pgxpool.Pool) repositories.UserRepository {
 	}
 }
 
+// convertToModel converts a domain user to the database model and returns an error on failure
+func (r *PostgresUserRepository) convertToModel(user *entities.User) (interface{}, error) {
+	model, err := r.mapper.PostgresUserFromDomain(user)
+	if err != nil {
+		return nil, fmt.Errorf("failed to convert user %s: %w", user.ID(), err)
+	}
+	return model, nil
+}
+
 // Create saves a new user to PostgreSQL
 func (r *PostgresUserRepository) Create(ctx context.Context, user *entities.User) error {
-	// Convert domain entity to PostgreSQL model
-	_, err := r.mapper.PostgresUserFromDomain(user)
+	_, err := r.convertToModel(user)
 	if err != nil {
-		return fmt.Errorf("failed to convert user %s: %w", user.ID(), err)
+		return err
 	}
 
 	// This would use actual generated sqlc code for PostgreSQL
@@ -130,10 +126,9 @@ func (r *PostgresUserRepository) getByUsername(ctx context.Context, username ent
 
 // Update updates an existing user in PostgreSQL
 func (r *PostgresUserRepository) Update(ctx context.Context, user *entities.User) error {
-	// Convert domain entity to PostgreSQL model
-	_, err := r.mapper.PostgresUserFromDomain(user)
+	_, err := r.convertToModel(user)
 	if err != nil {
-		return fmt.Errorf("failed to convert user %s: %w", user.ID(), err)
+		return err
 	}
 
 	// Update in database

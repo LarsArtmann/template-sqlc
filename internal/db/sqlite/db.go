@@ -87,36 +87,40 @@ func (q *Queries) Close() error {
 }
 
 func (q *Queries) exec(ctx context.Context, stmt *sql.Stmt, query string, args ...interface{}) (sql.Result, error) {
+	actualStmt := q.getStmtContext(ctx, stmt)
 	switch {
-	case stmt != nil && q.tx != nil:
-		return q.tx.StmtContext(ctx, stmt).ExecContext(ctx, args...)
-	case stmt != nil:
-		return stmt.ExecContext(ctx, args...)
+	case actualStmt != nil:
+		return actualStmt.ExecContext(ctx, args...)
 	default:
 		return q.db.ExecContext(ctx, query, args...)
 	}
 }
 
 func (q *Queries) query(ctx context.Context, stmt *sql.Stmt, query string, args ...interface{}) (*sql.Rows, error) {
+	actualStmt := q.getStmtContext(ctx, stmt)
 	switch {
-	case stmt != nil && q.tx != nil:
-		return q.tx.StmtContext(ctx, stmt).QueryContext(ctx, args...)
-	case stmt != nil:
-		return stmt.QueryContext(ctx, args...)
+	case actualStmt != nil:
+		return actualStmt.QueryContext(ctx, args...)
 	default:
 		return q.db.QueryContext(ctx, query, args...)
 	}
 }
 
 func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, args ...interface{}) *sql.Row {
+	actualStmt := q.getStmtContext(ctx, stmt)
 	switch {
-	case stmt != nil && q.tx != nil:
-		return q.tx.StmtContext(ctx, stmt).QueryRowContext(ctx, args...)
-	case stmt != nil:
-		return stmt.QueryRowContext(ctx, args...)
+	case actualStmt != nil:
+		return actualStmt.QueryRowContext(ctx, args...)
 	default:
 		return q.db.QueryRowContext(ctx, query, args...)
 	}
+}
+
+func (q *Queries) getStmtContext(ctx context.Context, stmt *sql.Stmt) *sql.Stmt {
+	if stmt != nil && q.tx != nil {
+		return q.tx.StmtContext(ctx, stmt)
+	}
+	return stmt
 }
 
 type Queries struct {

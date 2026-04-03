@@ -14,6 +14,20 @@ import (
 	"github.com/LarsArtmann/template-sqlc/pkg/validation"
 )
 
+const testPasswordHash = "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZRGdjGj/n3.rsQ5pPjZ5yVlWK5WAe"
+
+func newTestCreateUserRequest(username, firstName, lastName string) *services.CreateUserRequest {
+	return &services.CreateUserRequest{
+		Email:        "test@example.com",
+		Username:     username,
+		PasswordHash: testPasswordHash,
+		FirstName:    firstName,
+		LastName:     lastName,
+		Status:       "active",
+		Role:         "user",
+	}
+}
+
 // UserServiceIntegrationTestSuite contains integration tests for UserService
 type UserServiceIntegrationTestSuite struct {
 	suite.Suite
@@ -111,29 +125,13 @@ func (s *UserServiceIntegrationTestSuite) TestCreateUser() {
 
 func (s *UserServiceIntegrationTestSuite) TestCreateUserDuplicateEmail() {
 	// Create first user
-	req1 := &services.CreateUserRequest{
-		Email:        "test@example.com",
-		Username:     "testuser1",
-		PasswordHash: "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZRGdjGj/n3.rsQ5pPjZ5yVlWK5WAe",
-		FirstName:    "John",
-		LastName:     "Doe",
-		Status:       "active",
-		Role:         "user",
-	}
+	req1 := newTestCreateUserRequest("testuser1", "John", "Doe")
 
 	_, err := s.userService.CreateUser(s.ctx, req1)
 	s.Require().NoError(err)
 
 	// Try to create second user with same email
-	req2 := &services.CreateUserRequest{
-		Email:        "test@example.com",
-		Username:     "testuser2",
-		PasswordHash: "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZRGdjGj/n3.rsQ5pPjZ5yVlWK5WAe",
-		FirstName:    "Jane",
-		LastName:     "Smith",
-		Status:       "active",
-		Role:         "user",
-	}
+	req2 := newTestCreateUserRequest("testuser2", "Jane", "Smith")
 
 	user, err := s.userService.CreateUser(s.ctx, req2)
 	s.Error(err)
@@ -144,15 +142,7 @@ func (s *UserServiceIntegrationTestSuite) TestCreateUserDuplicateEmail() {
 
 func (s *UserServiceIntegrationTestSuite) TestGetUser() {
 	// Create a user first
-	req := &services.CreateUserRequest{
-		Email:        "test@example.com",
-		Username:     "testuser",
-		PasswordHash: "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZRGdjGj/n3.rsQ5pPjZ5yVlWK5WAe",
-		FirstName:    "John",
-		LastName:     "Doe",
-		Status:       "active",
-		Role:         "user",
-	}
+	req := newTestCreateUserRequest("testuser", "John", "Doe")
 
 	createdUser, err := s.userService.CreateUser(s.ctx, req)
 	s.Require().NoError(err)
@@ -169,15 +159,7 @@ func (s *UserServiceIntegrationTestSuite) TestGetUser() {
 
 func (s *UserServiceIntegrationTestSuite) TestUpdateUser() {
 	// Create a user first
-	createReq := &services.CreateUserRequest{
-		Email:        "test@example.com",
-		Username:     "testuser",
-		PasswordHash: "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZRGdjGj/n3.rsQ5pPjZ5yVlWK5WAe",
-		FirstName:    "John",
-		LastName:     "Doe",
-		Status:       "active",
-		Role:         "user",
-	}
+	createReq := newTestCreateUserRequest("testuser", "John", "Doe")
 
 	user, err := s.userService.CreateUser(s.ctx, createReq)
 	s.Require().NoError(err)
@@ -204,15 +186,7 @@ func (s *UserServiceIntegrationTestSuite) TestUpdateUser() {
 
 func (s *UserServiceIntegrationTestSuite) TestAuthenticateUser() {
 	// Create a user first
-	req := &services.CreateUserRequest{
-		Email:        "test@example.com",
-		Username:     "testuser",
-		PasswordHash: "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZRGdjGj/n3.rsQ5pPjZ5yVlWK5WAe",
-		FirstName:    "John",
-		LastName:     "Doe",
-		Status:       "active",
-		Role:         "user",
-	}
+	req := newTestCreateUserRequest("testuser", "John", "Doe")
 
 	user, err := s.userService.CreateUser(s.ctx, req)
 	s.Require().NoError(err)
@@ -264,15 +238,7 @@ func (s *UserServiceIntegrationTestSuite) TestAuthenticateUserInvalidCredentials
 
 func (s *UserServiceIntegrationTestSuite) TestChangeUserRole() {
 	// Create a user first
-	req := &services.CreateUserRequest{
-		Email:        "test@example.com",
-		Username:     "testuser",
-		PasswordHash: "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZRGdjGj/n3.rsQ5pPjZ5yVlWK5WAe",
-		FirstName:    "John",
-		LastName:     "Doe",
-		Status:       "active",
-		Role:         "user",
-	}
+	req := newTestCreateUserRequest("testuser", "John", "Doe")
 
 	user, err := s.userService.CreateUser(s.ctx, req)
 	s.Require().NoError(err)

@@ -132,28 +132,26 @@ func UserUpdated(
 	return NewUserEvent(EventUserUpdated, userID, data)
 }
 
-// UserLoggedIn creates a user login event
-func UserLoggedIn(userID entities.UserID, ipAddress, userAgent, device string) *UserEvent {
+// UserLoginAttempt creates a user login attempt event
+func UserLoginAttempt(userID entities.UserID, ipAddress, userAgent, device string, success bool, eventType EventType) *UserEvent {
 	data := UserLoginEvent{
 		UserID:    userID,
 		IPAddress: ipAddress,
 		UserAgent: userAgent,
 		Device:    device,
-		Success:   true,
+		Success:   success,
 	}
-	return NewUserEvent(EventUserLogin, userID, data)
+	return NewUserEvent(eventType, userID, data)
+}
+
+// UserLoggedIn creates a user login event
+func UserLoggedIn(userID entities.UserID, ipAddress, userAgent, device string) *UserEvent {
+	return UserLoginAttempt(userID, ipAddress, userAgent, device, true, EventUserLogin)
 }
 
 // UserLoginFailed creates a user login failed event
 func UserLoginFailed(userID entities.UserID, ipAddress, userAgent, device string) *UserEvent {
-	data := UserLoginEvent{
-		UserID:    userID,
-		IPAddress: ipAddress,
-		UserAgent: userAgent,
-		Device:    device,
-		Success:   false,
-	}
-	return NewUserEvent(EventUserLoginFail, userID, data)
+	return UserLoginAttempt(userID, ipAddress, userAgent, device, false, EventUserLoginFail)
 }
 
 // UserVerified creates a user verified event

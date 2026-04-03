@@ -8,9 +8,9 @@ import (
 	"github.com/LarsArtmann/template-sqlc/internal/adapters/converters"
 	"github.com/LarsArtmann/template-sqlc/internal/adapters/mappers"
 	"github.com/LarsArtmann/template-sqlc/internal/adapters/validation"
+	sqlitedb "github.com/LarsArtmann/template-sqlc/internal/db/sqlite"
 	"github.com/LarsArtmann/template-sqlc/internal/domain/entities"
 	"github.com/LarsArtmann/template-sqlc/internal/domain/repositories"
-	sqlitedb "github.com/LarsArtmann/template-sqlc/internal/db/sqlite"
 )
 
 // SQLiteUserRepository implements UserRepository for SQLite
@@ -39,7 +39,7 @@ func NewSQLiteUserRepository(db *sql.DB) repositories.UserRepository {
 	return &SQLiteUserRepository{
 		db: db,
 		converters: &ConverterSet{
-			UUID:     converters.NewSQLiteUUIDConverter(),
+			UUID:     converters.NewUUIDConverter("sqlite"),
 			Time:     converters.NewTimeConverter("sqlite"),
 			Bool:     converters.NewBoolConverter("sqlite"),
 			Email:    converters.NewDefaultEmailConverter(),
@@ -53,10 +53,9 @@ func NewSQLiteUserRepository(db *sql.DB) repositories.UserRepository {
 
 // Create saves a new user to SQLite
 func (r *SQLiteUserRepository) Create(ctx context.Context, user *entities.User) error {
-	// Convert domain entity to SQLite model
-	_, err := mappers.SQLiteUserFromDomain(user)
+	_, err := r.mapUserToSQLite(user)
 	if err != nil {
-		return fmt.Errorf("failed to convert user %s: %w", user.ID(), err)
+		return err
 	}
 
 	// This would use the actual generated sqlc code
@@ -127,14 +126,22 @@ func (r *SQLiteUserRepository) getByUsername(ctx context.Context, username entit
 
 // Update updates an existing user in SQLite
 func (r *SQLiteUserRepository) Update(ctx context.Context, user *entities.User) error {
-	// Convert domain entity to SQLite model
-	_, err := mappers.SQLiteUserFromDomain(user)
+	_, err := r.mapUserToSQLite(user)
 	if err != nil {
-		return fmt.Errorf("failed to convert user %s: %w", user.ID(), err)
+		return err
 	}
 
 	// Update in database
 	panic("implement me: use actual sqlc generated code")
+}
+
+// mapUserToSQLite converts a domain User entity to a SQLite model
+func (r *SQLiteUserRepository) mapUserToSQLite(user *entities.User) (any, error) {
+	sqliteUser, err := mappers.SQLiteUserFromDomain(user)
+	if err != nil {
+		return nil, fmt.Errorf("failed to convert user %s: %w", user.ID(), err)
+	}
+	return sqliteUser, nil
 }
 
 // Delete soft deletes a user from SQLite

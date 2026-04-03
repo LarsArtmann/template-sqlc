@@ -46,159 +46,96 @@ type Metrics struct {
 
 // NewMetrics creates a new metrics collector
 func NewMetrics() *Metrics {
-	registry := prometheus.NewRegistry()
+	return newMetrics(prometheus.NewRegistry())
+}
 
+// HistogramConfig holds configuration for a histogram metric
+type HistogramConfig struct {
+	Name      string
+	Help      string
+	Buckets   []float64
+	Subsystem string
+}
+
+func newHistogram(cfg HistogramConfig) prometheus.Histogram {
+	return prometheus.NewHistogram(
+		prometheus.HistogramOpts{
+			Name:      cfg.Name,
+			Help:      cfg.Help,
+			Buckets:   cfg.Buckets,
+			Namespace: "sqlc",
+			Subsystem: cfg.Subsystem,
+		},
+	)
+}
+
+func newCounter(name, help, subsystem string) prometheus.Counter {
+	return prometheus.NewCounter(
+		prometheus.CounterOpts{
+			Name:      name,
+			Help:      help,
+			Namespace: "sqlc",
+			Subsystem: subsystem,
+		},
+	)
+}
+
+func newGauge(name, help, subsystem string) prometheus.Gauge {
+	return prometheus.NewGauge(
+		prometheus.GaugeOpts{
+			Name:      name,
+			Help:      help,
+			Namespace: "sqlc",
+			Subsystem: subsystem,
+		},
+	)
+}
+
+func newMetrics(registry *prometheus.Registry) *Metrics {
 	metrics := &Metrics{
 		// Code generation metrics
-		CodeGenDuration: prometheus.NewHistogram(
-			prometheus.HistogramOpts{
-				Name:      "sqlc_codegen_duration_seconds",
-				Help:      "Duration of sqlc code generation in seconds",
-				Buckets:   []float64{0.1, 0.5, 1, 2, 5, 10, 30},
-				Namespace: "sqlc",
-				Subsystem: "codegen",
-			},
-		),
-		CodeGenErrors: prometheus.NewCounter(
-			prometheus.CounterOpts{
-				Name:      "sqlc_codegen_errors_total",
-				Help:      "Total number of sqlc code generation errors",
-				Namespace: "sqlc",
-				Subsystem: "codegen",
-			},
-		),
-		CodeGenTotal: prometheus.NewCounter(
-			prometheus.CounterOpts{
-				Name:      "sqlc_codegen_total",
-				Help:      "Total number of sqlc code generation attempts",
-				Namespace: "sqlc",
-				Subsystem: "codegen",
-			},
-		),
+		CodeGenDuration: newHistogram(HistogramConfig{
+			Name:      "sqlc_codegen_duration_seconds",
+			Help:      "Duration of sqlc code generation in seconds",
+			Buckets:   []float64{0.1, 0.5, 1, 2, 5, 10, 30},
+			Subsystem: "codegen",
+		}),
+		CodeGenErrors: newCounter("sqlc_codegen_errors_total", "Total number of sqlc code generation errors", "codegen"),
+		CodeGenTotal:  newCounter("sqlc_codegen_total", "Total number of sqlc code generation attempts", "codegen"),
 
 		// Database query metrics
-		QueryDuration: prometheus.NewHistogram(
-			prometheus.HistogramOpts{
-				Name:      "sqlc_query_duration_seconds",
-				Help:      "Duration of database queries in seconds",
-				Buckets:   []float64{0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1, 5},
-				Namespace: "sqlc",
-				Subsystem: "query",
-			},
-		),
-		QueryErrors: prometheus.NewCounter(
-			prometheus.CounterOpts{
-				Name:      "sqlc_query_errors_total",
-				Help:      "Total number of database query errors",
-				Namespace: "sqlc",
-				Subsystem: "query",
-			},
-		),
-		QueryTotal: prometheus.NewCounter(
-			prometheus.CounterOpts{
-				Name:      "sqlc_query_total",
-				Help:      "Total number of database queries executed",
-				Namespace: "sqlc",
-				Subsystem: "query",
-			},
-		),
-		ActiveConnections: prometheus.NewGauge(
-			prometheus.GaugeOpts{
-				Name:      "sqlc_database_connections_active",
-				Help:      "Number of active database connections",
-				Namespace: "sqlc",
-				Subsystem: "database",
-			},
-		),
+		QueryDuration: newHistogram(HistogramConfig{
+			Name:      "sqlc_query_duration_seconds",
+			Help:      "Duration of database queries in seconds",
+			Buckets:   []float64{0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1, 5},
+			Subsystem: "query",
+		}),
+		QueryErrors:       newCounter("sqlc_query_errors_total", "Total number of database query errors", "query"),
+		QueryTotal:        newCounter("sqlc_query_total", "Total number of database queries executed", "query"),
+		ActiveConnections: newGauge("sqlc_database_connections_active", "Number of active database connections", "database"),
 
 		// User operation metrics
-		UserOperations: prometheus.NewCounter(
-			prometheus.CounterOpts{
-				Name:      "sqlc_user_operations_total",
-				Help:      "Total number of user operations performed",
-				Namespace: "sqlc",
-				Subsystem: "user",
-			},
-		),
-		UserCreations: prometheus.NewCounter(
-			prometheus.CounterOpts{
-				Name:      "sqlc_user_creations_total",
-				Help:      "Total number of user creations performed",
-				Namespace: "sqlc",
-				Subsystem: "user",
-			},
-		),
-		UserAuthentications: prometheus.NewCounter(
-			prometheus.CounterOpts{
-				Name:      "sqlc_user_authentications_total",
-				Help:      "Total number of user authentications performed",
-				Namespace: "sqlc",
-				Subsystem: "user",
-			},
-		),
+		UserOperations:      newCounter("sqlc_user_operations_total", "Total number of user operations performed", "user"),
+		UserCreations:       newCounter("sqlc_user_creations_total", "Total number of user creations performed", "user"),
+		UserAuthentications: newCounter("sqlc_user_authentications_total", "Total number of user authentications performed", "user"),
 
 		// Session metrics
-		SessionCreations: prometheus.NewCounter(
-			prometheus.CounterOpts{
-				Name:      "sqlc_session_creations_total",
-				Help:      "Total number of session creations performed",
-				Namespace: "sqlc",
-				Subsystem: "session",
-			},
-		),
-		SessionActive: prometheus.NewGauge(
-			prometheus.GaugeOpts{
-				Name:      "sqlc_sessions_active",
-				Help:      "Number of active user sessions",
-				Namespace: "sqlc",
-				Subsystem: "session",
-			},
-		),
+		SessionCreations: newCounter("sqlc_session_creations_total", "Total number of session creations performed", "session"),
+		SessionActive:    newGauge("sqlc_sessions_active", "Number of active user sessions", "session"),
 
 		// Configuration metrics
-		ConfigFileSize: prometheus.NewGauge(
-			prometheus.GaugeOpts{
-				Name:      "sqlc_config_file_size_bytes",
-				Help:      "Size of sqlc configuration file in bytes",
-				Namespace: "sqlc",
-				Subsystem: "config",
-			},
-		),
-		ConfigDatabase: prometheus.NewGauge(
-			prometheus.GaugeOpts{
-				Name:      "sqlc_config_databases_total",
-				Help:      "Total number of databases configured in sqlc.yaml",
-				Namespace: "sqlc",
-				Subsystem: "config",
-			},
-		),
+		ConfigFileSize: newGauge("sqlc_config_file_size_bytes", "Size of sqlc configuration file in bytes", "config"),
+		ConfigDatabase: newGauge("sqlc_config_databases_total", "Total number of databases configured in sqlc.yaml", "config"),
 
 		// Build metrics
-		BuildDuration: prometheus.NewHistogram(
-			prometheus.HistogramOpts{
-				Name:      "sqlc_build_duration_seconds",
-				Help:      "Duration of build operations in seconds",
-				Buckets:   []float64{1, 5, 10, 30, 60, 300, 600},
-				Namespace: "sqlc",
-				Subsystem: "build",
-			},
-		),
-		BuildSuccess: prometheus.NewCounter(
-			prometheus.CounterOpts{
-				Name:      "sqlc_build_success_total",
-				Help:      "Total number of successful builds",
-				Namespace: "sqlc",
-				Subsystem: "build",
-			},
-		),
-		BuildFailures: prometheus.NewCounter(
-			prometheus.CounterOpts{
-				Name:      "sqlc_build_failures_total",
-				Help:      "Total number of build failures",
-				Namespace: "sqlc",
-				Subsystem: "build",
-			},
-		),
+		BuildDuration: newHistogram(HistogramConfig{
+			Name:      "sqlc_build_duration_seconds",
+			Help:      "Duration of build operations in seconds",
+			Buckets:   []float64{1, 5, 10, 30, 60, 300, 600},
+			Subsystem: "build",
+		}),
+		BuildSuccess:  newCounter("sqlc_build_success_total", "Total number of successful builds", "build"),
+		BuildFailures: newCounter("sqlc_build_failures_total", "Total number of build failures", "build"),
 
 		registry: registry,
 	}
@@ -227,24 +164,24 @@ func NewMetrics() *Metrics {
 	return metrics
 }
 
-// ObserveCodeGen records metrics for code generation
-func (m *Metrics) ObserveCodeGen(duration time.Duration, err error) {
-	m.CodeGenTotal.Inc()
-	m.CodeGenDuration.Observe(duration.Seconds())
+// observeDurationWithErrors observes duration and increments error counter if error occurs
+func (m *Metrics) observeDurationWithErrors(total prometheus.Counter, durationHist prometheus.Observer, duration time.Duration, err error, errors prometheus.Counter) {
+	total.Inc()
+	durationHist.Observe(duration.Seconds())
 
 	if err != nil {
-		m.CodeGenErrors.Inc()
+		errors.Inc()
 	}
+}
+
+// ObserveCodeGen records metrics for code generation
+func (m *Metrics) ObserveCodeGen(duration time.Duration, err error) {
+	m.observeDurationWithErrors(m.CodeGenTotal, m.CodeGenDuration, duration, err, m.CodeGenErrors)
 }
 
 // ObserveQuery records metrics for database queries
 func (m *Metrics) ObserveQuery(duration time.Duration, err error) {
-	m.QueryTotal.Inc()
-	m.QueryDuration.Observe(duration.Seconds())
-
-	if err != nil {
-		m.QueryErrors.Inc()
-	}
+	m.observeDurationWithErrors(m.QueryTotal, m.QueryDuration, duration, err, m.QueryErrors)
 }
 
 // RecordUserCreation records a user creation operation
