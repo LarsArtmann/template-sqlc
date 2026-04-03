@@ -103,7 +103,7 @@ func (e *ConflictError) Error() string {
 	return e.ResourceError.Error()
 }
 
-func newResourceError(resource, message string, prefix string) ResourceError {
+func newResourceError(resource, message, prefix string) ResourceError {
 	return ResourceError{Resource: resource, Message: message, Prefix: prefix}
 }
 
