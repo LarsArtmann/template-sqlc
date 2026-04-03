@@ -10,6 +10,7 @@ import (
 
 	"github.com/LarsArtmann/template-sqlc/internal/adapters/converters"
 	"github.com/LarsArtmann/template-sqlc/internal/adapters/mappers"
+	"github.com/LarsArtmann/template-sqlc/internal/adapters/validation"
 	"github.com/LarsArtmann/template-sqlc/internal/domain/entities"
 	"github.com/LarsArtmann/template-sqlc/internal/domain/repositories"
 	"github.com/LarsArtmann/template-sqlc/pkg/errors"
@@ -93,8 +94,8 @@ func (r *PostgresUserRepository) GetByUUID(
 	ctx context.Context,
 	uuid entities.UuID,
 ) (*entities.User, error) {
-	// Query using UUID type
-	panic("implement me: use actual sqlc generated code for PostgreSQL")
+	_, err := r.getByUUID(ctx, uuid)
+	return nil, err
 }
 
 // GetByEmail retrieves a user by email from PostgreSQL
@@ -102,8 +103,8 @@ func (r *PostgresUserRepository) GetByEmail(
 	ctx context.Context,
 	email entities.Email,
 ) (*entities.User, error) {
-	// Query using case-insensitive search (CITEXT)
-	panic("implement me: use actual sqlc generated code for PostgreSQL")
+	_, err := r.getByEmail(ctx, email)
+	return nil, err
 }
 
 // GetByUsername retrieves a user by username from PostgreSQL
@@ -111,7 +112,19 @@ func (r *PostgresUserRepository) GetByUsername(
 	ctx context.Context,
 	username entities.Username,
 ) (*entities.User, error) {
-	// Query using case-insensitive search (CITEXT)
+	_, err := r.getByUsername(ctx, username)
+	return nil, err
+}
+
+func (r *PostgresUserRepository) getByUUID(ctx context.Context, uuid entities.UuID) (struct{}, error) {
+	panic("implement me: use actual sqlc generated code for PostgreSQL")
+}
+
+func (r *PostgresUserRepository) getByEmail(ctx context.Context, email entities.Email) (struct{}, error) {
+	panic("implement me: use actual sqlc generated code for PostgreSQL")
+}
+
+func (r *PostgresUserRepository) getByUsername(ctx context.Context, username entities.Username) (struct{}, error) {
 	panic("implement me: use actual sqlc generated code for PostgreSQL")
 }
 
@@ -139,12 +152,8 @@ func (r *PostgresUserRepository) List(
 	status entities.UserStatus,
 	limit, offset int,
 ) ([]*entities.User, error) {
-	// Validate pagination parameters
-	if limit <= 0 || limit > 1000 {
-		return nil, errors.NewValidationError("limit", "must be between 1 and 1000")
-	}
-	if offset < 0 {
-		return nil, errors.NewValidationError("offset", "must be non-negative")
+	if err := validation.ValidatePagination(limit, offset); err != nil {
+		return nil, err
 	}
 
 	// Query database
@@ -158,8 +167,7 @@ func (r *PostgresUserRepository) Search(
 	status entities.UserStatus,
 	limit int,
 ) ([]*entities.User, error) {
-	// Validate search query
-	if err := entities.ValidateSearchQuery(query, limit); err != nil {
+	if err := validation.ValidateSearchQuery(query, limit); err != nil {
 		return nil, err
 	}
 
@@ -174,12 +182,8 @@ func (r *PostgresUserRepository) SearchByTags(
 	status entities.UserStatus,
 	limit, offset int,
 ) ([]*entities.User, error) {
-	// Validate tags
-	if len(tags) == 0 {
-		return nil, errors.NewValidationError("tags", "cannot be empty")
-	}
-	if len(tags) > 10 {
-		return nil, errors.NewValidationError("tags", "cannot exceed 10 tags")
+	if err := validation.ValidateTags(tags); err != nil {
+		return nil, err
 	}
 
 	// Use PostgreSQL's array operations with GIN index
@@ -226,19 +230,41 @@ func (r *PostgresUserRepository) MarkVerified(ctx context.Context, id entities.U
 	panic("implement me: use actual sqlc generated code for PostgreSQL")
 }
 
+// validateAndUpdateStatus validates and updates user status
+func (r *PostgresUserRepository) validateAndUpdateStatus(
+	_ context.Context,
+	_ entities.UserID,
+	status entities.UserStatus,
+	updateFn func() error,
+) error {
+	if err := validation.ValidateStatus(status); err != nil {
+		return err
+	}
+	return updateFn()
+}
+
+// validateAndUpdateRole validates and updates user role
+func (r *PostgresUserRepository) validateAndUpdateRole(
+	_ context.Context,
+	_ entities.UserID,
+	role entities.UserRole,
+	updateFn func() error,
+) error {
+	if err := validation.ValidateRole(role); err != nil {
+		return err
+	}
+	return updateFn()
+}
+
 // ChangeStatus changes user status in PostgreSQL
 func (r *PostgresUserRepository) ChangeStatus(
 	ctx context.Context,
 	id entities.UserID,
 	status entities.UserStatus,
 ) error {
-	// Validate status
-	if !status.IsValid() {
-		return errors.NewValidationError("status", "invalid user status")
-	}
-
-	// Update status
-	panic("implement me: use actual sqlc generated code for PostgreSQL")
+	return r.validateAndUpdateStatus(ctx, id, status, func() error {
+		panic("implement me: use actual sqlc generated code for PostgreSQL")
+	})
 }
 
 // Activate activates a user in PostgreSQL
@@ -262,13 +288,9 @@ func (r *PostgresUserRepository) ChangeRole(
 	id entities.UserID,
 	role entities.UserRole,
 ) error {
-	// Validate role
-	if !role.IsValid() {
-		return errors.NewValidationError("role", "invalid user role")
-	}
-
-	// Update role
-	panic("implement me: use actual sqlc generated code for PostgreSQL")
+	return r.validateAndUpdateRole(ctx, id, role, func() error {
+		panic("implement me: use actual sqlc generated code for PostgreSQL")
+	})
 }
 
 // Helper methods
@@ -292,31 +314,4 @@ func (r *PostgresUserRepository) handlePostgresError(err error, operation string
 	default:
 		return errors.NewDatabaseError(operation+" failed", err)
 	}
-}
-
-// isUniqueViolationError checks for PostgreSQL unique constraint violation
-func isUniqueViolationError(err error) bool {
-	// PostgreSQL error code 23505 for unique violation
-	if pgErr, ok := err.(interface{ Code() string }); ok {
-		return pgErr.Code() == "23505"
-	}
-	return false
-}
-
-// isForeignKeyViolationError checks for PostgreSQL foreign key violation
-func isForeignKeyViolationError(err error) bool {
-	// PostgreSQL error code 23503 for foreign key violation
-	if pgErr, ok := err.(interface{ Code() string }); ok {
-		return pgErr.Code() == "23503"
-	}
-	return false
-}
-
-// isCheckViolationError checks for PostgreSQL check constraint violation
-func isCheckViolationError(err error) bool {
-	// PostgreSQL error code 23514 for check constraint violation
-	if pgErr, ok := err.(interface{ Code() string }); ok {
-		return pgErr.Code() == "23514"
-	}
-	return false
 }

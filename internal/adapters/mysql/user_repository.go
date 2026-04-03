@@ -94,8 +94,8 @@ func (r *MySQLUserRepository) GetByUUID(
 	ctx context.Context,
 	uuid entities.UuID,
 ) (*entities.User, error) {
-	// Query using UUID
-	panic("implement me: use actual sqlc generated code for MySQL")
+	_, err := r.getByUUID(ctx, uuid)
+	return nil, err
 }
 
 // GetByEmail retrieves a user by email from MySQL
@@ -103,8 +103,8 @@ func (r *MySQLUserRepository) GetByEmail(
 	ctx context.Context,
 	email entities.Email,
 ) (*entities.User, error) {
-	// Query using case-insensitive search (COLLATE utf8mb4_unicode_ci)
-	panic("implement me: use actual sqlc generated code for MySQL")
+	_, err := r.getByEmail(ctx, email)
+	return nil, err
 }
 
 // GetByUsername retrieves a user by username from MySQL
@@ -112,7 +112,19 @@ func (r *MySQLUserRepository) GetByUsername(
 	ctx context.Context,
 	username entities.Username,
 ) (*entities.User, error) {
-	// Query using case-insensitive search
+	_, err := r.getByUsername(ctx, username)
+	return nil, err
+}
+
+func (r *MySQLUserRepository) getByUUID(ctx context.Context, uuid entities.UuID) (struct{}, error) {
+	panic("implement me: use actual sqlc generated code for MySQL")
+}
+
+func (r *MySQLUserRepository) getByEmail(ctx context.Context, email entities.Email) (struct{}, error) {
+	panic("implement me: use actual sqlc generated code for MySQL")
+}
+
+func (r *MySQLUserRepository) getByUsername(ctx context.Context, username entities.Username) (struct{}, error) {
 	panic("implement me: use actual sqlc generated code for MySQL")
 }
 
@@ -225,19 +237,41 @@ func (r *MySQLUserRepository) MarkVerified(ctx context.Context, id entities.User
 	panic("implement me: use actual sqlc generated code for MySQL")
 }
 
+// validateAndUpdateStatus validates and updates user status
+func (r *MySQLUserRepository) validateAndUpdateStatus(
+	_ context.Context,
+	_ entities.UserID,
+	status entities.UserStatus,
+	updateFn func() error,
+) error {
+	if err := validation.ValidateStatus(status); err != nil {
+		return err
+	}
+	return updateFn()
+}
+
+// validateAndUpdateRole validates and updates user role
+func (r *MySQLUserRepository) validateAndUpdateRole(
+	_ context.Context,
+	_ entities.UserID,
+	role entities.UserRole,
+	updateFn func() error,
+) error {
+	if err := validation.ValidateRole(role); err != nil {
+		return err
+	}
+	return updateFn()
+}
+
 // ChangeStatus changes user status in MySQL
 func (r *MySQLUserRepository) ChangeStatus(
 	ctx context.Context,
 	id entities.UserID,
 	status entities.UserStatus,
 ) error {
-	// Validate status
-	if !status.IsValid() {
-		return errors.NewValidationError("status", "invalid user status")
-	}
-
-	// Update status
-	panic("implement me: use actual sqlc generated code for MySQL")
+	return r.validateAndUpdateStatus(ctx, id, status, func() error {
+		panic("implement me: use actual sqlc generated code for MySQL")
+	})
 }
 
 // Activate activates a user in MySQL
@@ -261,13 +295,9 @@ func (r *MySQLUserRepository) ChangeRole(
 	id entities.UserID,
 	role entities.UserRole,
 ) error {
-	// Validate role
-	if !role.IsValid() {
-		return errors.NewValidationError("role", "invalid user role")
-	}
-
-	// Update role
-	panic("implement me: use actual sqlc generated code for MySQL")
+	return r.validateAndUpdateRole(ctx, id, role, func() error {
+		panic("implement me: use actual sqlc generated code for MySQL")
+	})
 }
 
 // Helper methods
@@ -282,43 +312,29 @@ func (r *MySQLUserRepository) handleMySQLError(err error, operation string) erro
 	switch {
 	case stderrors.Is(err, sql.ErrNoRows):
 		return entities.ErrUserNotFound
-	case isUniqueConstraintError(err):
+	case isMySQLError(err, mysqlErrorCodeUnique):
 		return entities.ErrUserAlreadyExists
-	case isForeignKeyError(err):
+	case isMySQLError(err, mysqlErrorCodeForeignKey):
 		return errors.NewValidationError("foreign_key", "referenced entity does not exist")
-	case isCheckConstraintError(err):
+	case isMySQLError(err, mysqlErrorCodeCheck):
 		return errors.NewValidationError("check_constraint", "check constraint violated")
 	default:
 		return errors.NewDatabaseError(operation+" failed", err)
 	}
 }
 
-// isUniqueConstraintError checks for MySQL unique constraint violation
-func isUniqueConstraintError(err error) bool {
-	mysqlErr := &mysql.MySQLError{}
-	if stderrors.As(err, &mysqlErr) {
-		// MySQL error code 1062 for duplicate entry
-		return mysqlErr.Number == 1062
-	}
-	return false
-}
+// MySQL error codes
+const (
+	mysqlErrorCodeUnique     uint16 = 1062
+	mysqlErrorCodeForeignKey uint16 = 1452
+	mysqlErrorCodeCheck      uint16 = 3819
+)
 
-// isForeignKeyError checks for MySQL foreign key violation
-func isForeignKeyError(err error) bool {
+// isMySQLError checks if the error is a MySQL error with the given error code
+func isMySQLError(err error, code uint16) bool {
 	mysqlErr := &mysql.MySQLError{}
 	if stderrors.As(err, &mysqlErr) {
-		// MySQL error code 1452 for foreign key constraint
-		return mysqlErr.Number == 1452
-	}
-	return false
-}
-
-// isCheckConstraintError checks for MySQL check constraint violation
-func isCheckConstraintError(err error) bool {
-	mysqlErr := &mysql.MySQLError{}
-	if stderrors.As(err, &mysqlErr) {
-		// MySQL error code 3819 for check constraint
-		return mysqlErr.Number == 3819
+		return mysqlErr.Number == code
 	}
 	return false
 }

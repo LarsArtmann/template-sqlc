@@ -3,14 +3,13 @@ package sqlite
 import (
 	"context"
 	"database/sql"
-	stderrors "errors"
 	"fmt"
 
 	"github.com/LarsArtmann/template-sqlc/internal/adapters/converters"
 	"github.com/LarsArtmann/template-sqlc/internal/adapters/mappers"
 	"github.com/LarsArtmann/template-sqlc/internal/domain/entities"
 	"github.com/LarsArtmann/template-sqlc/internal/domain/repositories"
-	"github.com/LarsArtmann/template-sqlc/pkg/errors"
+	sqlitedb "github.com/LarsArtmann/template-sqlc/internal/db/sqlite"
 )
 
 // SQLiteSessionRepository implements SessionRepository for SQLite
@@ -168,28 +167,8 @@ func (r *SQLiteSessionRepository) GetSessionStats(
 	panic("implement me: use actual sqlc generated code")
 }
 
-// Helper methods
+// Helper method
 
-// handleSessionError converts database errors to domain errors
 func (r *SQLiteSessionRepository) handleSessionError(err error, operation string) error {
-	if err == nil {
-		return nil
-	}
-
-	switch {
-	case stderrors.Is(err, sql.ErrNoRows):
-		return entities.ErrSessionNotFound
-	case isSessionUniqueConstraintError(err):
-		return entities.ErrUserAlreadyExists // or session-specific error
-	default:
-		return errors.NewDatabaseError(operation+" failed", err)
-	}
-}
-
-// isSessionUniqueConstraintError checks if error is a session-related unique constraint
-func isSessionUniqueConstraintError(err error) bool {
-	// This would check for SQLite-specific session constraint errors
-	return err != nil &&
-		(fmt.Sprintf("%s", err) == "UNIQUE constraint failed: sessions.token" ||
-			fmt.Sprintf("%s", err) == "session token already exists")
+	return sqlitedb.HandleDBError(err, operation, entities.ErrSessionNotFound, entities.ErrUserAlreadyExists, sqlitedb.IsSQLiteSessionTokenConstraintError)
 }

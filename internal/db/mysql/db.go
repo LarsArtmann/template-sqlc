@@ -10,6 +10,8 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+
+	"github.com/LarsArtmann/template-sqlc/internal/db"
 )
 
 type DBTX interface {
@@ -69,73 +71,21 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 }
 
 func (q *Queries) Close() error {
-	var err error
-	if q.countActiveUsersStmt != nil {
-		if cerr := q.countActiveUsersStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing countActiveUsersStmt: %w", cerr)
-		}
-	}
-	if q.createUserStmt != nil {
-		if cerr := q.createUserStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing createUserStmt: %w", cerr)
-		}
-	}
-	if q.getUserByEmailStmt != nil {
-		if cerr := q.getUserByEmailStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing getUserByEmailStmt: %w", cerr)
-		}
-	}
-	if q.getUserByIDStmt != nil {
-		if cerr := q.getUserByIDStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing getUserByIDStmt: %w", cerr)
-		}
-	}
-	if q.getUserByUUIDStmt != nil {
-		if cerr := q.getUserByUUIDStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing getUserByUUIDStmt: %w", cerr)
-		}
-	}
-	if q.getUserByUsernameStmt != nil {
-		if cerr := q.getUserByUsernameStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing getUserByUsernameStmt: %w", cerr)
-		}
-	}
-	if q.getUserStatsStmt != nil {
-		if cerr := q.getUserStatsStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing getUserStatsStmt: %w", cerr)
-		}
-	}
-	if q.listUsersStmt != nil {
-		if cerr := q.listUsersStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing listUsersStmt: %w", cerr)
-		}
-	}
-	if q.softDeleteUserStmt != nil {
-		if cerr := q.softDeleteUserStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing softDeleteUserStmt: %w", cerr)
-		}
-	}
-	if q.updateLastLoginStmt != nil {
-		if cerr := q.updateLastLoginStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing updateLastLoginStmt: %w", cerr)
-		}
-	}
-	if q.updatePasswordStmt != nil {
-		if cerr := q.updatePasswordStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing updatePasswordStmt: %w", cerr)
-		}
-	}
-	if q.updateUserStmt != nil {
-		if cerr := q.updateUserStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing updateUserStmt: %w", cerr)
-		}
-	}
-	if q.verifyUserStmt != nil {
-		if cerr := q.verifyUserStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing verifyUserStmt: %w", cerr)
-		}
-	}
-	return err
+	return db.CloseStatements(
+		q.countActiveUsersStmt,
+		q.createUserStmt,
+		q.getUserByEmailStmt,
+		q.getUserByIDStmt,
+		q.getUserByUUIDStmt,
+		q.getUserByUsernameStmt,
+		q.getUserStatsStmt,
+		q.listUsersStmt,
+		q.softDeleteUserStmt,
+		q.updateLastLoginStmt,
+		q.updatePasswordStmt,
+		q.updateUserStmt,
+		q.verifyUserStmt,
+	)
 }
 
 func (q *Queries) exec(ctx context.Context, stmt *sql.Stmt, query string, args ...interface{}) (sql.Result, error) {

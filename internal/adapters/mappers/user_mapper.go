@@ -73,22 +73,22 @@ func (m *UserMapper) MySQLUserFromDomain(user *entities.User) (any, error) {
 
 // DomainSessionFromSQLite converts SQLite session to domain entity
 func (m *UserMapper) DomainSessionFromSQLite(sqliteSession any) (*entities.UserSession, error) {
-	panic("implement me: convert SQLite session to domain entity")
+	return m.DomainSession(sqliteSession)
 }
 
 // DomainSessionFromPostgres converts PostgreSQL session to domain entity
 func (m *UserMapper) DomainSessionFromPostgres(postgresSession any) (*entities.UserSession, error) {
-	panic("implement me: convert PostgreSQL session to domain entity")
+	return m.DomainSession(postgresSession)
 }
 
 // DomainSessionFromMySQL converts MySQL session to domain entity
 func (m *UserMapper) DomainSessionFromMySQL(mysqlSession any) (*entities.UserSession, error) {
-	panic("implement me: convert MySQL session to domain entity")
+	return m.DomainSession(mysqlSession)
 }
 
 // SQLiteSessionFromDomain converts domain entity to SQLite model
 func (m *UserMapper) SQLiteSessionFromDomain(session *entities.UserSession) (any, error) {
-	panic("implement me: convert domain entity to SQLite session")
+	return m.SessionFromDomain(session)
 }
 
 // SQLiteUserFromDomain is a standalone function wrapper for backward compatibility
@@ -105,12 +105,28 @@ func SQLiteSessionFromDomain(session *entities.UserSession) (any, error) {
 
 // PostgresSessionFromDomain converts domain entity to PostgreSQL model
 func (m *UserMapper) PostgresSessionFromDomain(session *entities.UserSession) (any, error) {
-	panic("implement me: convert domain entity to PostgreSQL session")
+	return m.SessionFromDomain(session)
 }
 
 // MySQLSessionFromDomain converts domain entity to MySQL model
 func (m *UserMapper) MySQLSessionFromDomain(session *entities.UserSession) (any, error) {
-	panic("implement me: convert domain entity to MySQL session")
+	return m.SessionFromDomain(session)
+}
+
+// SessionMapper interface for session conversion operations
+type SessionMapper interface {
+	DomainSession(any) (*entities.UserSession, error)
+	SessionFromDomain(*entities.UserSession) (any, error)
+}
+
+// DomainSession is the common implementation for DomainSessionFromXxx methods
+func (m *UserMapper) DomainSession(session any) (*entities.UserSession, error) {
+	panic("implement me: convert session to domain entity")
+}
+
+// SessionFromDomain is the common implementation for XxxSessionFromDomain methods
+func (m *UserMapper) SessionFromDomain(session *entities.UserSession) (any, error) {
+	panic("implement me: convert domain entity to session")
 }
 
 // Helper functions for common conversions
@@ -174,20 +190,4 @@ func ParseBool(value any) bool {
 // FormatBool safely formats boolean to database format
 func FormatBool(b bool) any {
 	return b
-}
-
-// ParseInterface safely parses interface{} to string
-func ParseInterface(value any) string {
-	if value == nil {
-		return ""
-	}
-
-	switch v := value.(type) {
-	case string:
-		return v
-	case []byte:
-		return string(v)
-	default:
-		return ""
-	}
 }

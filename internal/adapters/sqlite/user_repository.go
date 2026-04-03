@@ -3,14 +3,14 @@ package sqlite
 import (
 	"context"
 	"database/sql"
-	stderrors "errors"
 	"fmt"
 
 	"github.com/LarsArtmann/template-sqlc/internal/adapters/converters"
 	"github.com/LarsArtmann/template-sqlc/internal/adapters/mappers"
+	"github.com/LarsArtmann/template-sqlc/internal/adapters/validation"
 	"github.com/LarsArtmann/template-sqlc/internal/domain/entities"
 	"github.com/LarsArtmann/template-sqlc/internal/domain/repositories"
-	"github.com/LarsArtmann/template-sqlc/pkg/errors"
+	sqlitedb "github.com/LarsArtmann/template-sqlc/internal/db/sqlite"
 )
 
 // SQLiteUserRepository implements UserRepository for SQLite
@@ -91,8 +91,8 @@ func (r *SQLiteUserRepository) GetByUUID(
 	ctx context.Context,
 	uuid entities.UuID,
 ) (*entities.User, error) {
-	// Similar implementation for UUID lookup
-	panic("implement me: use actual sqlc generated code")
+	_, err := r.getByUUID(ctx, uuid)
+	return nil, err
 }
 
 // GetByEmail retrieves a user by email from SQLite
@@ -100,8 +100,8 @@ func (r *SQLiteUserRepository) GetByEmail(
 	ctx context.Context,
 	email entities.Email,
 ) (*entities.User, error) {
-	// Similar implementation for email lookup
-	panic("implement me: use actual sqlc generated code")
+	_, err := r.getByEmail(ctx, email)
+	return nil, err
 }
 
 // GetByUsername retrieves a user by username from SQLite
@@ -109,7 +109,19 @@ func (r *SQLiteUserRepository) GetByUsername(
 	ctx context.Context,
 	username entities.Username,
 ) (*entities.User, error) {
-	// Similar implementation for username lookup
+	_, err := r.getByUsername(ctx, username)
+	return nil, err
+}
+
+func (r *SQLiteUserRepository) getByUUID(ctx context.Context, uuid entities.UuID) (struct{}, error) {
+	panic("implement me: use actual sqlc generated code")
+}
+
+func (r *SQLiteUserRepository) getByEmail(ctx context.Context, email entities.Email) (struct{}, error) {
+	panic("implement me: use actual sqlc generated code")
+}
+
+func (r *SQLiteUserRepository) getByUsername(ctx context.Context, username entities.Username) (struct{}, error) {
 	panic("implement me: use actual sqlc generated code")
 }
 
@@ -143,12 +155,8 @@ func (r *SQLiteUserRepository) List(
 	status entities.UserStatus,
 	limit, offset int,
 ) ([]*entities.User, error) {
-	// Validate pagination parameters
-	if limit <= 0 || limit > 1000 {
-		return nil, errors.NewValidationError("limit", "must be between 1 and 1000")
-	}
-	if offset < 0 {
-		return nil, errors.NewValidationError("offset", "must be non-negative")
+	if err := validation.ValidatePagination(limit, offset); err != nil {
+		return nil, err
 	}
 
 	// Query database
@@ -162,8 +170,7 @@ func (r *SQLiteUserRepository) Search(
 	status entities.UserStatus,
 	limit int,
 ) ([]*entities.User, error) {
-	// Validate search query
-	if err := entities.ValidateSearchQuery(query, limit); err != nil {
+	if err := validation.ValidateSearchQuery(query, limit); err != nil {
 		return nil, err
 	}
 
@@ -178,12 +185,8 @@ func (r *SQLiteUserRepository) SearchByTags(
 	status entities.UserStatus,
 	limit, offset int,
 ) ([]*entities.User, error) {
-	// Validate tags
-	if len(tags) == 0 {
-		return nil, errors.NewValidationError("tags", "cannot be empty")
-	}
-	if len(tags) > 10 {
-		return nil, errors.NewValidationError("tags", "cannot exceed 10 tags")
+	if err := validation.ValidateTags(tags); err != nil {
+		return nil, err
 	}
 
 	// Search by tags
@@ -230,19 +233,41 @@ func (r *SQLiteUserRepository) MarkVerified(ctx context.Context, id entities.Use
 	panic("implement me: use actual sqlc generated code")
 }
 
+// validateAndUpdateStatus validates and updates user status
+func (r *SQLiteUserRepository) validateAndUpdateStatus(
+	_ context.Context,
+	_ entities.UserID,
+	status entities.UserStatus,
+	updateFn func() error,
+) error {
+	if err := validation.ValidateStatus(status); err != nil {
+		return err
+	}
+	return updateFn()
+}
+
+// validateAndUpdateRole validates and updates user role
+func (r *SQLiteUserRepository) validateAndUpdateRole(
+	_ context.Context,
+	_ entities.UserID,
+	role entities.UserRole,
+	updateFn func() error,
+) error {
+	if err := validation.ValidateRole(role); err != nil {
+		return err
+	}
+	return updateFn()
+}
+
 // ChangeStatus changes user status in SQLite
 func (r *SQLiteUserRepository) ChangeStatus(
 	ctx context.Context,
 	id entities.UserID,
 	status entities.UserStatus,
 ) error {
-	// Validate status
-	if !status.IsValid() {
-		return errors.NewValidationError("status", "invalid user status")
-	}
-
-	// Update status
-	panic("implement me: use actual sqlc generated code")
+	return r.validateAndUpdateStatus(ctx, id, status, func() error {
+		panic("implement me: use actual sqlc generated code")
+	})
 }
 
 // Activate activates a user in SQLite
@@ -266,39 +291,13 @@ func (r *SQLiteUserRepository) ChangeRole(
 	id entities.UserID,
 	role entities.UserRole,
 ) error {
-	// Validate role
-	if !role.IsValid() {
-		return errors.NewValidationError("role", "invalid user role")
-	}
-
-	// Update role
-	panic("implement me: use actual sqlc generated code")
+	return r.validateAndUpdateRole(ctx, id, role, func() error {
+		panic("implement me: use actual sqlc generated code")
+	})
 }
 
-// Helper methods
+// Helper method
 
-// handleError converts database errors to domain errors
 func (r *SQLiteUserRepository) handleError(err error, operation string) error {
-	if err == nil {
-		return nil
-	}
-
-	// Check for common error types
-	switch {
-	case stderrors.Is(err, sql.ErrNoRows):
-		return entities.ErrUserNotFound
-	case isUniqueConstraintError(err):
-		return entities.ErrUserAlreadyExists
-	default:
-		return errors.NewDatabaseError(operation+" failed", err)
-	}
-}
-
-// isUniqueConstraintError checks if error is a unique constraint violation
-func isUniqueConstraintError(err error) bool {
-	// This would check for SQLite-specific constraint errors
-	// Example: check if error message contains "UNIQUE constraint failed"
-	return err != nil &&
-		(fmt.Sprintf("%s", err) == "UNIQUE constraint failed" ||
-			fmt.Sprintf("%s", err) == "column ... is not unique")
+	return sqlitedb.HandleDBError(err, operation, entities.ErrUserNotFound, entities.ErrUserAlreadyExists, sqlitedb.IsSQLiteUniqueConstraintError)
 }

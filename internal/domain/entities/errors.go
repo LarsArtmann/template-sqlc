@@ -156,56 +156,46 @@ func (e *InternalError) Unwrap() error {
 	return e.Cause
 }
 
-// IsValidationError checks if an error is a ValidationError
-func IsValidationError(err error) bool {
+// is[T any] is a generic helper that checks if err is of type T
+func is[T any](err error, target *T) bool {
 	if err == nil {
 		return false
 	}
+	return errors.As(err, target)
+}
+
+// IsValidationError checks if an error is a ValidationError
+func IsValidationError(err error) bool {
 	var ve *ValidationError
-	return errors.As(err, &ve)
+	return is(err, &ve)
 }
 
 // IsNotFoundError checks if an error is a NotFoundError
 func IsNotFoundError(err error) bool {
-	if err == nil {
-		return false
-	}
 	var ne *NotFoundError
-	return errors.As(err, &ne)
+	return is(err, &ne)
 }
 
 // IsConflictError checks if an error is a ConflictError
 func IsConflictError(err error) bool {
-	if err == nil {
-		return false
-	}
 	var ce *ConflictError
-	return errors.As(err, &ce)
+	return is(err, &ce)
 }
 
 // IsAuthenticationError checks if an error is an AuthenticationError
 func IsAuthenticationError(err error) bool {
-	if err == nil {
-		return false
-	}
 	var ae *AuthenticationError
-	return errors.As(err, &ae)
+	return is(err, &ae)
 }
 
 // IsUnauthorizedError checks if an error is an AuthorizationError
 func IsUnauthorizedError(err error) bool {
-	if err == nil {
-		return false
-	}
 	var aze *AuthorizationError
-	return errors.As(err, &aze)
+	return is(err, &aze)
 }
 
 // IsInternalError checks if an error is an InternalError
 func IsInternalError(err error) bool {
-	if err == nil {
-		return false
-	}
 	var ie *InternalError
-	return errors.As(err, &ie)
+	return is(err, &ie)
 }

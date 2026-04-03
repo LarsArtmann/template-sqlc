@@ -731,30 +731,26 @@ func (s *UserFeaturesTestSuite) userShouldHaveSpecifiedTags() error {
 	return nil
 }
 
-func (s *UserFeaturesTestSuite) userShouldHaveAdminPrivileges() error {
+func (s *UserFeaturesTestSuite) userShouldHaveRole(expectedRole entities.UserRole, roleName string) error {
 	if s.currentUser == nil {
 		return errors.New("no current user to check privileges")
 	}
-	if s.currentUser.Role() != entities.UserRoleAdmin {
+	if s.currentUser.Role() != expectedRole {
 		return fmt.Errorf(
-			"expected user role to be 'admin', got '%s'",
+			"expected user role to be '%s', got '%s'",
+			roleName,
 			s.currentUser.Role().String(),
 		)
 	}
 	return nil
 }
 
+func (s *UserFeaturesTestSuite) userShouldHaveAdminPrivileges() error {
+	return s.userShouldHaveRole(entities.UserRoleAdmin, "admin")
+}
+
 func (s *UserFeaturesTestSuite) userShouldHaveModeratorPrivileges() error {
-	if s.currentUser == nil {
-		return errors.New("no current user to check privileges")
-	}
-	if s.currentUser.Role() != entities.UserRoleModerator {
-		return fmt.Errorf(
-			"expected user role to be 'moderator', got '%s'",
-			s.currentUser.Role().String(),
-		)
-	}
-	return nil
+	return s.userShouldHaveRole(entities.UserRoleModerator, "moderator")
 }
 
 func (s *UserFeaturesTestSuite) statisticsShouldIncludeCounts() error {
@@ -820,117 +816,39 @@ func (s *UserFeaturesTestSuite) allSessionsShouldBeActive() error {
 }
 
 func (s *UserFeaturesTestSuite) userCreatedEventShouldBePublished() error {
-	userEvents := s.eventPublisher.Events()
-	if len(userEvents) == 0 {
-		return errors.New("expected events to be published, got none")
-	}
+	return s.assertEventPublished(events.EventUserCreated, "user created")
+}
 
-	found := false
+func (s *UserFeaturesTestSuite) assertEventPublished(eventType events.EventType, eventName string) error {
+	userEvents := s.eventPublisher.Events()
+
 	for _, event := range userEvents {
-		if event.Type == events.EventUserCreated {
-			found = true
-			break
+		if event.Type == eventType {
+			return nil
 		}
 	}
 
-	if !found {
-		return fmt.Errorf(
-			"expected user created event to be published, but wasn't found in %v events",
-			len(userEvents),
-		)
-	}
-
-	return nil
+	return fmt.Errorf("expected %s event to be published, but wasn't found", eventName)
 }
 
 func (s *UserFeaturesTestSuite) userUpdatedEventShouldBePublished() error {
-	userEvents := s.eventPublisher.Events()
-
-	found := false
-	for _, event := range userEvents {
-		if event.Type == events.EventUserUpdated {
-			found = true
-			break
-		}
-	}
-
-	if !found {
-		return errors.New("expected user updated event to be published, but wasn't found")
-	}
-
-	return nil
+	return s.assertEventPublished(events.EventUserUpdated, "user updated")
 }
 
 func (s *UserFeaturesTestSuite) userLoginEventShouldBePublished() error {
-	userEvents := s.eventPublisher.Events()
-
-	found := false
-	for _, event := range userEvents {
-		if event.Type == events.EventUserLogin {
-			found = true
-			break
-		}
-	}
-
-	if !found {
-		return errors.New("expected user login event to be published, but wasn't found")
-	}
-
-	return nil
+	return s.assertEventPublished(events.EventUserLogin, "user login")
 }
 
 func (s *UserFeaturesTestSuite) userLoginFailEventShouldBePublished() error {
-	userEvents := s.eventPublisher.Events()
-
-	found := false
-	for _, event := range userEvents {
-		if event.Type == events.EventUserLoginFail {
-			found = true
-			break
-		}
-	}
-
-	if !found {
-		return errors.New("expected user login fail event to be published, but wasn't found")
-	}
-
-	return nil
+	return s.assertEventPublished(events.EventUserLoginFail, "user login fail")
 }
 
 func (s *UserFeaturesTestSuite) roleChangedEventShouldBePublished() error {
-	userEvents := s.eventPublisher.Events()
-
-	found := false
-	for _, event := range userEvents {
-		if event.Type == events.EventRoleChanged {
-			found = true
-			break
-		}
-	}
-
-	if !found {
-		return errors.New("expected role changed event to be published, but wasn't found")
-	}
-
-	return nil
+	return s.assertEventPublished(events.EventRoleChanged, "role changed")
 }
 
 func (s *UserFeaturesTestSuite) userVerifiedEventShouldBePublished() error {
-	userEvents := s.eventPublisher.Events()
-
-	found := false
-	for _, event := range userEvents {
-		if event.Type == events.EventUserVerified {
-			found = true
-			break
-		}
-	}
-
-	if !found {
-		return errors.New("expected user verified event to be published, but wasn't found")
-	}
-
-	return nil
+	return s.assertEventPublished(events.EventUserVerified, "user verified")
 }
 
 // Test runner

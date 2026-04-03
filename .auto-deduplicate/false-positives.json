@@ -1,0 +1,12 @@
+[
+  {
+    "fingerprint": "34aff0aabe80a901f413758b0bc2bea17b60cafa571874a2ee8f79525b6b1720",
+    "files": [
+      "/Users/larsartmann/projects/template-sqlc/internal/domain/entities/user.go",
+      "/Users/larsartmann/projects/template-sqlc/internal/tests/unit/user_test.go"
+    ],
+    "reason": "These are not true duplicates. The two structs have completely different semantics and purposes:\n\n1. **Test struct** (`user_test.go:14-25`): Test case input data with fields like `name`, `email`, `username`, `password`, `firstName`, `lastName`, `status`, `role`, `expectError`, `errorType`\n\n2. **UserStats struct** (`user.go:351-362`): User statistics output with fields like `TotalUsers`, `ActiveUsers`, `InactiveUsers`, `SuspendedUsers`, etc.\n\nThe duplicate detector matched on structural coincidence (both have ~10 fields), but the fields, data types, and purposes are entirely different. Test structs and domain/stats structs are inherently different patterns and should not be merged.\n\n{\"strategy\": \"false_positive\", \"files_modified\": [], \"new_abstraction\": \"\", \"confidence\": 1.0}\nINFO Running in non-interactive mode\nINFO Overriding large model for non-interactive run provider=minimax model=MiniMax-M2.7-highspeed\nINFO Using provider default small model provider=minimax model=MiniMax-M2.7\nINFO Created session for non-interactive run session_id=444d5b01-2920-4b3b-926a-2920c1ec2ee2\nERRO Language server stderr command=golangci-lint-langserver\n  output=\n  │ 2026/04/03 20:42:41 golangci-lint-langserver: connections opened\n\nERRO Failed to enqueue PostHog event event=\"app exited\" props=\"[app duration pretty 39s app duration in seconds 39]\" error=\"the client was already closed\"\nERRO Failed to flush PostHog events error=\"the client was already closed\"",
+    "marked_at": "2026-04-03T20:43:13.847644+02:00",
+    "marked_by": "auto-deduplicate"
+  }
+]
