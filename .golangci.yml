@@ -1,10 +1,13 @@
 version: "2"
 run:
   timeout: 5m
-  go: ""
-  build-tags: []
-  allow-parallel-runners: false
-  allow-serial-runners: false
+  go: 1.26.1
+  build-tags:
+    - goexperiment.goroutineleakprofile
+    - goexperiment.jsonv2
+    - goexperiment.simd
+  allow-parallel-runners: true
+  allow-serial-runners: true
   issues-exit-code: 1
   tests: true
 output:
@@ -15,150 +18,119 @@ output:
       print-linter-name: true
 linters:
   enable:
-    - gochecknoinits
-    - intrange
-    - noctx
-    - ineffassign
-    - exhaustruct
-    - gosmopolitan
-    - unparam
-    - unused
-    - prealloc
-    - wastedassign
-    - reassign
-    - recvcheck
+    - arangolint
+    - asasalint
+    - asciicheck
+    - bidichk
     - bodyclose
-    - forcetypeassert
-    - nilerr
-    - nilnesserr
-    - paralleltest
-    - unconvert
-    - misspell
-    - exhaustive
-    - ginkgolinter
-    - sqlclosecheck
-    - dupl
-    - goconst
-    - protogetter
-    - spancheck
-    - govet
-    - durationcheck
-    - gochecknoglobals
-    - mirror
-    - thelper
-    - staticcheck
-    - errorlint
-    - errcheck
-    - revive
-    - funlen
-    - loggercheck
-    - maintidx
-    - errname
-    - gosec
-    - rowserrcheck
+    - canonicalheader
+    - containedctx
     - contextcheck
-    - gocyclo
-    - musttag
-    - nakedret
-    - predeclared
-    - sloglint
-    - usetesting
-    - gocognit
-    - nestif
-    - wrapcheck
-    - nolintlint
-    - gocritic
-    - testifylint
-    - zerologlint
     - copyloopvar
     - cyclop
+    - decorder
+    - depguard
+    - dogsled
+    - dupl
+    - dupword
+    - durationcheck
+    - embeddedstructfieldcheck
+    - err113
+    - errcheck
     - errchkjson
-    - interfacebloat
-    - perfsprint
+    - errname
+    - errorlint
+    - exhaustive
+    - exhaustruct
+    - exptostd
+    - fatcontext
+    - forbidigo
+    - forcetypeassert
+    - funlen
+    - ginkgolinter
+    - gocheckcompilerdirectives
+    - gochecknoglobals
+    - gochecknoinits
     - gochecksumtype
+    - gocognit
+    - goconst
+    - gocritic
+    - gocyclo
+    - godoclint
+    - godot
+    - godox
+    - goheader
+    - gomoddirectives
+    - gomodguard
+    - goprintffuncname
+    - gosec
+    - gosmopolitan
+    - govet
+    - grouper
+    - iface
+    - importas
+    - inamedparam
+    - ineffassign
+    - interfacebloat
+    - intrange
+    - iotamixing
+    - ireturn
+    - loggercheck
+    - maintidx
+    - makezero
+    - mirror
+    - misspell
+    - mnd
+    - modernize
+    - musttag
+    - nakedret
+    - nestif
+    - nilerr
+    - nilnesserr
     - nilnil
+    - nlreturn
+    - noctx
+    - noinlineerr
+    - nolintlint
+    - nonamedreturns
+    - nosprintfhostport
+    - paralleltest
+    - perfsprint
+    - prealloc
+    - predeclared
+    - promlinter
+    - protogetter
+    - reassign
+    - recvcheck
+    - revive
+    - rowserrcheck
+    - sloglint
+    - spancheck
+    - sqlclosecheck
+    - staticcheck
+    - tagalign
+    - tagliatelle
+    - testableexamples
+    - testifylint
+    - testpackage
+    - thelper
+    - tparallel
+    - unconvert
+    - unparam
+    - unqueryvet
+    - unused
+    - usestdlibvars
+    - usetesting
+    - varnamelen
+    - wastedassign
+    - whitespace
+    - wrapcheck
+    - wsl_v5
+    - zerologlint
 formatters:
   enable:
-    - gofmt
+    - gci
     - goimports
+    - gofumpt
     - golines
-issues:
-  exclusions:
-    generated: lax
-    presets:
-      - comments
-      - std-error-handling
-      - common-false-positives
-      - legacy
-    paths:
-      - third_party$
-      - builtin$
-      - examples$
-    rules:
-      - linters:
-          - exhaustruct
-        source: "^\\s*(return &|prometheus\\.|mysql\\.|entities\\.|services\\.|bdd\\.|godog\\.|flags\\.|unit\\.|sqlite\\.|monitoring\\.|integration\\.)"
-      - linters:
-          - exhaustruct
-        source: "^\\s*promhttp\\."
-      - linters:
-          - exhaustruct
-        source: "^\\s*&mysql\\."
-      - linters:
-          - exhaustruct
-        source: "^\\s*&entities\\..*\\{\\s*\\}"
-      - linters:
-          - exhaustruct
-        source: "^\\s*&services\\..*\\{\\s*\\}"
-      - linters:
-          - exhaustruct
-        source: "^\\s*&bdd\\..*\\{\\s*\\}"
-      - linters:
-          - exhaustruct
-        source: "^\\s*&godog\\..*\\{\\s*\\}"
-      - linters:
-          - exhaustruct
-        source: "^\\s*flags\\..*\\{\\s*\\}"
-      - linters:
-          - exhaustruct
-        source: "^\\s*unit\\.<anonymous>"
-      - linters:
-          - exhaustruct
-        source: "^\\s*return &.*\\{"
-      - linters:
-          - exhaustruct
-        path: _test\\.go
-      - linters:
-          - paralleltest
-        path: _test\\.go
-      - linters:
-          - wrapcheck
-        path: internal/domain/
-      - linters:
-          - wrapcheck
-        path: internal/tests/
-      - linters:
-          - unused
-        path: internal/adapters/
-      - linters:
-          - revive
-        path: pkg/errors/errors.go
-linters-settings:
-  exhaustruct:
-    exclude:
-      - "^github.com/go-sql-driver/mysql\\.MySQLError$"
-      - "^github.com/prometheus/client_golang/prometheus\\."
-      - "^database/sql\\."
-  cyclop:
-    max-complexity: 15
-  gocyclo:
-    min-complexity: 15
-  gocognit:
-    min-complexity: 20
-  funlen:
-    lines: 100
-    statements: 60
-  wrapcheck:
-    ignorePackageGlobs:
-      - github.com/LarsArtmann/template-sqlc/internal/domain/*
-      - github.com/LarsArtmann/template-sqlc/pkg/*
+issues: {}

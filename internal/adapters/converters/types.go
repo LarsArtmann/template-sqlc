@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 )
 
-// Database type constants for consistent database identification
+// Database type constants for consistent database identification.
 const (
 	DbTypeSQLite   = "sqlite"
 	DbTypePostgres = "postgres"
@@ -18,60 +18,60 @@ const (
 // TypeConverter handles database-specific type conversions
 // This isolates domain entities from database-specific type handling
 
-// TypeConverter is a generic interface for domain <-> database type conversions
+// TypeConverter is a generic interface for domain <-> database type conversions.
 type TypeConverter[Domain any, DB any] interface {
 	DomainToDB(domain Domain) DB
 	DBToDomain(db DB) (Domain, error)
 }
 
-// UUIDConverter handles UUID conversions between domain and database
+// UUIDConverter handles UUID conversions between domain and database.
 type UUIDConverter interface {
 	TypeConverter[uuid.UUID, any]
 }
 
-// TimeConverter handles time conversions between domain and database
+// TimeConverter handles time conversions between domain and database.
 type TimeConverter interface {
 	TypeConverter[time.Time, any]
 }
 
-// BoolConverter handles boolean conversions between domain and database
+// BoolConverter handles boolean conversions between domain and database.
 type BoolConverter interface {
 	TypeConverter[bool, any]
 }
 
-// EmailConverter handles email conversions between domain and database
+// EmailConverter handles email conversions between domain and database.
 type EmailConverter interface {
 	TypeConverter[entities.Email, string]
 }
 
-// UsernameConverter handles username conversions between domain and database
+// UsernameConverter handles username conversions between domain and database.
 type UsernameConverter interface {
 	TypeConverter[entities.Username, string]
 }
 
-// PasswordHashConverter handles password hash conversions between domain and database
+// PasswordHashConverter handles password hash conversions between domain and database.
 type PasswordHashConverter interface {
 	TypeConverter[entities.PasswordHash, string]
 }
 
-// UserStatusConverter handles user status conversions between domain and database
+// UserStatusConverter handles user status conversions between domain and database.
 type UserStatusConverter interface {
 	TypeConverter[entities.UserStatus, string]
 }
 
-// UserRoleConverter handles user role conversions between domain and database
+// UserRoleConverter handles user role conversions between domain and database.
 type UserRoleConverter interface {
 	TypeConverter[entities.UserRole, string]
 }
 
-// SessionTokenConverter handles session token conversions between domain and database
+// SessionTokenConverter handles session token conversions between domain and database.
 type SessionTokenConverter interface {
 	TypeConverter[entities.SessionToken, any]
 }
 
 // Default implementations
 
-// SQLiteUUIDConverter handles UUID conversion for SQLite (stores as string)
+// SQLiteUUIDConverter handles UUID conversion for SQLite (stores as string).
 type SQLiteUUIDConverter struct{}
 
 func NewSQLiteUUIDConverter() *SQLiteUUIDConverter {
@@ -82,6 +82,7 @@ func (c *SQLiteUUIDConverter) DomainToDB(domain uuid.UUID) any {
 	if domain == uuid.Nil {
 		return nil
 	}
+
 	return domain.String()
 }
 
@@ -98,7 +99,7 @@ func (c *SQLiteUUIDConverter) DBToDomain(db any) (uuid.UUID, error) {
 	return uuid.Parse(str)
 }
 
-// PostgresUUIDConverter handles UUID conversion for PostgreSQL (stores as UUID type)
+// PostgresUUIDConverter handles UUID conversion for PostgreSQL (stores as UUID type).
 type PostgresUUIDConverter struct{}
 
 func NewPostgresUUIDConverter() *PostgresUUIDConverter {
@@ -125,7 +126,7 @@ func (c *PostgresUUIDConverter) DBToDomain(db any) (uuid.UUID, error) {
 	return uuid.Nil, NewConversionError("expected UUID or string", db)
 }
 
-// MySQLUUIDConverter handles UUID conversion for MySQL (stores as binary)
+// MySQLUUIDConverter handles UUID conversion for MySQL (stores as binary).
 type MySQLUUIDConverter struct{}
 
 func NewMySQLUUIDConverter() *MySQLUUIDConverter {
@@ -152,7 +153,7 @@ func (c *MySQLUUIDConverter) DBToDomain(db any) (uuid.UUID, error) {
 	return uuid.Nil, NewConversionError("expected bytes or string for UUID", db)
 }
 
-// SQLiteTimeConverter handles time conversion for SQLite
+// SQLiteTimeConverter handles time conversion for SQLite.
 type SQLiteTimeConverter struct{}
 
 func NewSQLiteTimeConverter() *SQLiteTimeConverter {
@@ -163,6 +164,7 @@ func (c *SQLiteTimeConverter) DomainToDB(domain time.Time) any {
 	if domain.IsZero() {
 		return nil
 	}
+
 	return domain
 }
 
@@ -182,7 +184,7 @@ func (c *SQLiteTimeConverter) DBToDomain(db any) (time.Time, error) {
 	return time.Time{}, NewConversionError("expected time or string", db)
 }
 
-// SQLiteBoolConverter handles boolean conversion for SQLite
+// SQLiteBoolConverter handles boolean conversion for SQLite.
 type SQLiteBoolConverter struct{}
 
 func NewSQLiteBoolConverter() *SQLiteBoolConverter {
@@ -212,7 +214,7 @@ func (c *SQLiteBoolConverter) DBToDomain(db any) (bool, error) {
 	}
 }
 
-// Conversion errors
+// Conversion errors.
 type ConversionError struct {
 	Message string
 	Value   any
@@ -231,7 +233,7 @@ func (e *ConversionError) Error() string {
 
 // Factory functions to create converters for different databases
 
-// NewUUIDConverter creates UUID converter for specified database
+// NewUUIDConverter creates UUID converter for specified database.
 func NewUUIDConverter(database string) UUIDConverter {
 	switch database {
 	case "sqlite":
@@ -245,19 +247,19 @@ func NewUUIDConverter(database string) UUIDConverter {
 	}
 }
 
-// NewTimeConverter creates time converter for specified database
+// NewTimeConverter creates time converter for specified database.
 func NewTimeConverter(_ string) TimeConverter {
 	return NewSQLiteTimeConverter()
 }
 
-// NewBoolConverter creates boolean converter for specified database
+// NewBoolConverter creates boolean converter for specified database.
 func NewBoolConverter(_ string) BoolConverter {
 	return NewSQLiteBoolConverter()
 }
 
 // Default converters
 
-// DefaultEmailConverter handles email conversion
+// DefaultEmailConverter handles email conversion.
 type DefaultEmailConverter struct{}
 
 func NewDefaultEmailConverter() *DefaultEmailConverter {
@@ -272,7 +274,7 @@ func (c *DefaultEmailConverter) DBToDomain(db string) (entities.Email, error) {
 	return convertSimpleValue(db, entities.NewEmail)
 }
 
-// DefaultUsernameConverter handles username conversion
+// DefaultUsernameConverter handles username conversion.
 type DefaultUsernameConverter struct{}
 
 func NewDefaultUsernameConverter() *DefaultUsernameConverter {
@@ -287,7 +289,7 @@ func (c *DefaultUsernameConverter) DBToDomain(db string) (entities.Username, err
 	return convertSimpleValue(db, entities.NewUsername)
 }
 
-// DefaultPasswordHashConverter handles password hash conversion
+// DefaultPasswordHashConverter handles password hash conversion.
 type DefaultPasswordHashConverter struct{}
 
 func NewDefaultPasswordHashConverter() *DefaultPasswordHashConverter {
@@ -302,7 +304,7 @@ func (c *DefaultPasswordHashConverter) DBToDomain(db string) (entities.PasswordH
 	return convertSimpleValue(db, entities.NewPasswordHash)
 }
 
-// DefaultUserStatusConverter handles user status conversion
+// DefaultUserStatusConverter handles user status conversion.
 type DefaultUserStatusConverter struct{}
 
 func NewDefaultUserStatusConverter() *DefaultUserStatusConverter {
@@ -317,7 +319,7 @@ func (c *DefaultUserStatusConverter) DBToDomain(db string) (entities.UserStatus,
 	return convertEnumString(db, entities.UserStatusActive, "user status")
 }
 
-// convertEnumString converts a string to an enum type with validation
+// convertEnumString converts a string to an enum type with validation.
 type enum interface {
 	~string
 	IsValid() bool
@@ -328,18 +330,19 @@ func convertEnumString[T enum](db string, defaultVal T, typeName string) (T, err
 	if !val.IsValid() {
 		return defaultVal, NewConversionError("invalid "+typeName, db)
 	}
+
 	return val, nil
 }
 
-// stringConstructor is a function type for simple string-to-value conversion
+// stringConstructor is a function type for simple string-to-value conversion.
 type stringConstructor[T any] func(string) (T, error)
 
-// convertSimpleValue converts a database string using a simple constructor function
+// convertSimpleValue converts a database string using a simple constructor function.
 func convertSimpleValue[T any](db string, constructor stringConstructor[T]) (T, error) {
 	return constructor(db)
 }
 
-// DefaultUserRoleConverter handles user role conversion
+// DefaultUserRoleConverter handles user role conversion.
 type DefaultUserRoleConverter struct{}
 
 func NewDefaultUserRoleConverter() *DefaultUserRoleConverter {
@@ -354,7 +357,7 @@ func (c *DefaultUserRoleConverter) DBToDomain(db string) (entities.UserRole, err
 	return convertEnumString(db, entities.UserRoleUser, "user role")
 }
 
-// DefaultSessionTokenConverter handles session token conversion
+// DefaultSessionTokenConverter handles session token conversion.
 type DefaultSessionTokenConverter struct{}
 
 func NewDefaultSessionTokenConverter() *DefaultSessionTokenConverter {
@@ -377,6 +380,7 @@ func (c *DefaultSessionTokenConverter) DBToDomain(db any) (entities.SessionToken
 				db,
 			)
 		}
+
 		tokenUUID = parsed
 	case uuid.UUID:
 		tokenUUID = v
@@ -388,6 +392,7 @@ func (c *DefaultSessionTokenConverter) DBToDomain(db any) (entities.SessionToken
 				db,
 			)
 		}
+
 		tokenUUID = parsed
 	default:
 		return entities.SessionToken{}, NewConversionError(
@@ -399,7 +404,7 @@ func (c *DefaultSessionTokenConverter) DBToDomain(db any) (entities.SessionToken
 	return entities.SessionToken(tokenUUID), nil
 }
 
-// ConverterSet holds all type converters for user repository operations
+// ConverterSet holds all type converters for user repository operations.
 type ConverterSet struct {
 	UUID     UUIDConverter
 	Time     TimeConverter
@@ -413,15 +418,16 @@ type ConverterSet struct {
 
 // Helper functions
 
-// ConvertToGeneric converts any type to interface{} for database operations
+// ConvertToGeneric converts any type to interface{} for database operations.
 func ConvertToGeneric(value any) any {
 	if value == nil {
 		return nil
 	}
+
 	return value
 }
 
-// SafeString safely converts interface{} to string
+// SafeString safely converts interface{} to string.
 func SafeString(value any) string {
 	if value == nil {
 		return ""
@@ -437,7 +443,7 @@ func SafeString(value any) string {
 	}
 }
 
-// SafeTime safely converts interface{} to time.Time
+// SafeTime safely converts interface{} to time.Time.
 func SafeTime(value any) time.Time {
 	if value == nil {
 		return time.Time{}

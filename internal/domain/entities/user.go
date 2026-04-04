@@ -11,7 +11,7 @@ import (
 )
 
 // User represents the core domain entity for a user
-// This is INDEPENDENT of database representation
+// This is INDEPENDENT of database representation.
 type User struct {
 	id          UserID
 	uuid        uuid.UUID
@@ -30,64 +30,67 @@ type User struct {
 	lastLoginAt *time.Time
 }
 
-// UserID is a strongly-typed user identifier
+// UserID is a strongly-typed user identifier.
 type UserID int64
 
 func (id UserID) Int64() int64   { return int64(id) }
 func (id UserID) String() string { return fmt.Sprintf("user:%d", id) }
 
-// IDID is a strongly-typed event identifier
+// IDID is a strongly-typed event identifier.
 type IDID int64
 
 func (id IDID) Int64() int64   { return int64(id) }
 func (id IDID) String() string { return fmt.Sprintf("event:%d", id) }
 
-// AsIDID converts an int64 to IDID
+// AsIDID converts an int64 to IDID.
 func AsIDID(value int64) IDID { return IDID(value) }
 
-// UuID is a strongly-typed UUID identifier
+// UuID is a strongly-typed UUID identifier.
 type UuID string
 
 func (id UuID) String() string { return string(id) }
 
-// NewUuID generates a new UuID from a UUID string
+// NewUuID generates a new UuID from a UUID string.
 func NewUuID(s string) (UuID, error) {
 	if s == "" {
 		return "", nil
 	}
+
 	parsed, err := uuid.Parse(s)
 	if err != nil {
 		return "", err
 	}
+
 	return UuID(parsed.String()), nil
 }
 
-// NewUuIDFromUUID creates a UuID from a uuid.UUID
+// NewUuIDFromUUID creates a UuID from a uuid.UUID.
 func NewUuIDFromUUID(u uuid.UUID) UuID {
 	return UuID(u.String())
 }
 
-// emailRegex is a simple email validation pattern
+// emailRegex is a simple email validation pattern.
 var emailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
 
-// isValidEmail validates an email address
+// isValidEmail validates an email address.
 func isValidEmail(email string) bool {
 	return emailRegex.MatchString(email)
 }
 
-// Email represents a validated email address
+// Email represents a validated email address.
 type Email string
 
 func NewEmail(email string) (Email, error) {
 	if !isValidEmail(email) {
 		return "", ErrInvalidEmail
 	}
+
 	return Email(strings.ToLower(strings.TrimSpace(email))), nil
 }
 
 func (e Email) String() string { return string(e) }
 
-// Username represents a validated username
+// Username represents a validated username.
 type Username string
 
 var reservedUsernames = map[string]bool{
@@ -101,30 +104,34 @@ func NewUsername(username string) (Username, error) {
 	if len(username) < 3 || len(username) > 50 {
 		return "", ErrInvalidUsername
 	}
+
 	if !usernameValidChars.MatchString(username) {
 		return "", ErrInvalidUsername
 	}
+
 	if reservedUsernames[strings.ToLower(username)] {
 		return "", ErrInvalidUsername
 	}
+
 	return Username(username), nil
 }
 
 func (u Username) String() string { return string(u) }
 
-// PasswordHash represents a secure password hash
+// PasswordHash represents a secure password hash.
 type PasswordHash string
 
 func NewPasswordHash(hash string) (PasswordHash, error) {
 	if len(hash) < 32 { // Minimum bcrypt length
 		return "", ErrInvalidPasswordHash
 	}
+
 	return PasswordHash(hash), nil
 }
 
 func (p PasswordHash) String() string { return string(p) }
 
-// FirstName represents a validated first name
+// FirstName represents a validated first name.
 type FirstName string
 
 func NewFirstName(name string) (FirstName, error) {
@@ -132,12 +139,13 @@ func NewFirstName(name string) (FirstName, error) {
 	if err != nil {
 		return "", err
 	}
+
 	return FirstName(validated), nil
 }
 
 func (f FirstName) String() string { return string(f) }
 
-// LastName represents a validated last name
+// LastName represents a validated last name.
 type LastName string
 
 func NewLastName(name string) (LastName, error) {
@@ -145,21 +153,23 @@ func NewLastName(name string) (LastName, error) {
 	if err != nil {
 		return "", err
 	}
+
 	return LastName(validated), nil
 }
 
 func (l LastName) String() string { return string(l) }
 
-// validateNonEmpty trims whitespace and validates the string is not empty
+// validateNonEmpty trims whitespace and validates the string is not empty.
 func validateNonEmpty(name string, emptyErr error) (string, error) {
 	name = strings.TrimSpace(name)
 	if len(name) == 0 {
 		return "", emptyErr
 	}
+
 	return name, nil
 }
 
-// UserStatus represents user account status
+// UserStatus represents user account status.
 type UserStatus string
 
 const (
@@ -179,7 +189,7 @@ func (s UserStatus) IsValid() bool {
 	}
 }
 
-// UserRole represents user role in system
+// UserRole represents user role in system.
 type UserRole string
 
 const (
@@ -198,7 +208,7 @@ func (r UserRole) IsValid() bool {
 	}
 }
 
-// UserMetadata represents flexible user metadata
+// UserMetadata represents flexible user metadata.
 type UserMetadata map[string]any
 
 func NewUserMetadata() UserMetadata {
@@ -211,10 +221,11 @@ func (m UserMetadata) Set(key string, value any) {
 
 func (m UserMetadata) Get(key string) (any, bool) {
 	val, ok := m[key]
+
 	return val, ok
 }
 
-// NewUser creates a new user entity with validation
+// NewUser creates a new user entity with validation.
 func NewUser(
 	email Email,
 	username Username,
@@ -229,11 +240,13 @@ func NewUser(
 	if !status.IsValid() {
 		return nil, ErrInvalidUserStatus
 	}
+
 	if !role.IsValid() {
 		return nil, ErrInvalidUserRole
 	}
 
 	now := time.Now()
+
 	return &User{
 		uuid:       uuid.New(),
 		email:      email,
@@ -268,12 +281,12 @@ func (u *User) CreatedAt() time.Time    { return u.createdAt }
 func (u *User) UpdatedAt() time.Time    { return u.updatedAt }
 func (u *User) LastLoginAt() *time.Time { return u.lastLoginAt }
 
-// IsActive returns true if user status is active
+// IsActive returns true if user status is active.
 func (u *User) IsActive() bool {
 	return u.status == UserStatusActive
 }
 
-// UpdateProfile updates user profile information
+// UpdateProfile updates user profile information.
 func (u *User) UpdateProfile(
 	firstName *FirstName,
 	lastName *LastName,
@@ -283,31 +296,43 @@ func (u *User) UpdateProfile(
 	if firstName != nil {
 		u.firstName = *firstName
 	}
+
 	if lastName != nil {
 		u.lastName = *lastName
 	}
+
 	if metadata != nil {
 		u.metadata = *metadata
 	}
+
 	if tags != nil {
 		u.tags = *tags
 	}
 
 	u.updatedAt = time.Now()
+
 	return nil
 }
 
-// changeField updates a field with validation and timestamp using generics
-func changeField[T any](u *User, value T, valid func(T) bool, errForInvalid func() error, apply func(*User, T)) error {
+// changeField updates a field with validation and timestamp using generics.
+func changeField[T any](
+	u *User,
+	value T,
+	valid func(T) bool,
+	errForInvalid func() error,
+	apply func(*User, T),
+) error {
 	if !valid(value) {
 		return errForInvalid()
 	}
+
 	apply(u, value)
 	u.updatedAt = time.Now()
+
 	return nil
 }
 
-// ChangeStatus updates user status with validation
+// ChangeStatus updates user status with validation.
 func (u *User) ChangeStatus(status UserStatus) error {
 	return changeField(
 		u,
@@ -318,7 +343,7 @@ func (u *User) ChangeStatus(status UserStatus) error {
 	)
 }
 
-// ChangeRole updates user role with validation
+// ChangeRole updates user role with validation.
 func (u *User) ChangeRole(role UserRole) error {
 	return changeField(
 		u,
@@ -329,46 +354,48 @@ func (u *User) ChangeRole(role UserRole) error {
 	)
 }
 
-// Verify marks user as verified
+// Verify marks user as verified.
 func (u *User) Verify() {
 	u.isVerified = true
 	u.updatedAt = time.Now()
 }
 
-// RecordLogin updates last login time
+// RecordLogin updates last login time.
 func (u *User) RecordLogin() {
 	now := time.Now()
 	u.lastLoginAt = &now
 	u.updatedAt = now
 }
 
-// AddTag adds a tag to user if not already present
+// AddTag adds a tag to user if not already present.
 func (u *User) AddTag(tag string) {
 	if slices.Contains(u.tags, tag) {
 		return
 	}
+
 	u.tags = append(u.tags, tag)
 	u.updatedAt = time.Now()
 }
 
-// RemoveTag removes a tag from user
+// RemoveTag removes a tag from user.
 func (u *User) RemoveTag(tag string) {
 	for i, existingTag := range u.tags {
 		if existingTag == tag {
 			u.tags = append(u.tags[:i], u.tags[i+1:]...)
 			u.updatedAt = time.Now()
+
 			return
 		}
 	}
 }
 
 // SetID sets the user ID (used by repository after creation)
-// This is intentionally package-private to allow repository to set ID after creation
+// This is intentionally package-private to allow repository to set ID after creation.
 func (u *User) SetID(id UserID) {
 	u.id = id
 }
 
-// UserStats represents user statistics
+// UserStats represents user statistics.
 type UserStats struct {
 	TotalUsers       int64   `json:"total_users"`
 	ActiveUsers      int64   `json:"active_users"`
@@ -382,7 +409,7 @@ type UserStats struct {
 	VerificationRate float64 `json:"verification_rate"`
 }
 
-// SessionStats represents session statistics
+// SessionStats represents session statistics.
 type SessionStats struct {
 	TotalSessions   int64 `json:"total_sessions"`
 	ActiveSessions  int64 `json:"active_sessions"`

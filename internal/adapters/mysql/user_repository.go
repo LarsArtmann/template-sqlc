@@ -6,25 +6,24 @@ import (
 	stderrors "errors"
 	"fmt"
 
-	"github.com/go-sql-driver/mysql"
-
 	"github.com/LarsArtmann/template-sqlc/internal/adapters/converters"
 	"github.com/LarsArtmann/template-sqlc/internal/adapters/mappers"
 	"github.com/LarsArtmann/template-sqlc/internal/adapters/validation"
 	"github.com/LarsArtmann/template-sqlc/internal/domain/entities"
 	"github.com/LarsArtmann/template-sqlc/internal/domain/repositories"
 	"github.com/LarsArtmann/template-sqlc/pkg/errors"
+	"github.com/go-sql-driver/mysql"
 )
 
 // MySQLUserRepository implements UserRepository for MySQL
-// This adapts MySQL-specific types to domain interfaces
+// This adapts MySQL-specific types to domain interfaces.
 type MySQLUserRepository struct {
 	db         *sql.DB
 	mapper     *mappers.UserMapper
 	converters *converters.ConverterSet
 }
 
-// NewMySQLUserRepository creates a new MySQL user repository
+// NewMySQLUserRepository creates a new MySQL user repository.
 func NewMySQLUserRepository(db *sql.DB) repositories.UserRepository {
 	return &MySQLUserRepository{
 		db:     db,
@@ -42,16 +41,17 @@ func NewMySQLUserRepository(db *sql.DB) repositories.UserRepository {
 	}
 }
 
-// convertToModel converts a domain user to the database model and returns an error on failure
-func (r *MySQLUserRepository) convertToModel(user *entities.User) (interface{}, error) {
+// convertToModel converts a domain user to the database model and returns an error on failure.
+func (r *MySQLUserRepository) convertToModel(user *entities.User) (any, error) {
 	model, err := r.mapper.MySQLUserFromDomain(user)
 	if err != nil {
 		return nil, fmt.Errorf("failed to convert user %s: %w", user.ID(), err)
 	}
+
 	return model, nil
 }
 
-// Create saves a new user to MySQL
+// Create saves a new user to MySQL.
 func (r *MySQLUserRepository) Create(ctx context.Context, user *entities.User) error {
 	_, err := r.convertToModel(user)
 	if err != nil {
@@ -66,7 +66,7 @@ func (r *MySQLUserRepository) Create(ctx context.Context, user *entities.User) e
 	panic("implement me: use actual sqlc generated code for MySQL")
 }
 
-// GetByID retrieves a user by ID from MySQL
+// GetByID retrieves a user by ID from MySQL.
 func (r *MySQLUserRepository) GetByID(
 	ctx context.Context,
 	id entities.UserID,
@@ -81,34 +81,36 @@ func (r *MySQLUserRepository) GetByID(
 	//     return nil, errors.NewDatabaseError("failed to get user", err)
 	// }
 	// return mappers.DomainUserFromMySQL(mysqlUser)
-
 	panic("implement me: use actual sqlc generated code for MySQL")
 }
 
-// GetByUUID retrieves a user by UUID from MySQL
+// GetByUUID retrieves a user by UUID from MySQL.
 func (r *MySQLUserRepository) GetByUUID(
 	ctx context.Context,
 	uuid entities.UuID,
 ) (*entities.User, error) {
 	_, err := r.getByUUID(ctx, uuid)
+
 	return nil, err
 }
 
-// GetByEmail retrieves a user by email from MySQL
+// GetByEmail retrieves a user by email from MySQL.
 func (r *MySQLUserRepository) GetByEmail(
 	ctx context.Context,
 	email entities.Email,
 ) (*entities.User, error) {
 	_, err := r.getByEmail(ctx, email)
+
 	return nil, err
 }
 
-// GetByUsername retrieves a user by username from MySQL
+// GetByUsername retrieves a user by username from MySQL.
 func (r *MySQLUserRepository) GetByUsername(
 	ctx context.Context,
 	username entities.Username,
 ) (*entities.User, error) {
 	_, err := r.getByUsername(ctx, username)
+
 	return nil, err
 }
 
@@ -116,15 +118,21 @@ func (r *MySQLUserRepository) getByUUID(ctx context.Context, uuid entities.UuID)
 	panic("implement me: use actual sqlc generated code for MySQL")
 }
 
-func (r *MySQLUserRepository) getByEmail(ctx context.Context, email entities.Email) (struct{}, error) {
+func (r *MySQLUserRepository) getByEmail(
+	ctx context.Context,
+	email entities.Email,
+) (struct{}, error) {
 	panic("implement me: use actual sqlc generated code for MySQL")
 }
 
-func (r *MySQLUserRepository) getByUsername(ctx context.Context, username entities.Username) (struct{}, error) {
+func (r *MySQLUserRepository) getByUsername(
+	ctx context.Context,
+	username entities.Username,
+) (struct{}, error) {
 	panic("implement me: use actual sqlc generated code for MySQL")
 }
 
-// Update updates an existing user in MySQL
+// Update updates an existing user in MySQL.
 func (r *MySQLUserRepository) Update(ctx context.Context, user *entities.User) error {
 	_, err := r.convertToModel(user)
 	if err != nil {
@@ -135,19 +143,20 @@ func (r *MySQLUserRepository) Update(ctx context.Context, user *entities.User) e
 	panic("implement me: use actual sqlc generated code for MySQL")
 }
 
-// Delete soft deletes a user from MySQL
+// Delete soft deletes a user from MySQL.
 func (r *MySQLUserRepository) Delete(ctx context.Context, id entities.UserID) error {
 	// Soft delete by changing status
 	return r.ChangeStatus(ctx, id, entities.UserStatusInactive)
 }
 
-// List retrieves users with pagination from MySQL
+// List retrieves users with pagination from MySQL.
 func (r *MySQLUserRepository) List(
 	ctx context.Context,
 	status entities.UserStatus,
 	limit, offset int,
 ) ([]*entities.User, error) {
-	if err := validation.ValidatePagination(limit, offset); err != nil {
+	err := validation.ValidatePagination(limit, offset)
+	if err != nil {
 		return nil, err
 	}
 
@@ -155,7 +164,7 @@ func (r *MySQLUserRepository) List(
 	panic("implement me: use actual sqlc generated code for MySQL")
 }
 
-// Search searches users by query in MySQL using FULLTEXT
+// Search searches users by query in MySQL using FULLTEXT.
 func (r *MySQLUserRepository) Search(
 	ctx context.Context,
 	query string,
@@ -166,9 +175,11 @@ func (r *MySQLUserRepository) Search(
 	if len(query) == 0 {
 		return nil, errors.NewValidationError("query", "cannot be empty")
 	}
+
 	if len(query) > 500 {
 		return nil, errors.NewValidationError("query", "cannot exceed 500 characters")
 	}
+
 	if limit <= 0 || limit > 100 {
 		return nil, errors.NewValidationError("limit", "must be between 1 and 100")
 	}
@@ -177,14 +188,15 @@ func (r *MySQLUserRepository) Search(
 	panic("implement me: use actual sqlc generated code for MySQL")
 }
 
-// SearchByTags searches users by tags in MySQL using JSON operations
+// SearchByTags searches users by tags in MySQL using JSON operations.
 func (r *MySQLUserRepository) SearchByTags(
 	ctx context.Context,
 	tags []string,
 	status entities.UserStatus,
 	limit, offset int,
 ) ([]*entities.User, error) {
-	if err := validation.ValidateTags(tags); err != nil {
+	err := validation.ValidateTags(tags)
+	if err != nil {
 		return nil, err
 	}
 
@@ -192,7 +204,7 @@ func (r *MySQLUserRepository) SearchByTags(
 	panic("implement me: use actual sqlc generated code for MySQL")
 }
 
-// CountByStatus counts users by status in MySQL
+// CountByStatus counts users by status in MySQL.
 func (r *MySQLUserRepository) CountByStatus(
 	ctx context.Context,
 ) (map[entities.UserStatus]int64, error) {
@@ -200,13 +212,13 @@ func (r *MySQLUserRepository) CountByStatus(
 	panic("implement me: use actual sqlc generated code for MySQL")
 }
 
-// GetStats retrieves user statistics from MySQL
+// GetStats retrieves user statistics from MySQL.
 func (r *MySQLUserRepository) GetStats(ctx context.Context) (*entities.UserStats, error) {
 	// Query stats using MySQL's aggregate functions
 	panic("implement me: use actual sqlc generated code for MySQL")
 }
 
-// VerifyCredentials verifies user credentials in MySQL
+// VerifyCredentials verifies user credentials in MySQL.
 func (r *MySQLUserRepository) VerifyCredentials(
 	ctx context.Context,
 	email entities.Email,
@@ -216,7 +228,7 @@ func (r *MySQLUserRepository) VerifyCredentials(
 	panic("implement me: use actual sqlc generated code for MySQL")
 }
 
-// UpdatePassword updates user password in MySQL
+// UpdatePassword updates user password in MySQL.
 func (r *MySQLUserRepository) UpdatePassword(
 	ctx context.Context,
 	id entities.UserID,
@@ -226,38 +238,42 @@ func (r *MySQLUserRepository) UpdatePassword(
 	panic("implement me: use actual sqlc generated code for MySQL")
 }
 
-// MarkVerified marks user as verified in MySQL
+// MarkVerified marks user as verified in MySQL.
 func (r *MySQLUserRepository) MarkVerified(ctx context.Context, id entities.UserID) error {
 	return entities.StubNotImplemented("MarkVerified", "MySQL")
 }
 
-// validateAndUpdateStatus validates and updates user status
+// validateAndUpdateStatus validates and updates user status.
 func (r *MySQLUserRepository) validateAndUpdateStatus(
 	_ context.Context,
 	_ entities.UserID,
 	status entities.UserStatus,
 	updateFn func() error,
 ) error {
-	if err := validation.Validate(status, "status", "invalid user status"); err != nil {
+	err := validation.Validate(status, "status", "invalid user status")
+	if err != nil {
 		return err
 	}
+
 	return updateFn()
 }
 
-// validateAndUpdateRole validates and updates user role
+// validateAndUpdateRole validates and updates user role.
 func (r *MySQLUserRepository) validateAndUpdateRole(
 	_ context.Context,
 	_ entities.UserID,
 	role entities.UserRole,
 	updateFn func() error,
 ) error {
-	if err := validation.Validate(role, "role", "invalid user role"); err != nil {
+	err := validation.Validate(role, "role", "invalid user role")
+	if err != nil {
 		return err
 	}
+
 	return updateFn()
 }
 
-// ChangeStatus changes user status in MySQL
+// ChangeStatus changes user status in MySQL.
 func (r *MySQLUserRepository) ChangeStatus(
 	ctx context.Context,
 	id entities.UserID,
@@ -268,22 +284,22 @@ func (r *MySQLUserRepository) ChangeStatus(
 	})
 }
 
-// Activate activates a user in MySQL
+// Activate activates a user in MySQL.
 func (r *MySQLUserRepository) Activate(ctx context.Context, id entities.UserID) error {
 	return r.ChangeStatus(ctx, id, entities.UserStatusActive)
 }
 
-// Deactivate deactivates a user in MySQL
+// Deactivate deactivates a user in MySQL.
 func (r *MySQLUserRepository) Deactivate(ctx context.Context, id entities.UserID) error {
 	return r.ChangeStatus(ctx, id, entities.UserStatusInactive)
 }
 
-// Suspend suspends a user in MySQL
+// Suspend suspends a user in MySQL.
 func (r *MySQLUserRepository) Suspend(ctx context.Context, id entities.UserID) error {
 	return r.ChangeStatus(ctx, id, entities.UserStatusSuspended)
 }
 
-// ChangeRole changes user role in MySQL
+// ChangeRole changes user role in MySQL.
 func (r *MySQLUserRepository) ChangeRole(
 	ctx context.Context,
 	id entities.UserID,
@@ -296,7 +312,7 @@ func (r *MySQLUserRepository) ChangeRole(
 
 // Helper methods
 
-// handleMySQLError converts MySQL errors to domain errors
+// handleMySQLError converts MySQL errors to domain errors.
 func (r *MySQLUserRepository) handleMySQLError(err error, operation string) error {
 	if err == nil {
 		return nil
@@ -317,18 +333,19 @@ func (r *MySQLUserRepository) handleMySQLError(err error, operation string) erro
 	}
 }
 
-// MySQL error codes
+// MySQL error codes.
 const (
 	mysqlErrorCodeUnique     uint16 = 1062
 	mysqlErrorCodeForeignKey uint16 = 1452
 	mysqlErrorCodeCheck      uint16 = 3819
 )
 
-// isMySQLError checks if the error is a MySQL error with the given error code
+// isMySQLError checks if the error is a MySQL error with the given error code.
 func isMySQLError(err error, code uint16) bool {
 	mysqlErr := &mysql.MySQLError{}
 	if stderrors.As(err, &mysqlErr) {
 		return mysqlErr.Number == code
 	}
+
 	return false
 }

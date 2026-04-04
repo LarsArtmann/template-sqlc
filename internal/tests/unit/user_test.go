@@ -4,27 +4,27 @@ import (
 	"testing"
 	"time"
 
+	"github.com/LarsArtmann/template-sqlc/internal/domain/entities"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
-	"github.com/LarsArtmann/template-sqlc/internal/domain/entities"
 )
 
-// Validatable defines the IsValid method
+// Validatable defines the IsValid method.
 type Validatable interface {
 	IsValid() bool
 }
 
-// ValidatableTestCase is a test case for validatable types
+// ValidatableTestCase is a test case for validatable types.
 type ValidatableTestCase[T Validatable] struct {
 	Name     string
 	Value    T
 	Expected bool
 }
 
-// runValidatableTests runs validation tests for a validatable type
+// runValidatableTests runs validation tests for a validatable type.
 func runValidatableTests[T Validatable](t *testing.T, tests []ValidatableTestCase[T]) {
 	t.Helper()
+
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			assert.Equal(t, tt.Expected, tt.Value.IsValid())
@@ -32,8 +32,10 @@ func runValidatableTests[T Validatable](t *testing.T, tests []ValidatableTestCas
 	}
 }
 
-// validUserTestCase creates a valid user test case with the given field values
-func validUserTestCase(name, email, username, password, firstName, lastName, status, role string) struct {
+// validUserTestCase creates a valid user test case with the given field values.
+func validUserTestCase(
+	name, email, username, password, firstName, lastName, status, role string,
+) struct {
 	name        string
 	email       string
 	username    string
@@ -69,12 +71,12 @@ func validUserTestCase(name, email, username, password, firstName, lastName, sta
 	}
 }
 
-// valueObject is an interface for entities that have a String() method
+// valueObject is an interface for entities that have a String() method.
 type valueObject interface {
 	String() string
 }
 
-// testEntityValidation is a helper function to test value object creation
+// testEntityValidation is a helper function to test value object creation.
 func testEntityValidation[T valueObject](
 	t *testing.T,
 	name string,
@@ -371,7 +373,7 @@ func TestUserID(t *testing.T) {
 	assert.Equal(t, "user:123", userID.String())
 }
 
-// generateInvalidStatusTestCase creates a test case for invalid status validation
+// generateInvalidStatusTestCase creates a test case for invalid status validation.
 func generateInvalidStatusTestCase(invalidStatus string, expectedError error) struct {
 	name        string
 	email       string
@@ -396,10 +398,11 @@ func generateInvalidStatusTestCase(invalidStatus string, expectedError error) st
 	)
 	base.expectError = true
 	base.errorType = expectedError
+
 	return base
 }
 
-// generateInvalidRoleTestCase creates a test case for invalid role validation
+// generateInvalidRoleTestCase creates a test case for invalid role validation.
 func generateInvalidRoleTestCase(invalidRole string, expectedError error) struct {
 	name        string
 	email       string
@@ -424,6 +427,7 @@ func generateInvalidRoleTestCase(invalidRole string, expectedError error) struct
 	)
 	base.expectError = true
 	base.errorType = expectedError
+
 	return base
 }
 

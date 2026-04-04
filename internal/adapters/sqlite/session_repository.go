@@ -12,14 +12,14 @@ import (
 	"github.com/LarsArtmann/template-sqlc/internal/domain/repositories"
 )
 
-// SQLiteSessionRepository implements SessionRepository for SQLite
+// SQLiteSessionRepository implements SessionRepository for SQLite.
 type SQLiteSessionRepository struct {
 	db         *sql.DB
 	mapper     mappers.UserMapper
 	converters *ConverterSet
 }
 
-// NewSQLiteSessionRepository creates a new SQLite session repository
+// NewSQLiteSessionRepository creates a new SQLite session repository.
 func NewSQLiteSessionRepository(db *sql.DB) repositories.SessionRepository {
 	return &SQLiteSessionRepository{
 		db: db,
@@ -31,7 +31,7 @@ func NewSQLiteSessionRepository(db *sql.DB) repositories.SessionRepository {
 	}
 }
 
-// Create saves a new session to SQLite
+// Create saves a new session to SQLite.
 func (r *SQLiteSessionRepository) Create(ctx context.Context, session *entities.UserSession) error {
 	_, err := r.toSQLiteSession(session)
 	if err != nil {
@@ -45,7 +45,7 @@ func (r *SQLiteSessionRepository) Create(ctx context.Context, session *entities.
 	panic("implement me: use actual sqlc generated code")
 }
 
-// GetByToken retrieves a session by token from SQLite
+// GetByToken retrieves a session by token from SQLite.
 func (r *SQLiteSessionRepository) GetByToken(
 	ctx context.Context,
 	token entities.SessionToken,
@@ -66,7 +66,7 @@ func (r *SQLiteSessionRepository) GetByToken(
 	panic("implement me: use actual sqlc generated code")
 }
 
-// GetByUserID retrieves sessions by user ID from SQLite
+// GetByUserID retrieves sessions by user ID from SQLite.
 func (r *SQLiteSessionRepository) GetByUserID(
 	ctx context.Context,
 	userID entities.UserID,
@@ -88,11 +88,10 @@ func (r *SQLiteSessionRepository) GetByUserID(
 	//     sessions[i] = session
 	// }
 	// return sessions, nil
-
 	panic("implement me: use actual sqlc generated code")
 }
 
-// Update updates a session in SQLite
+// Update updates a session in SQLite.
 func (r *SQLiteSessionRepository) Update(ctx context.Context, session *entities.UserSession) error {
 	_, err := r.toSQLiteSession(session)
 	if err != nil {
@@ -103,12 +102,12 @@ func (r *SQLiteSessionRepository) Update(ctx context.Context, session *entities.
 	panic("implement me: use actual sqlc generated code")
 }
 
-// Delete removes a session from SQLite
+// Delete removes a session from SQLite.
 func (r *SQLiteSessionRepository) Delete(ctx context.Context, id entities.SessionID) error {
 	return entities.StubNotImplemented("Delete", "SQLite")
 }
 
-// DeactivateByToken deactivates a session by token in SQLite
+// DeactivateByToken deactivates a session by token in SQLite.
 func (r *SQLiteSessionRepository) DeactivateByToken(
 	ctx context.Context,
 	token entities.SessionToken,
@@ -123,7 +122,7 @@ func (r *SQLiteSessionRepository) DeactivateByToken(
 	panic("implement me: use actual sqlc generated code")
 }
 
-// DeactivateByUserID deactivates all sessions for a user in SQLite
+// DeactivateByUserID deactivates all sessions for a user in SQLite.
 func (r *SQLiteSessionRepository) DeactivateByUserID(
 	ctx context.Context,
 	userID entities.UserID,
@@ -131,16 +130,15 @@ func (r *SQLiteSessionRepository) DeactivateByUserID(
 	return entities.StubNotImplemented("DeactivateByUserID", "SQLite")
 }
 
-// CleanupExpired removes expired sessions from SQLite
+// CleanupExpired removes expired sessions from SQLite.
 func (r *SQLiteSessionRepository) CleanupExpired(ctx context.Context) (int64, error) {
 	// Clean up expired sessions
 	// count, err := r.queries.CleanupExpiredSessions(ctx)
 	// return count, errors.NewDatabaseError("failed to cleanup expired sessions", err)
-
 	panic("implement me: use actual sqlc generated code")
 }
 
-// GetActiveSessions returns count of active sessions for a user in SQLite
+// GetActiveSessions returns count of active sessions for a user in SQLite.
 func (r *SQLiteSessionRepository) GetActiveSessions(
 	ctx context.Context,
 	userID entities.UserID,
@@ -148,11 +146,10 @@ func (r *SQLiteSessionRepository) GetActiveSessions(
 	// Count active sessions
 	// count, err := r.queries.GetActiveSessionCount(ctx, int64(userID))
 	// return count, errors.NewDatabaseError("failed to get active session count", err)
-
 	panic("implement me: use actual sqlc generated code")
 }
 
-// GetSessionStats returns session statistics from SQLite
+// GetSessionStats returns session statistics from SQLite.
 func (r *SQLiteSessionRepository) GetSessionStats(
 	ctx context.Context,
 ) (*entities.SessionStats, error) {
@@ -167,9 +164,16 @@ func (r *SQLiteSessionRepository) toSQLiteSession(session *entities.UserSession)
 	if err != nil {
 		return nil, fmt.Errorf("failed to convert session: %w", err)
 	}
+
 	return sqliteSession, nil
 }
 
 func (r *SQLiteSessionRepository) handleSessionError(err error, operation string) error {
-	return sqlitedb.HandleDBError(err, operation, entities.ErrSessionNotFound, entities.ErrUserAlreadyExists, sqlitedb.IsSQLiteSessionTokenConstraintError)
+	return sqlitedb.HandleDBError(
+		err,
+		operation,
+		entities.ErrSessionNotFound,
+		entities.ErrUserAlreadyExists,
+		sqlitedb.IsSQLiteSessionTokenConstraintError,
+	)
 }

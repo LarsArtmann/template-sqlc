@@ -14,14 +14,14 @@ import (
 )
 
 // WorkingSQLiteUserRepository is a simplified implementation that works without generated sqlc code
-// This demonstrates the pattern while we fix the SQL syntax issues
+// This demonstrates the pattern while we fix the SQL syntax issues.
 type WorkingSQLiteUserRepository struct {
 	db         *sql.DB
 	mapper     mappers.UserMapper
 	converters *ConverterSet
 }
 
-// NewWorkingSQLiteUserRepository creates a new working SQLite user repository
+// NewWorkingSQLiteUserRepository creates a new working SQLite user repository.
 func NewWorkingSQLiteUserRepository(db *sql.DB) repositories.UserRepository {
 	return &WorkingSQLiteUserRepository{
 		db:     db,
@@ -39,7 +39,7 @@ func NewWorkingSQLiteUserRepository(db *sql.DB) repositories.UserRepository {
 	}
 }
 
-// Create creates a new user in SQLite
+// Create creates a new user in SQLite.
 func (r *WorkingSQLiteUserRepository) Create(ctx context.Context, user *entities.User) error {
 	// For now, implement using raw SQL to avoid generated code dependency
 	query := `
@@ -99,7 +99,7 @@ func (r *WorkingSQLiteUserRepository) Create(ctx context.Context, user *entities
 	return nil
 }
 
-// GetByID retrieves a user by ID from SQLite
+// GetByID retrieves a user by ID from SQLite.
 func (r *WorkingSQLiteUserRepository) GetByID(
 	ctx context.Context,
 	id entities.UserID,
@@ -112,19 +112,23 @@ func (r *WorkingSQLiteUserRepository) GetByID(
 	`
 
 	_ = &entities.User{} // This is wrong - need proper constructor
-	var email, username, passwordHash, firstName, lastName, status, role string
-	var isVerified bool
-	var metadataJSON, tagsJSON string
-	var createdAt, updatedAt, lastLoginAt sql.NullTime
+
+	var (
+		email, username, passwordHash, firstName, lastName, status, role string
+		isVerified                                                       bool
+		metadataJSON, tagsJSON                                           string
+		createdAt, updatedAt, lastLoginAt                                sql.NullTime
+	)
 
 	err := r.db.QueryRowContext(ctx, query, id).Scan(
 		&id, &email, &username, &passwordHash, &firstName, &lastName, &status, &role,
 		&isVerified, &metadataJSON, &tagsJSON, &createdAt, &updatedAt, &lastLoginAt,
 	)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, fmt.Errorf("user %s not found: %w", id, entities.ErrUserNotFound)
 		}
+
 		return nil, fmt.Errorf("failed to get user by ID %s: %w", id, err)
 	}
 
@@ -137,7 +141,7 @@ func (r *WorkingSQLiteUserRepository) GetByID(
 	return nil, fmt.Errorf("implementation in progress - user found with ID %s", id)
 }
 
-// GetByUUID retrieves a user by UUID from SQLite
+// GetByUUID retrieves a user by UUID from SQLite.
 func (r *WorkingSQLiteUserRepository) GetByUUID(
 	ctx context.Context,
 	uuid entities.UuID,
@@ -146,7 +150,7 @@ func (r *WorkingSQLiteUserRepository) GetByUUID(
 	return nil, fmt.Errorf("implementation in progress - get by UUID %s", uuid)
 }
 
-// GetByEmail retrieves a user by email from SQLite
+// GetByEmail retrieves a user by email from SQLite.
 func (r *WorkingSQLiteUserRepository) GetByEmail(
 	ctx context.Context,
 	email entities.Email,
@@ -154,7 +158,7 @@ func (r *WorkingSQLiteUserRepository) GetByEmail(
 	return r.notImplementedGetBy("email", email.String())
 }
 
-// GetByUsername retrieves a user by username from SQLite
+// GetByUsername retrieves a user by username from SQLite.
 func (r *WorkingSQLiteUserRepository) GetByUsername(
 	ctx context.Context,
 	username entities.Username,
@@ -162,22 +166,24 @@ func (r *WorkingSQLiteUserRepository) GetByUsername(
 	return r.notImplementedGetBy("username", username.String())
 }
 
-func (r *WorkingSQLiteUserRepository) notImplementedGetBy(fieldName, value string) (*entities.User, error) {
+func (r *WorkingSQLiteUserRepository) notImplementedGetBy(
+	fieldName, value string,
+) (*entities.User, error) {
 	return nil, fmt.Errorf("implementation in progress - get by %s %s", fieldName, value)
 }
 
-// Update updates an existing user in SQLite
+// Update updates an existing user in SQLite.
 func (r *WorkingSQLiteUserRepository) Update(ctx context.Context, user *entities.User) error {
 	// Implementation with UPDATE query
 	return fmt.Errorf("implementation in progress - update user ID %d", user.ID())
 }
 
-// Delete soft deletes a user from SQLite
+// Delete soft deletes a user from SQLite.
 func (r *WorkingSQLiteUserRepository) Delete(ctx context.Context, id entities.UserID) error {
 	return notImplemented("delete user", id)
 }
 
-// List retrieves users with pagination from SQLite
+// List retrieves users with pagination from SQLite.
 func (r *WorkingSQLiteUserRepository) List(
 	ctx context.Context,
 	status entities.UserStatus,
@@ -192,7 +198,7 @@ func (r *WorkingSQLiteUserRepository) List(
 	)
 }
 
-// Search searches users by query in SQLite
+// Search searches users by query in SQLite.
 func (r *WorkingSQLiteUserRepository) Search(
 	ctx context.Context,
 	query string,
@@ -208,7 +214,7 @@ func (r *WorkingSQLiteUserRepository) Search(
 	)
 }
 
-// SearchByTags searches users by tags in SQLite
+// SearchByTags searches users by tags in SQLite.
 func (r *WorkingSQLiteUserRepository) SearchByTags(
 	ctx context.Context,
 	tags []string,
@@ -225,7 +231,7 @@ func (r *WorkingSQLiteUserRepository) SearchByTags(
 	)
 }
 
-// CountByStatus counts users by status in SQLite
+// CountByStatus counts users by status in SQLite.
 func (r *WorkingSQLiteUserRepository) CountByStatus(
 	ctx context.Context,
 ) (map[entities.UserStatus]int64, error) {
@@ -233,13 +239,13 @@ func (r *WorkingSQLiteUserRepository) CountByStatus(
 	return nil, stderrors.New("implementation in progress - count users by status")
 }
 
-// GetStats retrieves user statistics from SQLite
+// GetStats retrieves user statistics from SQLite.
 func (r *WorkingSQLiteUserRepository) GetStats(ctx context.Context) (*entities.UserStats, error) {
 	// Implementation with aggregate functions
 	return nil, stderrors.New("implementation in progress - get user stats")
 }
 
-// VerifyCredentials verifies user credentials in SQLite
+// VerifyCredentials verifies user credentials in SQLite.
 func (r *WorkingSQLiteUserRepository) VerifyCredentials(
 	ctx context.Context,
 	email entities.Email,
@@ -252,7 +258,7 @@ func (r *WorkingSQLiteUserRepository) VerifyCredentials(
 	)
 }
 
-// UpdatePassword updates user password in SQLite
+// UpdatePassword updates user password in SQLite.
 func (r *WorkingSQLiteUserRepository) UpdatePassword(
 	ctx context.Context,
 	id entities.UserID,
@@ -262,17 +268,17 @@ func (r *WorkingSQLiteUserRepository) UpdatePassword(
 	return fmt.Errorf("implementation in progress - update password for user ID %d", id)
 }
 
-// MarkVerified marks user as verified in SQLite
+// MarkVerified marks user as verified in SQLite.
 func (r *WorkingSQLiteUserRepository) MarkVerified(ctx context.Context, id entities.UserID) error {
 	return notImplemented("mark user verified", id)
 }
 
-// notImplemented returns an error indicating the method is not yet implemented
+// notImplemented returns an error indicating the method is not yet implemented.
 func notImplemented(method string, id entities.UserID) error {
 	return fmt.Errorf("implementation in progress - %s for user ID %d", method, id)
 }
 
-// ChangeStatus changes user status in SQLite
+// ChangeStatus changes user status in SQLite.
 func (r *WorkingSQLiteUserRepository) ChangeStatus(
 	ctx context.Context,
 	id entities.UserID,
@@ -281,22 +287,22 @@ func (r *WorkingSQLiteUserRepository) ChangeStatus(
 	return notImplemented("change status to "+status.String(), id)
 }
 
-// Activate activates a user in SQLite
+// Activate activates a user in SQLite.
 func (r *WorkingSQLiteUserRepository) Activate(ctx context.Context, id entities.UserID) error {
 	return r.ChangeStatus(ctx, id, entities.UserStatusActive)
 }
 
-// Deactivate deactivates a user in SQLite
+// Deactivate deactivates a user in SQLite.
 func (r *WorkingSQLiteUserRepository) Deactivate(ctx context.Context, id entities.UserID) error {
 	return r.ChangeStatus(ctx, id, entities.UserStatusInactive)
 }
 
-// Suspend suspends a user in SQLite
+// Suspend suspends a user in SQLite.
 func (r *WorkingSQLiteUserRepository) Suspend(ctx context.Context, id entities.UserID) error {
 	return r.ChangeStatus(ctx, id, entities.UserStatusSuspended)
 }
 
-// ChangeRole changes user role in SQLite
+// ChangeRole changes user role in SQLite.
 func (r *WorkingSQLiteUserRepository) ChangeRole(
 	ctx context.Context,
 	id entities.UserID,

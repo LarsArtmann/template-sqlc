@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 )
 
-// UserSession represents a user session entity
+// UserSession represents a user session entity.
 type UserSession struct {
 	id         SessionID
 	userID     UserID
@@ -21,13 +21,13 @@ type UserSession struct {
 	isActive   bool
 }
 
-// SessionID is a strongly-typed session identifier
+// SessionID is a strongly-typed session identifier.
 type SessionID int64
 
 func (id SessionID) Int64() int64   { return int64(id) }
 func (id SessionID) String() string { return fmt.Sprintf("session:%d", id) }
 
-// SessionToken represents a secure session token
+// SessionToken represents a secure session token.
 type SessionToken uuid.UUID
 
 func NewSessionToken() SessionToken {
@@ -37,7 +37,7 @@ func NewSessionToken() SessionToken {
 func (t SessionToken) UUID() uuid.UUID { return uuid.UUID(t) }
 func (t SessionToken) String() string  { return uuid.UUID(t).String() }
 
-// SessionDeviceInfo contains device information for a session
+// SessionDeviceInfo contains device information for a session.
 type SessionDeviceInfo struct {
 	Platform string         `json:"platform"`
 	Device   string         `json:"device"`
@@ -52,7 +52,7 @@ func NewSessionDeviceInfo() SessionDeviceInfo {
 	}
 }
 
-// NewUserSession creates a new user session
+// NewUserSession creates a new user session.
 func NewUserSession(
 	userID UserID,
 	ipAddress net.IP,
@@ -61,6 +61,7 @@ func NewUserSession(
 	duration time.Duration,
 ) *UserSession {
 	now := time.Now()
+
 	return &UserSession{
 		userID:     userID,
 		token:      NewSessionToken(),
@@ -73,7 +74,7 @@ func NewUserSession(
 	}
 }
 
-// Session methods
+// Session methods.
 func (s *UserSession) ID() SessionID                 { return s.id }
 func (s *UserSession) UserID() UserID                { return s.userID }
 func (s *UserSession) Token() SessionToken           { return s.token }
@@ -84,41 +85,43 @@ func (s *UserSession) CreatedAt() time.Time          { return s.createdAt }
 func (s *UserSession) ExpiresAt() time.Time          { return s.expiresAt }
 func (s *UserSession) IsActive() bool                { return s.isActive }
 
-// IsExpired returns true if the session has expired
+// IsExpired returns true if the session has expired.
 func (s *UserSession) IsExpired() bool {
 	return time.Now().After(s.expiresAt)
 }
 
-// IsValid returns true if the session is active and not expired
+// IsValid returns true if the session is active and not expired.
 func (s *UserSession) IsValid() bool {
 	return s.isActive && !s.IsExpired()
 }
 
-// Deactivate marks the session as inactive
+// Deactivate marks the session as inactive.
 func (s *UserSession) Deactivate() {
 	s.isActive = false
 }
 
-// Extend extends the session expiration time
+// Extend extends the session expiration time.
 func (s *UserSession) Extend(duration time.Duration) {
 	s.expiresAt = time.Now().Add(duration)
 }
 
-// GetMetadata returns device metadata
+// GetMetadata returns device metadata.
 func (d SessionDeviceInfo) GetMetadata(key string) (any, bool) {
 	val, ok := d.Metadata[key]
+
 	return val, ok
 }
 
-// SetMetadata sets device metadata
+// SetMetadata sets device metadata.
 func (d SessionDeviceInfo) SetMetadata(key string, value any) {
 	if d.Metadata == nil {
 		d.Metadata = make(map[string]any)
 	}
+
 	d.Metadata[key] = value
 }
 
-// Common session durations
+// Common session durations.
 const (
 	SessionDurationShort    = 24 * time.Hour      // 1 day
 	SessionDurationMedium   = 7 * 24 * time.Hour  // 1 week

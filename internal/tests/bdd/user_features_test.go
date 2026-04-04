@@ -10,16 +10,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cucumber/godog"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-
 	"github.com/LarsArtmann/template-sqlc/internal/domain/entities"
 	"github.com/LarsArtmann/template-sqlc/internal/domain/events"
 	"github.com/LarsArtmann/template-sqlc/internal/domain/services"
 	"github.com/LarsArtmann/template-sqlc/internal/tests/integration"
 	apperrors "github.com/LarsArtmann/template-sqlc/pkg/errors"
 	"github.com/LarsArtmann/template-sqlc/pkg/validation"
+	"github.com/cucumber/godog"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // TestPasswordHash is a bcrypt hash for "test_password" used in tests.
@@ -27,7 +26,7 @@ import (
 //nolint:gosec,G101 // This is a test constant, not a production secret.
 const TestPasswordHash = "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZRGdjGj/n3.rsQ5pPjZ5yVlWK5WAe"
 
-// UserFeaturesTestSuite contains BDD tests for user functionality
+// UserFeaturesTestSuite contains BDD tests for user functionality.
 type UserFeaturesTestSuite struct {
 	userService    *services.UserService
 	userRepo       *integration.MockUserRepository
@@ -40,7 +39,7 @@ type UserFeaturesTestSuite struct {
 	stats          *entities.UserStats
 }
 
-// InitializeContext sets up the test context
+// InitializeContext sets up the test context.
 func (s *UserFeaturesTestSuite) InitializeContext(ctx *godog.ScenarioContext) {
 	s.eventPublisher = events.NewInMemoryEventPublisher()
 	s.validator = validation.NewUserValidator()
@@ -147,11 +146,13 @@ func (s *UserFeaturesTestSuite) cleanUserSystem() error {
 	s.currentUser = nil
 	s.currentSession = nil
 	s.lastError = nil
+
 	return nil
 }
 
 func (s *UserFeaturesTestSuite) clearEventPublisher() error {
 	s.eventPublisher.Clear()
+
 	return nil
 }
 
@@ -245,7 +246,9 @@ func (s *UserFeaturesTestSuite) haveValidCredentialsForCurrentAccount() error {
 	if s.currentUser == nil {
 		return errors.New("no current user to set credentials for")
 	}
+
 	s.userRepo.SetPasswordVerification(s.currentUser.Email().String(), "correct_password")
+
 	return nil
 }
 
@@ -261,11 +264,13 @@ func (s *UserFeaturesTestSuite) createMultipleStatusAccounts() error {
 			Status:       status,
 			Role:         "user",
 		}
+
 		_, err := s.userService.CreateUser(context.Background(), req)
 		if err != nil {
 			return err
 		}
 	}
+
 	return nil
 }
 
@@ -470,7 +475,9 @@ func (s *UserFeaturesTestSuite) expireSession() error {
 	if s.currentSession == nil {
 		return errors.New("no current session to expire")
 	}
+
 	s.currentSession.Deactivate()
+
 	return nil
 }
 
@@ -490,8 +497,10 @@ func (s *UserFeaturesTestSuite) authenticateFromMultipleDevices() error {
 		)
 		if err != nil {
 			s.lastError = err
+
 			return err
 		}
+
 		if session != nil && s.currentSession == nil {
 			s.currentSession = session
 		}
@@ -507,14 +516,19 @@ func (s *UserFeaturesTestSuite) userShouldBeCreatedSuccessfully() error {
 		if s.currentUser == nil {
 			return errors.New("expected user to be created, but got nil")
 		}
+
 		return nil
 	}, "expected user to be created successfully")
 }
 
-func (s *UserFeaturesTestSuite) expectSuccessfulOperationWithSession(check func() error, msg string) error {
+func (s *UserFeaturesTestSuite) expectSuccessfulOperationWithSession(
+	check func() error,
+	msg string,
+) error {
 	if s.lastError != nil {
 		return fmt.Errorf("%s, got error: %w", msg, s.lastError)
 	}
+
 	return check()
 }
 
@@ -527,10 +541,12 @@ func (s *UserFeaturesTestSuite) requireCurrentUserStringProperty(
 	if s.currentUser == nil {
 		return errors.New(nilError)
 	}
+
 	actual := getProperty()
 	if actual != expected {
 		return fmt.Errorf("expected user %s to be '%s', got '%s'", propertyName, expected, actual)
 	}
+
 	return nil
 }
 
@@ -574,6 +590,7 @@ func (s *UserFeaturesTestSuite) authenticationShouldSucceed() error {
 		if s.currentSession == nil {
 			return errors.New("expected session to be created, but got nil")
 		}
+
 		return nil
 	}, "expected authentication to succeed")
 }
@@ -586,10 +603,12 @@ func (s *UserFeaturesTestSuite) expectUnauthorizedOrAuthError(msg string) error 
 	if s.lastError == nil {
 		return fmt.Errorf("%s, got nil", msg)
 	}
+
 	if !entities.IsUnauthorizedError(s.lastError) &&
 		!entities.IsAuthenticationError(s.lastError) {
 		return fmt.Errorf("%s, got: %w", msg, s.lastError)
 	}
+
 	return nil
 }
 
@@ -597,10 +616,12 @@ func (s *UserFeaturesTestSuite) shouldReceiveUserNotFoundError() error {
 	if s.lastError == nil {
 		return errors.New("expected user not found error, got nil")
 	}
+
 	if !entities.IsNotFoundError(s.lastError) &&
 		!errors.Is(s.lastError, entities.ErrUserNotFound) {
 		return fmt.Errorf("expected user not found error, got: %w", s.lastError)
 	}
+
 	return nil
 }
 
@@ -612,6 +633,7 @@ func (s *UserFeaturesTestSuite) sessionShouldBeCreated() error {
 	if s.currentSession == nil {
 		return errors.New("expected session to be created, but got nil")
 	}
+
 	return nil
 }
 
@@ -619,15 +641,18 @@ func (s *UserFeaturesTestSuite) userProfileShouldBeUpdated() error {
 	if s.lastError != nil {
 		return fmt.Errorf("expected profile update to succeed, got error: %w", s.lastError)
 	}
+
 	if s.currentUser == nil {
 		return errors.New("expected user to be updated, but got nil")
 	}
+
 	if s.currentUser.FirstName().String() != "Updated" {
 		return fmt.Errorf(
 			"expected first name to be 'Updated', got '%s'",
 			s.currentUser.FirstName().String(),
 		)
 	}
+
 	return nil
 }
 
@@ -635,6 +660,7 @@ func (s *UserFeaturesTestSuite) userRoleShouldBeChanged(expectedRole string) err
 	if s.lastError != nil {
 		return fmt.Errorf("expected role change to succeed, got error: %w", s.lastError)
 	}
+
 	return s.requireCurrentUserStringProperty(
 		"expected user role to be changed, but got nil",
 		func() string { return s.currentUser.Role().String() },
@@ -647,9 +673,11 @@ func (s *UserFeaturesTestSuite) userAccountShouldBeVerified() error {
 	if s.currentUser == nil {
 		return errors.New("expected user to be verified, but got nil")
 	}
+
 	if !s.currentUser.IsVerified() {
 		return errors.New("expected user to be verified, but it's not")
 	}
+
 	return nil
 }
 
@@ -660,6 +688,7 @@ func (s *UserFeaturesTestSuite) userAccountShouldHaveStatus(
 	if s.currentUser == nil {
 		return fmt.Errorf("expected user to be %s, but got nil", statusName)
 	}
+
 	if s.currentUser.Status() != expectedStatus {
 		return fmt.Errorf(
 			"expected user status to be '%s', got '%s'",
@@ -667,6 +696,7 @@ func (s *UserFeaturesTestSuite) userAccountShouldHaveStatus(
 			s.currentUser.Status().String(),
 		)
 	}
+
 	return nil
 }
 
@@ -688,7 +718,6 @@ func (s *UserFeaturesTestSuite) userShouldNotAuthenticate() error {
 	}
 
 	_, err := s.authenticateCurrentUser()
-
 	if err == nil {
 		return errors.New("expected authentication to fail for non-active user, but it succeeded")
 	}
@@ -706,9 +735,11 @@ func (s *UserFeaturesTestSuite) userShouldHaveSpecifiedMetadata() error {
 	if s.currentUser == nil {
 		return errors.New("no current user to check metadata")
 	}
+
 	if s.currentUser.Metadata() == nil {
 		return errors.New("expected user to have metadata, but got nil")
 	}
+
 	return nil
 }
 
@@ -716,16 +747,22 @@ func (s *UserFeaturesTestSuite) userShouldHaveSpecifiedTags() error {
 	if s.currentUser == nil {
 		return errors.New("no current user to check tags")
 	}
+
 	if len(s.currentUser.Tags()) == 0 {
 		return errors.New("expected user to have tags, but got none")
 	}
+
 	return nil
 }
 
-func (s *UserFeaturesTestSuite) userShouldHaveRole(expectedRole entities.UserRole, roleName string) error {
+func (s *UserFeaturesTestSuite) userShouldHaveRole(
+	expectedRole entities.UserRole,
+	roleName string,
+) error {
 	if s.currentUser == nil {
 		return errors.New("no current user to check privileges")
 	}
+
 	if s.currentUser.Role() != expectedRole {
 		return fmt.Errorf(
 			"expected user role to be '%s', got '%s'",
@@ -733,6 +770,7 @@ func (s *UserFeaturesTestSuite) userShouldHaveRole(expectedRole entities.UserRol
 			s.currentUser.Role().String(),
 		)
 	}
+
 	return nil
 }
 
@@ -748,12 +786,15 @@ func (s *UserFeaturesTestSuite) statisticsShouldIncludeCounts() error {
 	if s.lastError != nil {
 		return fmt.Errorf("expected stats to be retrieved, got error: %w", s.lastError)
 	}
+
 	if s.stats == nil {
 		return errors.New("expected stats to be populated, got nil")
 	}
+
 	if s.stats.TotalUsers == 0 {
 		return errors.New("expected total users count to be greater than 0")
 	}
+
 	return nil
 }
 
@@ -761,9 +802,11 @@ func (s *UserFeaturesTestSuite) sessionShouldNotBeValid() error {
 	if s.currentSession == nil {
 		return errors.New("no current session to check validity")
 	}
+
 	if s.currentSession.IsActive() {
 		return errors.New("expected session to be expired, but it's still active")
 	}
+
 	return nil
 }
 
@@ -810,7 +853,10 @@ func (s *UserFeaturesTestSuite) userCreatedEventShouldBePublished() error {
 	return s.assertEventPublished(events.EventUserCreated, "user created")
 }
 
-func (s *UserFeaturesTestSuite) assertEventPublished(eventType events.EventType, eventName string) error {
+func (s *UserFeaturesTestSuite) assertEventPublished(
+	eventType events.EventType,
+	eventName string,
+) error {
 	userEvents := s.eventPublisher.Events()
 
 	for _, event := range userEvents {
@@ -842,7 +888,7 @@ func (s *UserFeaturesTestSuite) userVerifiedEventShouldBePublished() error {
 	return s.assertEventPublished(events.EventUserVerified, "user verified")
 }
 
-// Test runner
+// Test runner.
 func TestUserFeatures(t *testing.T) {
 	t.Parallel()
 
@@ -850,6 +896,7 @@ func TestUserFeatures(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to get working directory: %v", err)
 	}
+
 	featurePath := filepath.Join(wd, "..", "..", "..", "test", "features", "user")
 
 	suite := godog.TestSuite{
@@ -868,7 +915,7 @@ func TestUserFeatures(t *testing.T) {
 	}
 }
 
-// Standalone test for simple scenarios
+// Standalone test for simple scenarios.
 func TestUserManagementFeatures(t *testing.T) {
 	t.Parallel()
 

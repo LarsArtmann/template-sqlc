@@ -6,7 +6,7 @@ import (
 	"github.com/LarsArtmann/template-sqlc/internal/domain/entities"
 )
 
-// UserEvent represents a domain event related to users
+// UserEvent represents a domain event related to users.
 type UserEvent struct {
 	ID        entities.IDID   `json:"id"`
 	Type      EventType       `json:"type"`
@@ -16,11 +16,11 @@ type UserEvent struct {
 	Version   string          `json:"version"`
 }
 
-// EventType represents the type of domain event
+// EventType represents the type of domain event.
 type EventType string
 
 const (
-	// User lifecycle events
+	// User lifecycle events.
 	EventUserCreated     EventType = "user.created"
 	EventUserUpdated     EventType = "user.updated"
 	EventUserDeleted     EventType = "user.deleted"
@@ -28,26 +28,26 @@ const (
 	EventUserDeactivated EventType = "user.deactivated"
 	EventUserSuspended   EventType = "user.suspended"
 
-	// Authentication events
+	// Authentication events.
 	EventUserLogin     EventType = "user.login"
 	EventUserLogout    EventType = "user.logout"
 	EventUserLoginFail EventType = "user.login.failed"
 
-	// Verification events
+	// Verification events.
 	EventUserVerified              EventType = "user.verified"
 	EventUserVerificationRequested EventType = "user.verification.requested"
 
-	// Password events
+	// Password events.
 	EventPasswordChanged        EventType = "password.changed"
 	EventPasswordReset          EventType = "password.reset"
 	EventPasswordResetRequested EventType = "password.reset.requested"
 
-	// Profile events
+	// Profile events.
 	EventProfileUpdated EventType = "profile.updated"
 	EventRoleChanged    EventType = "role.changed"
 )
 
-// UserCreatedEvent data for user creation
+// UserCreatedEvent data for user creation.
 type UserCreatedEvent struct {
 	UserID    entities.UserID `json:"user_id"`
 	Email     string          `json:"email"`
@@ -58,14 +58,14 @@ type UserCreatedEvent struct {
 	Status    string          `json:"status"`
 }
 
-// UserUpdatedEvent data for user updates
+// UserUpdatedEvent data for user updates.
 type UserUpdatedEvent struct {
 	UserID    entities.UserID `json:"user_id"`
 	Changes   map[string]any  `json:"changes"`
 	UpdatedBy entities.UserID `json:"updated_by"`
 }
 
-// UserLoginEvent data for user login
+// UserLoginEvent data for user login.
 type UserLoginEvent struct {
 	UserID    entities.UserID `json:"user_id"`
 	IPAddress string          `json:"ip_address"`
@@ -74,14 +74,14 @@ type UserLoginEvent struct {
 	Success   bool            `json:"success"`
 }
 
-// UserVerifiedEvent data for user verification
+// UserVerifiedEvent data for user verification.
 type UserVerifiedEvent struct {
 	UserID    entities.UserID `json:"user_id"`
 	Method    string          `json:"method"`
 	Timestamp time.Time       `json:"timestamp"`
 }
 
-// RoleChangedEvent data for role changes
+// RoleChangedEvent data for role changes.
 type RoleChangedEvent struct {
 	UserID    entities.UserID `json:"user_id"`
 	OldRole   string          `json:"old_role"`
@@ -89,7 +89,7 @@ type RoleChangedEvent struct {
 	ChangedBy entities.UserID `json:"changed_by"`
 }
 
-// NewUserEvent creates a new user domain event
+// NewUserEvent creates a new user domain event.
 func NewUserEvent(eventType EventType, userID entities.UserID, data any) *UserEvent {
 	return &UserEvent{
 		ID:        entities.AsIDID(time.Now().UnixNano()),
@@ -101,7 +101,7 @@ func NewUserEvent(eventType EventType, userID entities.UserID, data any) *UserEv
 	}
 }
 
-// UserCreated creates a user created event
+// UserCreated creates a user created event.
 func UserCreated(
 	userID entities.UserID,
 	email, username, firstName, lastName, role, status string,
@@ -115,10 +115,11 @@ func UserCreated(
 		Role:      role,
 		Status:    status,
 	}
+
 	return NewUserEvent(EventUserCreated, userID, data)
 }
 
-// UserUpdated creates a user updated event
+// UserUpdated creates a user updated event.
 func UserUpdated(
 	userID entities.UserID,
 	changes map[string]any,
@@ -129,11 +130,17 @@ func UserUpdated(
 		Changes:   changes,
 		UpdatedBy: updatedBy,
 	}
+
 	return NewUserEvent(EventUserUpdated, userID, data)
 }
 
-// UserLoginAttempt creates a user login attempt event
-func UserLoginAttempt(userID entities.UserID, ipAddress, userAgent, device string, success bool, eventType EventType) *UserEvent {
+// UserLoginAttempt creates a user login attempt event.
+func UserLoginAttempt(
+	userID entities.UserID,
+	ipAddress, userAgent, device string,
+	success bool,
+	eventType EventType,
+) *UserEvent {
 	data := UserLoginEvent{
 		UserID:    userID,
 		IPAddress: ipAddress,
@@ -141,30 +148,32 @@ func UserLoginAttempt(userID entities.UserID, ipAddress, userAgent, device strin
 		Device:    device,
 		Success:   success,
 	}
+
 	return NewUserEvent(eventType, userID, data)
 }
 
-// UserLoggedIn creates a user login event
+// UserLoggedIn creates a user login event.
 func UserLoggedIn(userID entities.UserID, ipAddress, userAgent, device string) *UserEvent {
 	return UserLoginAttempt(userID, ipAddress, userAgent, device, true, EventUserLogin)
 }
 
-// UserLoginFailed creates a user login failed event
+// UserLoginFailed creates a user login failed event.
 func UserLoginFailed(userID entities.UserID, ipAddress, userAgent, device string) *UserEvent {
 	return UserLoginAttempt(userID, ipAddress, userAgent, device, false, EventUserLoginFail)
 }
 
-// UserVerified creates a user verified event
+// UserVerified creates a user verified event.
 func UserVerified(userID entities.UserID, method string) *UserEvent {
 	data := UserVerifiedEvent{
 		UserID:    userID,
 		Method:    method,
 		Timestamp: time.Now(),
 	}
+
 	return NewUserEvent(EventUserVerified, userID, data)
 }
 
-// RoleChanged creates a role changed event
+// RoleChanged creates a role changed event.
 func RoleChanged(
 	userID entities.UserID,
 	oldRole, newRole string,
@@ -176,16 +185,17 @@ func RoleChanged(
 		NewRole:   newRole,
 		ChangedBy: changedBy,
 	}
+
 	return NewUserEvent(EventRoleChanged, userID, data)
 }
 
-// EventPublisher interface for publishing domain events
+// EventPublisher interface for publishing domain events.
 type EventPublisher interface {
 	Publish(event *UserEvent) error
 	PublishBatch(events []*UserEvent) error
 }
 
-// InMemoryEventPublisher is a simple in-memory event publisher
+// InMemoryEventPublisher is a simple in-memory event publisher.
 type InMemoryEventPublisher struct {
 	events []*UserEvent
 }
@@ -198,11 +208,13 @@ func NewInMemoryEventPublisher() *InMemoryEventPublisher {
 
 func (p *InMemoryEventPublisher) Publish(event *UserEvent) error {
 	p.events = append(p.events, event)
+
 	return nil
 }
 
 func (p *InMemoryEventPublisher) PublishBatch(events []*UserEvent) error {
 	p.events = append(p.events, events...)
+
 	return nil
 }
 
@@ -214,12 +226,12 @@ func (p *InMemoryEventPublisher) Clear() {
 	p.events = make([]*UserEvent, 0)
 }
 
-// EventType returns the string representation of EventType
+// EventType returns the string representation of EventType.
 func (e EventType) String() string {
 	return string(e)
 }
 
-// IsValidEventType checks if the event type is valid
+// IsValidEventType checks if the event type is valid.
 func (e EventType) IsValid() bool {
 	validTypes := map[EventType]bool{
 		EventUserCreated:               true,
@@ -239,5 +251,6 @@ func (e EventType) IsValid() bool {
 		EventProfileUpdated:            true,
 		EventRoleChanged:               true,
 	}
+
 	return validTypes[e]
 }

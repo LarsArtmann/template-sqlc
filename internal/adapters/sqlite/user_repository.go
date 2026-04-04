@@ -14,14 +14,14 @@ import (
 )
 
 // SQLiteUserRepository implements UserRepository for SQLite
-// This adapts SQLite-specific types to domain interfaces
+// This adapts SQLite-specific types to domain interfaces.
 type SQLiteUserRepository struct {
 	db         *sql.DB
 	mapper     mappers.UserMapper
 	converters *ConverterSet
 }
 
-// ConverterSet holds all type converters for SQLite
+// ConverterSet holds all type converters for SQLite.
 type ConverterSet struct {
 	UUID         converters.UUIDConverter
 	Time         converters.TimeConverter
@@ -34,7 +34,7 @@ type ConverterSet struct {
 	SessionToken *converters.DefaultSessionTokenConverter
 }
 
-// NewSQLiteUserRepository creates a new SQLite user repository
+// NewSQLiteUserRepository creates a new SQLite user repository.
 func NewSQLiteUserRepository(db *sql.DB) repositories.UserRepository {
 	return &SQLiteUserRepository{
 		db: db,
@@ -51,7 +51,7 @@ func NewSQLiteUserRepository(db *sql.DB) repositories.UserRepository {
 	}
 }
 
-// Create saves a new user to SQLite
+// Create saves a new user to SQLite.
 func (r *SQLiteUserRepository) Create(ctx context.Context, user *entities.User) error {
 	_, err := r.mapUserToSQLite(user)
 	if err != nil {
@@ -66,7 +66,7 @@ func (r *SQLiteUserRepository) Create(ctx context.Context, user *entities.User) 
 	panic("implement me: use actual sqlc generated code")
 }
 
-// GetByID retrieves a user by ID from SQLite
+// GetByID retrieves a user by ID from SQLite.
 func (r *SQLiteUserRepository) GetByID(
 	ctx context.Context,
 	id entities.UserID,
@@ -81,50 +81,61 @@ func (r *SQLiteUserRepository) GetByID(
 	//     return nil, errors.NewDatabaseError("failed to get user", err)
 	// }
 	// return mappers.DomainUserFromSQLite(sqliteUser)
-
 	panic("implement me: use actual sqlc generated code")
 }
 
-// GetByUUID retrieves a user by UUID from SQLite
+// GetByUUID retrieves a user by UUID from SQLite.
 func (r *SQLiteUserRepository) GetByUUID(
 	ctx context.Context,
 	uuid entities.UuID,
 ) (*entities.User, error) {
 	_, err := r.getByUUID(ctx, uuid)
+
 	return nil, err
 }
 
-// GetByEmail retrieves a user by email from SQLite
+// GetByEmail retrieves a user by email from SQLite.
 func (r *SQLiteUserRepository) GetByEmail(
 	ctx context.Context,
 	email entities.Email,
 ) (*entities.User, error) {
 	_, err := r.getByEmail(ctx, email)
+
 	return nil, err
 }
 
-// GetByUsername retrieves a user by username from SQLite
+// GetByUsername retrieves a user by username from SQLite.
 func (r *SQLiteUserRepository) GetByUsername(
 	ctx context.Context,
 	username entities.Username,
 ) (*entities.User, error) {
 	_, err := r.getByUsername(ctx, username)
+
 	return nil, err
 }
 
-func (r *SQLiteUserRepository) getByUUID(ctx context.Context, uuid entities.UuID) (struct{}, error) {
+func (r *SQLiteUserRepository) getByUUID(
+	ctx context.Context,
+	uuid entities.UuID,
+) (struct{}, error) {
 	panic("implement me: use actual sqlc generated code")
 }
 
-func (r *SQLiteUserRepository) getByEmail(ctx context.Context, email entities.Email) (struct{}, error) {
+func (r *SQLiteUserRepository) getByEmail(
+	ctx context.Context,
+	email entities.Email,
+) (struct{}, error) {
 	panic("implement me: use actual sqlc generated code")
 }
 
-func (r *SQLiteUserRepository) getByUsername(ctx context.Context, username entities.Username) (struct{}, error) {
+func (r *SQLiteUserRepository) getByUsername(
+	ctx context.Context,
+	username entities.Username,
+) (struct{}, error) {
 	panic("implement me: use actual sqlc generated code")
 }
 
-// Update updates an existing user in SQLite
+// Update updates an existing user in SQLite.
 func (r *SQLiteUserRepository) Update(ctx context.Context, user *entities.User) error {
 	_, err := r.mapUserToSQLite(user)
 	if err != nil {
@@ -135,16 +146,17 @@ func (r *SQLiteUserRepository) Update(ctx context.Context, user *entities.User) 
 	panic("implement me: use actual sqlc generated code")
 }
 
-// mapUserToSQLite converts a domain User entity to a SQLite model
+// mapUserToSQLite converts a domain User entity to a SQLite model.
 func (r *SQLiteUserRepository) mapUserToSQLite(user *entities.User) (any, error) {
 	sqliteUser, err := mappers.SQLiteUserFromDomain(user)
 	if err != nil {
 		return nil, fmt.Errorf("failed to convert user %s: %w", user.ID(), err)
 	}
+
 	return sqliteUser, nil
 }
 
-// Delete soft deletes a user from SQLite
+// Delete soft deletes a user from SQLite.
 func (r *SQLiteUserRepository) Delete(ctx context.Context, id entities.UserID) error {
 	// Soft delete by changing status
 	// panic("implement me: use actual sqlc generated code")
@@ -152,17 +164,17 @@ func (r *SQLiteUserRepository) Delete(ctx context.Context, id entities.UserID) e
 	// For now, implement as hard delete
 	// _, err := r.queries.DeleteUser(ctx, int64(id))
 	// return errors.NewDatabaseError("failed to delete user", err)
-
 	return nil
 }
 
-// List retrieves users with pagination from SQLite
+// List retrieves users with pagination from SQLite.
 func (r *SQLiteUserRepository) List(
 	ctx context.Context,
 	status entities.UserStatus,
 	limit, offset int,
 ) ([]*entities.User, error) {
-	if err := validation.ValidatePagination(limit, offset); err != nil {
+	err := validation.ValidatePagination(limit, offset)
+	if err != nil {
 		return nil, err
 	}
 
@@ -170,14 +182,15 @@ func (r *SQLiteUserRepository) List(
 	panic("implement me: use actual sqlc generated code")
 }
 
-// Search searches users by query in SQLite
+// Search searches users by query in SQLite.
 func (r *SQLiteUserRepository) Search(
 	ctx context.Context,
 	query string,
 	status entities.UserStatus,
 	limit int,
 ) ([]*entities.User, error) {
-	if err := validation.ValidateSearchQuery(query, limit); err != nil {
+	err := validation.ValidateSearchQuery(query, limit)
+	if err != nil {
 		return nil, err
 	}
 
@@ -185,14 +198,15 @@ func (r *SQLiteUserRepository) Search(
 	panic("implement me: use actual sqlc generated code")
 }
 
-// SearchByTags searches users by tags in SQLite
+// SearchByTags searches users by tags in SQLite.
 func (r *SQLiteUserRepository) SearchByTags(
 	ctx context.Context,
 	tags []string,
 	status entities.UserStatus,
 	limit, offset int,
 ) ([]*entities.User, error) {
-	if err := validation.ValidateTags(tags); err != nil {
+	err := validation.ValidateTags(tags)
+	if err != nil {
 		return nil, err
 	}
 
@@ -200,7 +214,7 @@ func (r *SQLiteUserRepository) SearchByTags(
 	panic("implement me: use actual sqlc generated code")
 }
 
-// CountByStatus counts users by status in SQLite
+// CountByStatus counts users by status in SQLite.
 func (r *SQLiteUserRepository) CountByStatus(
 	ctx context.Context,
 ) (map[entities.UserStatus]int64, error) {
@@ -208,13 +222,13 @@ func (r *SQLiteUserRepository) CountByStatus(
 	panic("implement me: use actual sqlc generated code")
 }
 
-// GetStats retrieves user statistics from SQLite
+// GetStats retrieves user statistics from SQLite.
 func (r *SQLiteUserRepository) GetStats(ctx context.Context) (*entities.UserStats, error) {
 	// Query stats
 	panic("implement me: use actual sqlc generated code")
 }
 
-// VerifyCredentials verifies user credentials in SQLite
+// VerifyCredentials verifies user credentials in SQLite.
 func (r *SQLiteUserRepository) VerifyCredentials(
 	ctx context.Context,
 	email entities.Email,
@@ -224,7 +238,7 @@ func (r *SQLiteUserRepository) VerifyCredentials(
 	panic("implement me: use actual sqlc generated code")
 }
 
-// UpdatePassword updates user password in SQLite
+// UpdatePassword updates user password in SQLite.
 func (r *SQLiteUserRepository) UpdatePassword(
 	ctx context.Context,
 	id entities.UserID,
@@ -234,38 +248,42 @@ func (r *SQLiteUserRepository) UpdatePassword(
 	panic("implement me: use actual sqlc generated code")
 }
 
-// MarkVerified marks user as verified in SQLite
+// MarkVerified marks user as verified in SQLite.
 func (r *SQLiteUserRepository) MarkVerified(ctx context.Context, id entities.UserID) error {
 	return entities.StubNotImplemented("MarkVerified", "SQLite")
 }
 
-// validateAndUpdateStatus validates and updates user status
+// validateAndUpdateStatus validates and updates user status.
 func (r *SQLiteUserRepository) validateAndUpdateStatus(
 	_ context.Context,
 	_ entities.UserID,
 	status entities.UserStatus,
 	updateFn func() error,
 ) error {
-	if err := validation.Validate(status, "status", "invalid user status"); err != nil {
+	err := validation.Validate(status, "status", "invalid user status")
+	if err != nil {
 		return err
 	}
+
 	return updateFn()
 }
 
-// validateAndUpdateRole validates and updates user role
+// validateAndUpdateRole validates and updates user role.
 func (r *SQLiteUserRepository) validateAndUpdateRole(
 	_ context.Context,
 	_ entities.UserID,
 	role entities.UserRole,
 	updateFn func() error,
 ) error {
-	if err := validation.Validate(role, "role", "invalid user role"); err != nil {
+	err := validation.Validate(role, "role", "invalid user role")
+	if err != nil {
 		return err
 	}
+
 	return updateFn()
 }
 
-// ChangeStatus changes user status in SQLite
+// ChangeStatus changes user status in SQLite.
 func (r *SQLiteUserRepository) ChangeStatus(
 	ctx context.Context,
 	id entities.UserID,
@@ -276,22 +294,22 @@ func (r *SQLiteUserRepository) ChangeStatus(
 	})
 }
 
-// Activate activates a user in SQLite
+// Activate activates a user in SQLite.
 func (r *SQLiteUserRepository) Activate(ctx context.Context, id entities.UserID) error {
 	return r.ChangeStatus(ctx, id, entities.UserStatusActive)
 }
 
-// Deactivate deactivates a user in SQLite
+// Deactivate deactivates a user in SQLite.
 func (r *SQLiteUserRepository) Deactivate(ctx context.Context, id entities.UserID) error {
 	return r.ChangeStatus(ctx, id, entities.UserStatusInactive)
 }
 
-// Suspend suspends a user in SQLite
+// Suspend suspends a user in SQLite.
 func (r *SQLiteUserRepository) Suspend(ctx context.Context, id entities.UserID) error {
 	return r.ChangeStatus(ctx, id, entities.UserStatusSuspended)
 }
 
-// ChangeRole changes user role in SQLite
+// ChangeRole changes user role in SQLite.
 func (r *SQLiteUserRepository) ChangeRole(
 	ctx context.Context,
 	id entities.UserID,
@@ -305,5 +323,11 @@ func (r *SQLiteUserRepository) ChangeRole(
 // Helper method
 
 func (r *SQLiteUserRepository) handleError(err error, operation string) error {
-	return sqlitedb.HandleDBError(err, operation, entities.ErrUserNotFound, entities.ErrUserAlreadyExists, sqlitedb.IsSQLiteUniqueConstraintError)
+	return sqlitedb.HandleDBError(
+		err,
+		operation,
+		entities.ErrUserNotFound,
+		entities.ErrUserAlreadyExists,
+		sqlitedb.IsSQLiteUniqueConstraintError,
+	)
 }

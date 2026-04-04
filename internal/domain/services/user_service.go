@@ -12,7 +12,7 @@ import (
 )
 
 // UserService provides business logic for user operations
-// This layer sits between domain entities and repositories
+// This layer sits between domain entities and repositories.
 type UserService struct {
 	userRepo    repositories.UserRepository
 	sessionRepo repositories.SessionRepository
@@ -20,14 +20,14 @@ type UserService struct {
 	validator   UserValidator
 }
 
-// UserValidator defines validation interface for user operations
+// UserValidator defines validation interface for user operations.
 type UserValidator interface {
 	ValidateUserCreate(email, username, firstName, lastName string) error
 	ValidateUserUpdate(user *entities.User) error
 	ValidatePasswordRequirements(password string) error
 }
 
-// NewUserService creates a new user service
+// NewUserService creates a new user service.
 func NewUserService(
 	userRepo repositories.UserRepository,
 	sessionRepo repositories.SessionRepository,
@@ -42,7 +42,7 @@ func NewUserService(
 	}
 }
 
-// CreateUser creates a new user with business logic validation
+// CreateUser creates a new user with business logic validation.
 func (s *UserService) CreateUser(
 	ctx context.Context,
 	req *CreateUserRequest,
@@ -95,18 +95,20 @@ func (s *UserService) CreateUser(
 	return user, nil
 }
 
-// checkUserNotExists verifies user doesn't already exist
+// checkUserNotExists verifies user doesn't already exist.
 func (s *UserService) checkUserNotExists(ctx context.Context, email, username string) error {
 	if _, err := s.userRepo.GetByEmail(ctx, entities.Email(email)); err == nil {
 		return entities.ErrUserAlreadyExists
 	}
+
 	if _, err := s.userRepo.GetByUsername(ctx, entities.Username(username)); err == nil {
 		return entities.ErrUserAlreadyExists
 	}
+
 	return nil
 }
 
-// domainEntities holds created domain value objects
+// domainEntities holds created domain value objects.
 type domainEntities struct {
 	Email        entities.Email
 	Username     entities.Username
@@ -115,7 +117,7 @@ type domainEntities struct {
 	PasswordHash entities.PasswordHash
 }
 
-// createDomainEntities creates domain value objects from request
+// createDomainEntities creates domain value objects from request.
 func (s *UserService) createDomainEntities(req *CreateUserRequest) (*domainEntities, error) {
 	email, err := entities.NewEmail(req.Email)
 	if err != nil {
@@ -151,7 +153,7 @@ func (s *UserService) createDomainEntities(req *CreateUserRequest) (*domainEntit
 	}, nil
 }
 
-// publishUserCreatedEvent publishes user created event (non-blocking)
+// publishUserCreatedEvent publishes user created event (non-blocking).
 func (s *UserService) publishUserCreatedEvent(user *entities.User, de *domainEntities) {
 	event := events.UserCreated(
 		user.ID(),
@@ -162,12 +164,13 @@ func (s *UserService) publishUserCreatedEvent(user *entities.User, de *domainEnt
 		user.Role().String(),
 		user.Status().String(),
 	)
-	if err := s.eventPub.Publish(event); err != nil {
+	err := s.eventPub.Publish(event)
+	if err != nil {
 		fmt.Printf("warning: failed to publish event: %v\n", err)
 	}
 }
 
-// GetUser retrieves a user by ID with business logic checks
+// GetUser retrieves a user by ID with business logic checks.
 func (s *UserService) GetUser(ctx context.Context, userID entities.UserID) (*entities.User, error) {
 	user, err := s.userRepo.GetByID(ctx, userID)
 	if err != nil {
@@ -180,7 +183,7 @@ func (s *UserService) GetUser(ctx context.Context, userID entities.UserID) (*ent
 	return user, nil
 }
 
-// UpdateUser updates a user with business logic validation
+// UpdateUser updates a user with business logic validation.
 func (s *UserService) UpdateUser(
 	ctx context.Context,
 	req *UpdateUserRequest,
@@ -202,7 +205,8 @@ func (s *UserService) UpdateUser(
 
 	if len(changes) > 0 {
 		event := events.UserUpdated(user.ID(), changes, user.ID())
-		if err := s.eventPub.Publish(event); err != nil {
+		err := s.eventPub.Publish(event)
+		if err != nil {
 			fmt.Printf("warning: failed to publish event: %v\n", err)
 		}
 	}
@@ -210,7 +214,7 @@ func (s *UserService) UpdateUser(
 	return user, nil
 }
 
-// applyProfileUpdates applies profile field updates and returns changes map
+// applyProfileUpdates applies profile field updates and returns changes map.
 func (s *UserService) applyProfileUpdates(
 	user *entities.User,
 	req *UpdateUserRequest,
@@ -222,6 +226,7 @@ func (s *UserService) applyProfileUpdates(
 		if err != nil {
 			return changes
 		}
+
 		changes["first_name"] = map[string]any{
 			"old": user.FirstName().String(),
 			"new": firstName.String(),
@@ -234,6 +239,7 @@ func (s *UserService) applyProfileUpdates(
 		if err != nil {
 			return changes
 		}
+
 		changes["last_name"] = map[string]any{
 			"old": user.LastName().String(),
 			"new": lastName.String(),
@@ -246,6 +252,7 @@ func (s *UserService) applyProfileUpdates(
 		for k, v := range *req.Metadata {
 			metadata.Set(k, v)
 		}
+
 		changes["metadata"] = map[string]any{
 			"old": user.Metadata(),
 			"new": metadata,
@@ -264,7 +271,7 @@ func (s *UserService) applyProfileUpdates(
 	return changes
 }
 
-// AuthenticateUser authenticates a user with email and password
+// AuthenticateUser authenticates a user with email and password.
 func (s *UserService) AuthenticateUser(
 	ctx context.Context,
 	email, password, ipAddress, userAgent string,
@@ -281,6 +288,7 @@ func (s *UserService) AuthenticateUser(
 		// Publish failed login event
 		event := events.UserLoginFailed(entities.UserID(0), ipAddress, userAgent, "unknown")
 		_ = s.eventPub.Publish(event)
+
 		return nil, entities.ErrInvalidCredentials
 	}
 
@@ -292,6 +300,7 @@ func (s *UserService) AuthenticateUser(
 		if user.Status() == entities.UserStatusSuspended {
 			return nil, entities.ErrAccountSuspended
 		}
+
 		return nil, entities.ErrAccountInactive
 	}
 
@@ -314,6 +323,7 @@ func (s *UserService) AuthenticateUser(
 
 	// Update user last login
 	user.RecordLogin()
+
 	if err := s.userRepo.Update(ctx, user); err != nil {
 		fmt.Printf("warning: failed to update last login: %v\n", err)
 	}
@@ -327,7 +337,7 @@ func (s *UserService) AuthenticateUser(
 	return session, nil
 }
 
-// VerifySession validates a session token and returns associated user
+// VerifySession validates a session token and returns associated user.
 func (s *UserService) VerifySession(
 	ctx context.Context,
 	token string,
@@ -351,6 +361,7 @@ func (s *UserService) VerifySession(
 		if session.IsExpired() {
 			return nil, nil, entities.ErrSessionExpired
 		}
+
 		return nil, nil, entities.ErrSessionNotFound
 	}
 
@@ -368,7 +379,7 @@ func (s *UserService) VerifySession(
 	return session, user, nil
 }
 
-// Logout deactivates a session
+// Logout deactivates a session.
 func (s *UserService) Logout(ctx context.Context, token string) error {
 	// Parse token
 	tokenUUID, err := uuid.Parse(token)
@@ -389,7 +400,7 @@ func (s *UserService) Logout(ctx context.Context, token string) error {
 	return nil
 }
 
-// ChangeUserRole changes a user's role with validation and event publishing
+// ChangeUserRole changes a user's role with validation and event publishing.
 func (s *UserService) ChangeUserRole(
 	ctx context.Context,
 	userID entities.UserID,
@@ -429,11 +440,12 @@ func (s *UserService) ChangeUserRole(
 	return user, nil
 }
 
-// GetUserStats returns user statistics
+// GetUserStats returns user statistics.
 func (s *UserService) GetUserStats(ctx context.Context) (*entities.UserStats, error) {
 	stats, err := s.userRepo.GetStats(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get user stats: %w", err)
 	}
+
 	return stats, nil
 }

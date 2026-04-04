@@ -14,20 +14,21 @@ func isPostgresErrorCode(err error, code string) bool {
 	if errors.As(err, &pgErr) {
 		return pgErr.Code() == code
 	}
+
 	return false
 }
 
-// isUniqueViolationError checks for PostgreSQL unique constraint violation (23505)
+// isUniqueViolationError checks for PostgreSQL unique constraint violation (23505).
 func isUniqueViolationError(err error) bool {
 	return isPostgresErrorCode(err, "23505")
 }
 
-// isForeignKeyViolationError checks for PostgreSQL foreign key violation (23503)
+// isForeignKeyViolationError checks for PostgreSQL foreign key violation (23503).
 func isForeignKeyViolationError(err error) bool {
 	return isPostgresErrorCode(err, "23503")
 }
 
-// isCheckViolationError checks for PostgreSQL check constraint violation (23514)
+// isCheckViolationError checks for PostgreSQL check constraint violation (23514).
 func isCheckViolationError(err error) bool {
 	return isPostgresErrorCode(err, "23514")
 }

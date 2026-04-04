@@ -22,25 +22,33 @@ func NewMockSessionRepository() *MockSessionRepository {
 	}
 }
 
-func findUserBy(m map[entities.UserID]*entities.User, match func(*entities.User) bool) (*entities.User, error) {
+func findUserBy(
+	m map[entities.UserID]*entities.User,
+	match func(*entities.User) bool,
+) (*entities.User, error) {
 	for _, user := range m {
 		if match(user) {
 			return user, nil
 		}
 	}
+
 	return nil, entities.ErrUserNotFound
 }
 
-func findSessionBy(m map[entities.SessionID]*entities.UserSession, match func(*entities.UserSession) bool) (*entities.UserSession, error) {
+func findSessionBy(
+	m map[entities.SessionID]*entities.UserSession,
+	match func(*entities.UserSession) bool,
+) (*entities.UserSession, error) {
 	for _, session := range m {
 		if match(session) {
 			return session, nil
 		}
 	}
+
 	return nil, entities.ErrSessionNotFound
 }
 
-// MockUserRepository implements UserRepository for testing
+// MockUserRepository implements UserRepository for testing.
 type MockUserRepository struct {
 	users                 map[entities.UserID]*entities.User
 	passwordVerifications map[string]string
@@ -54,6 +62,7 @@ func (m *MockUserRepository) Create(ctx context.Context, user *entities.User) er
 	// Set the ID on the user entity so it can be retrieved later
 	user.SetID(userID)
 	m.users[userID] = user
+
 	return nil
 }
 
@@ -65,6 +74,7 @@ func (m *MockUserRepository) GetByID(
 	if !ok {
 		return nil, entities.ErrUserNotFound
 	}
+
 	return user, nil
 }
 
@@ -81,6 +91,7 @@ func (m *MockUserRepository) GetByUUID(
 			return user, nil
 		}
 	}
+
 	return nil, entities.ErrUserNotFound
 }
 
@@ -108,6 +119,7 @@ func (m *MockUserRepository) Update(ctx context.Context, user *entities.User) er
 
 func (m *MockUserRepository) Delete(ctx context.Context, id entities.UserID) error {
 	delete(m.users, id)
+
 	return nil
 }
 
@@ -117,11 +129,13 @@ func (m *MockUserRepository) List(
 	limit, offset int,
 ) ([]*entities.User, error) {
 	result := make([]*entities.User, 0)
+
 	for _, user := range m.users {
 		if user.Status() == status {
 			result = append(result, user)
 		}
 	}
+
 	return result, nil
 }
 
@@ -150,6 +164,7 @@ func (m *MockUserRepository) CountByStatus(
 	for _, user := range m.users {
 		counts[user.Status()]++
 	}
+
 	return counts, nil
 }
 
@@ -161,6 +176,7 @@ func (m *MockUserRepository) GetStats(ctx context.Context) (*entities.UserStats,
 			stats.ActiveUsers++
 		}
 	}
+
 	return stats, nil
 }
 
@@ -178,6 +194,7 @@ func (m *MockUserRepository) VerifyCredentials(
 	if err != nil {
 		return nil, err
 	}
+
 	return user, nil
 }
 
@@ -221,7 +238,7 @@ func (m *MockUserRepository) ChangeRole(
 	return nil
 }
 
-// MockSessionRepository implements SessionRepository for testing
+// MockSessionRepository implements SessionRepository for testing.
 type MockSessionRepository struct {
 	sessions  map[entities.SessionID]*entities.UserSession
 	idCounter entities.SessionID
@@ -232,6 +249,7 @@ func (m *MockSessionRepository) Create(ctx context.Context, session *entities.Us
 	m.idCounter++
 
 	m.sessions[sessionID] = session
+
 	return nil
 }
 
@@ -250,6 +268,7 @@ func (m *MockSessionRepository) GetByUserID(
 	activeOnly bool,
 ) ([]*entities.UserSession, error) {
 	result := make([]*entities.UserSession, 0)
+
 	for _, session := range m.sessions {
 		if session.UserID() == userID {
 			if !activeOnly || session.IsActive() {
@@ -257,6 +276,7 @@ func (m *MockSessionRepository) GetByUserID(
 			}
 		}
 	}
+
 	return result, nil
 }
 
@@ -266,6 +286,7 @@ func (m *MockSessionRepository) Update(ctx context.Context, session *entities.Us
 
 func (m *MockSessionRepository) Delete(ctx context.Context, id entities.SessionID) error {
 	delete(m.sessions, id)
+
 	return nil
 }
 
@@ -292,11 +313,13 @@ func (m *MockSessionRepository) GetActiveSessions(
 	userID entities.UserID,
 ) (int64, error) {
 	count := int64(0)
+
 	for _, session := range m.sessions {
 		if session.UserID() == userID && session.IsActive() {
 			count++
 		}
 	}
+
 	return count, nil
 }
 
@@ -310,11 +333,12 @@ func (m *MockSessionRepository) GetSessionStats(
 			stats.ActiveSessions++
 		}
 	}
+
 	return stats, nil
 }
 
-// Ensure MockUserRepository implements UserRepository
+// Ensure MockUserRepository implements UserRepository.
 var _ repositories.UserRepository = (*MockUserRepository)(nil)
 
-// Ensure MockSessionRepository implements SessionRepository
+// Ensure MockSessionRepository implements SessionRepository.
 var _ repositories.SessionRepository = (*MockSessionRepository)(nil)

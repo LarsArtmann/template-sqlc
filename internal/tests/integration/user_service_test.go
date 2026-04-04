@@ -4,14 +4,13 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/suite"
-
 	"github.com/LarsArtmann/template-sqlc/internal/domain/entities"
 	"github.com/LarsArtmann/template-sqlc/internal/domain/events"
 	"github.com/LarsArtmann/template-sqlc/internal/domain/repositories"
 	"github.com/LarsArtmann/template-sqlc/internal/domain/services"
 	"github.com/LarsArtmann/template-sqlc/pkg/validation"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 )
 
 const testPasswordHash = "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZRGdjGj/n3.rsQ5pPjZ5yVlWK5WAe"
@@ -28,9 +27,10 @@ func newTestCreateUserRequest(username, firstName, lastName string) *services.Cr
 	}
 }
 
-// UserServiceIntegrationTestSuite contains integration tests for UserService
+// UserServiceIntegrationTestSuite contains integration tests for UserService.
 type UserServiceIntegrationTestSuite struct {
 	suite.Suite
+
 	ctx            context.Context
 	userService    *services.UserService
 	userRepo       repositories.UserRepository
@@ -40,7 +40,7 @@ type UserServiceIntegrationTestSuite struct {
 	cleanup        []func() error
 }
 
-// SetupSuite sets up the test suite
+// SetupSuite sets up the test suite.
 func (s *UserServiceIntegrationTestSuite) SetupSuite() {
 	s.ctx = context.Background()
 
@@ -63,7 +63,7 @@ func (s *UserServiceIntegrationTestSuite) SetupSuite() {
 	)
 }
 
-// SetupTest resets state before each test
+// SetupTest resets state before each test.
 func (s *UserServiceIntegrationTestSuite) SetupTest() {
 	// Reset mock repositories for each test
 	s.eventPublisher.Clear()
@@ -77,17 +77,18 @@ func (s *UserServiceIntegrationTestSuite) SetupTest() {
 	)
 }
 
-// TearDownSuite cleans up the test suite
+// TearDownSuite cleans up the test suite.
 func (s *UserServiceIntegrationTestSuite) TearDownSuite() {
 	// Cleanup test resources
 	for i, cleanup := range s.cleanup {
-		if err := cleanup(); err != nil {
+		err := cleanup()
+		if err != nil {
 			s.T().Logf("Cleanup %d failed: %v", i, err)
 		}
 	}
 }
 
-// TestCreateUser tests user creation
+// TestCreateUser tests user creation.
 func (s *UserServiceIntegrationTestSuite) TestCreateUser() {
 	req := &services.CreateUserRequest{
 		Email:        "test@example.com",
@@ -203,7 +204,6 @@ func (s *UserServiceIntegrationTestSuite) TestAuthenticateUser() {
 		"correct_password",
 		"127.0.0.1",
 		"test-user-agent")
-
 	if err == nil {
 		s.Require().NotNil(session)
 		s.Equal(user.ID(), session.UserID())
@@ -295,7 +295,7 @@ func (s *UserServiceIntegrationTestSuite) TestGetUserStats() {
 	s.Positive(stats.ActiveUsers)
 }
 
-// Test suite runner
+// Test suite runner.
 func TestUserServiceIntegrationSuite(t *testing.T) {
 	suite.Run(t, new(UserServiceIntegrationTestSuite))
 }

@@ -7,7 +7,7 @@ import (
 )
 
 // UserRepository defines the interface for user data access
-// This abstracts away database-specific implementation details
+// This abstracts away database-specific implementation details.
 type UserRepository interface {
 	// CRUD operations
 	Create(ctx context.Context, user *entities.User) error
@@ -60,7 +60,7 @@ type UserRepository interface {
 	ChangeRole(ctx context.Context, id entities.UserID, role entities.UserRole) error
 }
 
-// SessionRepository defines the interface for session data access
+// SessionRepository defines the interface for session data access.
 type SessionRepository interface {
 	// CRUD operations
 	Create(ctx context.Context, session *entities.UserSession) error
@@ -83,14 +83,14 @@ type SessionRepository interface {
 	GetSessionStats(ctx context.Context) (*entities.SessionStats, error)
 }
 
-// TransactionalRepository defines transaction support
+// TransactionalRepository defines transaction support.
 type TransactionalRepository interface {
 	// Transaction operations
 	BeginTx(ctx context.Context) (Transaction, error)
 	RunInTransaction(ctx context.Context, fn func(ctx context.Context, tx Transaction) error) error
 }
 
-// Transaction defines the transaction interface
+// Transaction defines the transaction interface.
 type Transaction interface {
 	// Commit commits the transaction
 	Commit() error

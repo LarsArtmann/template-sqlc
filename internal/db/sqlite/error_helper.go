@@ -10,7 +10,12 @@ import (
 // HandleDBError converts database errors to domain errors.
 // Takes entity-specific notFoundErr for sql.ErrNoRows and a custom
 // uniqueConstraintChecker for constraint violations.
-func HandleDBError(err error, operation string, notFoundErr, conflictErr error, uniqueConstraintChecker func(error) bool) error {
+func HandleDBError(
+	err error,
+	operation string,
+	notFoundErr, conflictErr error,
+	uniqueConstraintChecker func(error) bool,
+) error {
 	if err == nil {
 		return nil
 	}
@@ -25,22 +30,26 @@ func HandleDBError(err error, operation string, notFoundErr, conflictErr error, 
 	}
 }
 
-// IsSQLiteUniqueConstraintError checks if error is a SQLite UNIQUE constraint violation
+// IsSQLiteUniqueConstraintError checks if error is a SQLite UNIQUE constraint violation.
 func IsSQLiteUniqueConstraintError(err error) bool {
 	if err == nil {
 		return false
 	}
+
 	msg := err.Error()
+
 	return contains(msg, "UNIQUE constraint failed") ||
 		contains(msg, "is not unique")
 }
 
-// IsSQLiteSessionTokenConstraintError checks if error is a session token constraint violation
+// IsSQLiteSessionTokenConstraintError checks if error is a session token constraint violation.
 func IsSQLiteSessionTokenConstraintError(err error) bool {
 	if err == nil {
 		return false
 	}
+
 	msg := err.Error()
+
 	return contains(msg, "UNIQUE constraint failed: sessions.token") ||
 		contains(msg, "session token already exists")
 }
@@ -55,5 +64,6 @@ func containsHelper(s, substr string) bool {
 			return true
 		}
 	}
+
 	return false
 }
