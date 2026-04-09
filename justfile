@@ -27,9 +27,8 @@ validate-all db="": # Validate all database configurations
     fi
 
 # Code generation targets
-generate: # Generate code from sqlc
-    echo "⚡ Generating code..."
-    sqlc generate
+generate: # Generate code from sqlc (with deduplication)
+    @bash scripts/generate.sh
 
 generate-verbose: # Generate code with verbose output
     echo "⚡ Generating code (verbose)..."

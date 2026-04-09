@@ -34,7 +34,8 @@ internal/
 ├── db/             # sqlc generated code
 │   ├── sqlite/
 │   ├── postgres/
-│   └── mysql/
+│   ├── mysql/
+│   └── shared/      # Shared types for MySQL/SQLite (deduplication)
 ├── monitoring/     # Metrics and observability
 └── tests/          # Test suites
     ├── unit/
@@ -50,6 +51,18 @@ Each database has its own build tag:
 - `//go:build sqlite` - SQLite code
 - `//go:build postgres` - PostgreSQL code
 - `//go:build mysql` - MySQL code
+
+## Code Deduplication
+
+MySQL and SQLite both use `database/sql` and generate identical db.go code.
+To avoid duplication, SQLite uses a shared package:
+
+- `internal/db/shared/` - Contains common `DBTX` interface and `BaseQueries` struct
+- SQLite's `db.go` uses type alias for `DBTX` and embeds `shared.BaseQueries`
+- MySQL keeps its own implementation (required for pgx compatibility)
+
+**Important:** Always run `bash scripts/generate.sh` instead of `sqlc generate` directly,
+as the script includes post-processing to maintain the deduplication.
 
 ## Code Style
 

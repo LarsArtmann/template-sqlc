@@ -9,9 +9,6 @@ package mysql
 import (
 	"context"
 	"database/sql"
-	"fmt"
-
-	"github.com/LarsArtmann/template-sqlc/internal/db"
 )
 
 type DBTX interface {
@@ -25,140 +22,12 @@ func New(db DBTX) *Queries {
 	return &Queries{db: db}
 }
 
-func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
-	q := Queries{db: db}
-	var err error
-	if q.countActiveUsersStmt, err = db.PrepareContext(ctx, CountActiveUsers); err != nil {
-		return nil, fmt.Errorf("error preparing query CountActiveUsers: %w", err)
-	}
-	if q.createUserStmt, err = db.PrepareContext(ctx, CreateUser); err != nil {
-		return nil, fmt.Errorf("error preparing query CreateUser: %w", err)
-	}
-	if q.getUserByEmailStmt, err = db.PrepareContext(ctx, GetUserByEmail); err != nil {
-		return nil, fmt.Errorf("error preparing query GetUserByEmail: %w", err)
-	}
-	if q.getUserByIDStmt, err = db.PrepareContext(ctx, GetUserByID); err != nil {
-		return nil, fmt.Errorf("error preparing query GetUserByID: %w", err)
-	}
-	if q.getUserByUUIDStmt, err = db.PrepareContext(ctx, GetUserByUUID); err != nil {
-		return nil, fmt.Errorf("error preparing query GetUserByUUID: %w", err)
-	}
-	if q.getUserByUsernameStmt, err = db.PrepareContext(ctx, GetUserByUsername); err != nil {
-		return nil, fmt.Errorf("error preparing query GetUserByUsername: %w", err)
-	}
-	if q.getUserStatsStmt, err = db.PrepareContext(ctx, GetUserStats); err != nil {
-		return nil, fmt.Errorf("error preparing query GetUserStats: %w", err)
-	}
-	if q.listUsersStmt, err = db.PrepareContext(ctx, ListUsers); err != nil {
-		return nil, fmt.Errorf("error preparing query ListUsers: %w", err)
-	}
-	if q.softDeleteUserStmt, err = db.PrepareContext(ctx, SoftDeleteUser); err != nil {
-		return nil, fmt.Errorf("error preparing query SoftDeleteUser: %w", err)
-	}
-	if q.updateLastLoginStmt, err = db.PrepareContext(ctx, UpdateLastLogin); err != nil {
-		return nil, fmt.Errorf("error preparing query UpdateLastLogin: %w", err)
-	}
-	if q.updatePasswordStmt, err = db.PrepareContext(ctx, UpdatePassword); err != nil {
-		return nil, fmt.Errorf("error preparing query UpdatePassword: %w", err)
-	}
-	if q.updateUserStmt, err = db.PrepareContext(ctx, UpdateUser); err != nil {
-		return nil, fmt.Errorf("error preparing query UpdateUser: %w", err)
-	}
-	if q.verifyUserStmt, err = db.PrepareContext(ctx, VerifyUser); err != nil {
-		return nil, fmt.Errorf("error preparing query VerifyUser: %w", err)
-	}
-	return &q, nil
-}
-
-func (q *Queries) Close() error {
-	return db.CloseStatements(
-		q.countActiveUsersStmt,
-		q.createUserStmt,
-		q.getUserByEmailStmt,
-		q.getUserByIDStmt,
-		q.getUserByUUIDStmt,
-		q.getUserByUsernameStmt,
-		q.getUserStatsStmt,
-		q.listUsersStmt,
-		q.softDeleteUserStmt,
-		q.updateLastLoginStmt,
-		q.updatePasswordStmt,
-		q.updateUserStmt,
-		q.verifyUserStmt,
-	)
-}
-
-func (q *Queries) exec(ctx context.Context, stmt *sql.Stmt, query string, args ...interface{}) (sql.Result, error) {
-	actualStmt := q.getStmtContext(ctx, stmt)
-	switch {
-	case actualStmt != nil:
-		return actualStmt.ExecContext(ctx, args...)
-	default:
-		return q.db.ExecContext(ctx, query, args...)
-	}
-}
-
-func (q *Queries) query(ctx context.Context, stmt *sql.Stmt, query string, args ...interface{}) (*sql.Rows, error) {
-	actualStmt := q.getStmtContext(ctx, stmt)
-	switch {
-	case actualStmt != nil:
-		return actualStmt.QueryContext(ctx, args...)
-	default:
-		return q.db.QueryContext(ctx, query, args...)
-	}
-}
-
-func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, args ...interface{}) *sql.Row {
-	actualStmt := q.getStmtContext(ctx, stmt)
-	switch {
-	case actualStmt != nil:
-		return actualStmt.QueryRowContext(ctx, args...)
-	default:
-		return q.db.QueryRowContext(ctx, query, args...)
-	}
-}
-
-func (q *Queries) getStmtContext(ctx context.Context, stmt *sql.Stmt) *sql.Stmt {
-	if stmt != nil && q.tx != nil {
-		return q.tx.StmtContext(ctx, stmt)
-	}
-	return stmt
-}
-
 type Queries struct {
-	db                    DBTX
-	tx                    *sql.Tx
-	countActiveUsersStmt  *sql.Stmt
-	createUserStmt        *sql.Stmt
-	getUserByEmailStmt    *sql.Stmt
-	getUserByIDStmt       *sql.Stmt
-	getUserByUUIDStmt     *sql.Stmt
-	getUserByUsernameStmt *sql.Stmt
-	getUserStatsStmt      *sql.Stmt
-	listUsersStmt         *sql.Stmt
-	softDeleteUserStmt    *sql.Stmt
-	updateLastLoginStmt   *sql.Stmt
-	updatePasswordStmt    *sql.Stmt
-	updateUserStmt        *sql.Stmt
-	verifyUserStmt        *sql.Stmt
+	db DBTX
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{
-		db:                    tx,
-		tx:                    tx,
-		countActiveUsersStmt:  q.countActiveUsersStmt,
-		createUserStmt:        q.createUserStmt,
-		getUserByEmailStmt:    q.getUserByEmailStmt,
-		getUserByIDStmt:       q.getUserByIDStmt,
-		getUserByUUIDStmt:     q.getUserByUUIDStmt,
-		getUserByUsernameStmt: q.getUserByUsernameStmt,
-		getUserStatsStmt:      q.getUserStatsStmt,
-		listUsersStmt:         q.listUsersStmt,
-		softDeleteUserStmt:    q.softDeleteUserStmt,
-		updateLastLoginStmt:   q.updateLastLoginStmt,
-		updatePasswordStmt:    q.updatePasswordStmt,
-		updateUserStmt:        q.updateUserStmt,
-		verifyUserStmt:        q.verifyUserStmt,
+		db: tx,
 	}
 }

@@ -122,9 +122,9 @@ sql:
         emit_db_tags: true
 
         # emit_prepared_queries: Generate Prepare() method for pre-compiled SQL statements
-        # ✅ ENABLED: Performance optimization - prepared statements are faster for repeated queries
-        # 🚫 CONFLICTS with emit_methods_with_db_argument (see below)
-        emit_prepared_queries: true
+        # 🚫 DISABLED: Prepared queries cause code duplication between MySQL/SQLite
+        # Both use database/sql and generate identical prepared query code
+        emit_prepared_queries: false
 
         # emit_interface: Generate a Querier interface for the generated methods
         # ✅ ENABLED: Enables dependency injection, mocking, and testing
@@ -461,7 +461,11 @@ sql:
         # All emission options
         emit_json_tags: true
         emit_db_tags: true
-        emit_prepared_queries: true
+        # emit_prepared_queries: Generate Prepare() method for pre-compiled SQL statements
+        # 🚫 DISABLED: Prepared queries cause code duplication between MySQL/SQLite
+        # Both use database/sql and generate identical prepared query code
+        emit_prepared_queries: false
+
         emit_interface: true
         emit_exact_table_names: true
         emit_empty_slices: true

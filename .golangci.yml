@@ -133,4 +133,8 @@ formatters:
     - goimports
     - gofumpt
     - golines
-issues: {}
+issues:
+  exclude-dirs:
+    - internal/db/mysql
+    - internal/db/sqlite
+    - internal/db/postgres

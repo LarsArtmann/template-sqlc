@@ -42,7 +42,7 @@ sql:
         emit_methods_with_db_argument: false
         emit_params_struct_pointers: true
         emit_pointers_for_null_types: false
-        emit_prepared_queries: true
+        emit_prepared_queries: false
         emit_result_struct_pointers: true
         emit_sql_as_comment: true
         inflection_exclude_table_names:
@@ -113,7 +113,7 @@ sql:
         emit_methods_with_db_argument: false
         emit_params_struct_pointers: true
         emit_pointers_for_null_types: true
-        emit_prepared_queries: true
+        emit_prepared_queries: false
         emit_result_struct_pointers: true
         emit_sql_as_comment: true
         inflection_exclude_table_names:
@@ -198,7 +198,7 @@ sql:
         emit_methods_with_db_argument: false
         emit_params_struct_pointers: true
         emit_pointers_for_null_types: true
-        emit_prepared_queries: true
+        emit_prepared_queries: false
         emit_result_struct_pointers: true
         emit_sql_as_comment: true
         inflection_exclude_table_names:

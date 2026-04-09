@@ -23,7 +23,7 @@ SELECT COUNT(*) FROM users WHERE is_active = TRUE
 //
 //	SELECT COUNT(*) FROM users WHERE is_active = TRUE
 func (q *Queries) CountActiveUsers(ctx context.Context) (int64, error) {
-	row := q.queryRow(ctx, q.countActiveUsersStmt, CountActiveUsers)
+	row := q.db.QueryRowContext(ctx, CountActiveUsers)
 	var count int64
 	err := row.Scan(&count)
 	return count, err
@@ -58,7 +58,7 @@ type CreateUserParams struct {
 //	    ?, ?, ?, ?, ?, ?, ?, ?
 //	)
 func (q *Queries) CreateUser(ctx context.Context, arg *CreateUserParams) (sql.Result, error) {
-	return q.exec(ctx, q.createUserStmt, CreateUser,
+	return q.db.ExecContext(ctx, CreateUser,
 		arg.UUID,
 		arg.Email,
 		arg.Username,
@@ -78,7 +78,7 @@ SELECT id, uuid, email, username, password_hash, first_name, last_name, created_
 //
 //	SELECT id, uuid, email, username, password_hash, first_name, last_name, created_at, updated_at, last_login_at, is_active, is_verified, profile_metadata FROM users WHERE email = ? AND is_active = TRUE
 func (q *Queries) GetUserByEmail(ctx context.Context, email string) (*Users, error) {
-	row := q.queryRow(ctx, q.getUserByEmailStmt, GetUserByEmail, email)
+	row := q.db.QueryRowContext(ctx, GetUserByEmail, email)
 	var i Users
 	err := row.Scan(
 		&i.ID,
@@ -106,7 +106,7 @@ SELECT id, uuid, email, username, password_hash, first_name, last_name, created_
 //
 //	SELECT id, uuid, email, username, password_hash, first_name, last_name, created_at, updated_at, last_login_at, is_active, is_verified, profile_metadata FROM users WHERE id = ? AND is_active = TRUE
 func (q *Queries) GetUserByID(ctx context.Context, id uint64) (*Users, error) {
-	row := q.queryRow(ctx, q.getUserByIDStmt, GetUserByID, id)
+	row := q.db.QueryRowContext(ctx, GetUserByID, id)
 	var i Users
 	err := row.Scan(
 		&i.ID,
@@ -134,7 +134,7 @@ SELECT id, uuid, email, username, password_hash, first_name, last_name, created_
 //
 //	SELECT id, uuid, email, username, password_hash, first_name, last_name, created_at, updated_at, last_login_at, is_active, is_verified, profile_metadata FROM users WHERE uuid = ? AND is_active = TRUE
 func (q *Queries) GetUserByUUID(ctx context.Context, uuid string) (*Users, error) {
-	row := q.queryRow(ctx, q.getUserByUUIDStmt, GetUserByUUID, uuid)
+	row := q.db.QueryRowContext(ctx, GetUserByUUID, uuid)
 	var i Users
 	err := row.Scan(
 		&i.ID,
@@ -162,7 +162,7 @@ SELECT id, uuid, email, username, password_hash, first_name, last_name, created_
 //
 //	SELECT id, uuid, email, username, password_hash, first_name, last_name, created_at, updated_at, last_login_at, is_active, is_verified, profile_metadata FROM users WHERE username = ? AND is_active = TRUE
 func (q *Queries) GetUserByUsername(ctx context.Context, username string) (*Users, error) {
-	row := q.queryRow(ctx, q.getUserByUsernameStmt, GetUserByUsername, username)
+	row := q.db.QueryRowContext(ctx, GetUserByUsername, username)
 	var i Users
 	err := row.Scan(
 		&i.ID,
@@ -207,7 +207,7 @@ type GetUserStatsRow struct {
 //	    SUM(CASE WHEN last_login_at IS NOT NULL THEN 1 ELSE 0 END) as users_with_logins
 //	FROM users
 func (q *Queries) GetUserStats(ctx context.Context) (*GetUserStatsRow, error) {
-	row := q.queryRow(ctx, q.getUserStatsStmt, GetUserStats)
+	row := q.db.QueryRowContext(ctx, GetUserStats)
 	var i GetUserStatsRow
 	err := row.Scan(
 		&i.TotalUsers,
@@ -237,7 +237,7 @@ type ListUsersParams struct {
 //	ORDER BY created_at DESC
 //	LIMIT ? OFFSET ?
 func (q *Queries) ListUsers(ctx context.Context, arg *ListUsersParams) ([]*Users, error) {
-	rows, err := q.query(ctx, q.listUsersStmt, ListUsers, arg.Limit, arg.Offset)
+	rows, err := q.db.QueryContext(ctx, ListUsers, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -285,7 +285,7 @@ WHERE id = ?
 //	SET is_active = FALSE, updated_at = CURRENT_TIMESTAMP
 //	WHERE id = ?
 func (q *Queries) SoftDeleteUser(ctx context.Context, id uint64) error {
-	_, err := q.exec(ctx, q.softDeleteUserStmt, SoftDeleteUser, id)
+	_, err := q.db.ExecContext(ctx, SoftDeleteUser, id)
 	return err
 }
 
@@ -301,7 +301,7 @@ WHERE id = ?
 //	SET last_login_at = CURRENT_TIMESTAMP
 //	WHERE id = ?
 func (q *Queries) UpdateLastLogin(ctx context.Context, id uint64) error {
-	_, err := q.exec(ctx, q.updateLastLoginStmt, UpdateLastLogin, id)
+	_, err := q.db.ExecContext(ctx, UpdateLastLogin, id)
 	return err
 }
 
@@ -322,7 +322,7 @@ type UpdatePasswordParams struct {
 //	SET password_hash = ?, updated_at = CURRENT_TIMESTAMP
 //	WHERE id = ?
 func (q *Queries) UpdatePassword(ctx context.Context, arg *UpdatePasswordParams) error {
-	_, err := q.exec(ctx, q.updatePasswordStmt, UpdatePassword, arg.PasswordHash, arg.ID)
+	_, err := q.db.ExecContext(ctx, UpdatePassword, arg.PasswordHash, arg.ID)
 	return err
 }
 
@@ -363,7 +363,7 @@ type UpdateUserParams struct {
 //	    is_verified = COALESCE(?, is_verified)
 //	WHERE id = ?
 func (q *Queries) UpdateUser(ctx context.Context, arg *UpdateUserParams) (sql.Result, error) {
-	return q.exec(ctx, q.updateUserStmt, UpdateUser,
+	return q.db.ExecContext(ctx, UpdateUser,
 		arg.Email,
 		arg.Username,
 		arg.FirstName,
@@ -387,6 +387,6 @@ WHERE uuid = ?
 //	SET is_verified = TRUE, updated_at = CURRENT_TIMESTAMP
 //	WHERE uuid = ?
 func (q *Queries) VerifyUser(ctx context.Context, uuid string) error {
-	_, err := q.exec(ctx, q.verifyUserStmt, VerifyUser, uuid)
+	_, err := q.db.ExecContext(ctx, VerifyUser, uuid)
 	return err
 }
