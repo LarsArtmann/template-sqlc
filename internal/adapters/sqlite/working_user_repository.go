@@ -125,7 +125,7 @@ func (r *WorkingSQLiteUserRepository) GetByID(
 		&isVerified, &metadataJSON, &tagsJSON, &createdAt, &updatedAt, &lastLoginAt,
 	)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
+		if stderrors.Is(err, sql.ErrNoRows) {
 			return nil, fmt.Errorf("user %s not found: %w", id, entities.ErrUserNotFound)
 		}
 

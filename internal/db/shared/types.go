@@ -18,19 +18,19 @@ type DBTX interface {
 
 // BaseQueries contains the common fields for Queries struct.
 type BaseQueries struct {
-	db DBTX
+	DB DBTX
 	tx *sql.Tx
 }
 
 // NewBase creates a new BaseQueries instance.
 func NewBase(db DBTX) *BaseQueries {
-	return &BaseQueries{db: db}
+	return &BaseQueries{DB: db}
 }
 
 // WithTx returns a new BaseQueries with the given transaction.
 func (q *BaseQueries) WithTx(tx *sql.Tx) *BaseQueries {
 	return &BaseQueries{
-		db: tx,
+		DB: tx,
 		tx: tx,
 	}
 }

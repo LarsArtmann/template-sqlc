@@ -2,10 +2,6 @@ version: "2"
 run:
   timeout: 5m
   go: 1.26.1
-  build-tags:
-    - goexperiment.goroutineleakprofile
-    - goexperiment.jsonv2
-    - goexperiment.simd
   allow-parallel-runners: true
   allow-serial-runners: true
   issues-exit-code: 1
@@ -134,7 +130,8 @@ formatters:
     - gofumpt
     - golines
 issues:
-  exclude-dirs:
-    - internal/db/mysql
-    - internal/db/sqlite
-    - internal/db/postgres
+  exclusions:
+    paths:
+      - internal/db/mysql
+      - internal/db/sqlite
+      - internal/db/postgres
