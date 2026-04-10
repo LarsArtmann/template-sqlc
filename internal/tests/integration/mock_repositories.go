@@ -48,8 +48,86 @@ func findSessionBy(
 	return nil, entities.ErrSessionNotFound
 }
 
+// MockUserRepositoryStub provides default stub implementations for UserRepository methods.
+// Embed this in mock implementations to avoid duplicating stub code.
+type MockUserRepositoryStub struct{}
+
+// UpdatePassword stub implementation.
+func (MockUserRepositoryStub) UpdatePassword(
+	context.Context,
+	entities.UserID,
+	entities.PasswordHash,
+) error {
+	return nil
+}
+
+// MarkVerified stub implementation.
+func (MockUserRepositoryStub) MarkVerified(context.Context, entities.UserID) error {
+	return nil
+}
+
+// ChangeStatus stub implementation.
+func (MockUserRepositoryStub) ChangeStatus(
+	context.Context,
+	entities.UserID,
+	entities.UserStatus,
+) error {
+	return nil
+}
+
+// Activate stub implementation.
+func (MockUserRepositoryStub) Activate(context.Context, entities.UserID) error {
+	return nil
+}
+
+// Deactivate stub implementation.
+func (MockUserRepositoryStub) Deactivate(context.Context, entities.UserID) error {
+	return nil
+}
+
+// Suspend stub implementation.
+func (MockUserRepositoryStub) Suspend(context.Context, entities.UserID) error {
+	return nil
+}
+
+// ChangeRole stub implementation.
+func (MockUserRepositoryStub) ChangeRole(
+	context.Context,
+	entities.UserID,
+	entities.UserRole,
+) error {
+	return nil
+}
+
+// Update stub implementation.
+func (MockUserRepositoryStub) Update(context.Context, *entities.User) error {
+	return nil
+}
+
+// Search stub implementation.
+func (MockUserRepositoryStub) Search(
+	context.Context,
+	string,
+	entities.UserStatus,
+	int,
+) ([]*entities.User, error) {
+	return []*entities.User{}, nil
+}
+
+// SearchByTags stub implementation.
+func (MockUserRepositoryStub) SearchByTags(
+	context.Context,
+	[]string,
+	entities.UserStatus,
+	int,
+	int,
+) ([]*entities.User, error) {
+	return []*entities.User{}, nil
+}
+
 // MockUserRepository implements UserRepository for testing.
 type MockUserRepository struct {
+	MockUserRepositoryStub
 	users                 map[entities.UserID]*entities.User
 	passwordVerifications map[string]string
 	idCounter             entities.UserID
@@ -59,7 +137,6 @@ func (m *MockUserRepository) Create(ctx context.Context, user *entities.User) er
 	userID := m.idCounter
 	m.idCounter++
 
-	// Set the ID on the user entity so it can be retrieved later
 	user.SetID(userID)
 	m.users[userID] = user
 
@@ -113,10 +190,6 @@ func (m *MockUserRepository) GetByUsername(
 	})
 }
 
-func (m *MockUserRepository) Update(ctx context.Context, user *entities.User) error {
-	return nil
-}
-
 func (m *MockUserRepository) Delete(ctx context.Context, id entities.UserID) error {
 	delete(m.users, id)
 
@@ -137,24 +210,6 @@ func (m *MockUserRepository) List(
 	}
 
 	return result, nil
-}
-
-func (m *MockUserRepository) Search(
-	ctx context.Context,
-	query string,
-	status entities.UserStatus,
-	limit int,
-) ([]*entities.User, error) {
-	return []*entities.User{}, nil
-}
-
-func (m *MockUserRepository) SearchByTags(
-	ctx context.Context,
-	tags []string,
-	status entities.UserStatus,
-	limit, offset int,
-) ([]*entities.User, error) {
-	return []*entities.User{}, nil
 }
 
 func (m *MockUserRepository) CountByStatus(
@@ -198,48 +253,33 @@ func (m *MockUserRepository) VerifyCredentials(
 	return user, nil
 }
 
-func (m *MockUserRepository) UpdatePassword(
-	ctx context.Context,
-	id entities.UserID,
-	password entities.PasswordHash,
-) error {
+// MockSessionRepositoryStub provides default stub implementations for SessionRepository methods.
+// Embed this in mock implementations to avoid duplicating stub code.
+type MockSessionRepositoryStub struct{}
+
+// Update stub implementation.
+func (MockSessionRepositoryStub) Update(context.Context, *entities.UserSession) error {
 	return nil
 }
 
-func (m *MockUserRepository) MarkVerified(ctx context.Context, id entities.UserID) error {
+// DeactivateByToken stub implementation.
+func (MockSessionRepositoryStub) DeactivateByToken(context.Context, entities.SessionToken) error {
 	return nil
 }
 
-func (m *MockUserRepository) ChangeStatus(
-	ctx context.Context,
-	id entities.UserID,
-	status entities.UserStatus,
-) error {
+// DeactivateByUserID stub implementation.
+func (MockSessionRepositoryStub) DeactivateByUserID(context.Context, entities.UserID) error {
 	return nil
 }
 
-func (m *MockUserRepository) Activate(ctx context.Context, id entities.UserID) error {
-	return nil
-}
-
-func (m *MockUserRepository) Deactivate(ctx context.Context, id entities.UserID) error {
-	return nil
-}
-
-func (m *MockUserRepository) Suspend(ctx context.Context, id entities.UserID) error {
-	return nil
-}
-
-func (m *MockUserRepository) ChangeRole(
-	ctx context.Context,
-	id entities.UserID,
-	role entities.UserRole,
-) error {
-	return nil
+// CleanupExpired stub implementation.
+func (MockSessionRepositoryStub) CleanupExpired(context.Context) (int64, error) {
+	return 0, nil
 }
 
 // MockSessionRepository implements SessionRepository for testing.
 type MockSessionRepository struct {
+	MockSessionRepositoryStub
 	sessions  map[entities.SessionID]*entities.UserSession
 	idCounter entities.SessionID
 }
@@ -280,32 +320,10 @@ func (m *MockSessionRepository) GetByUserID(
 	return result, nil
 }
 
-func (m *MockSessionRepository) Update(ctx context.Context, session *entities.UserSession) error {
-	return nil
-}
-
 func (m *MockSessionRepository) Delete(ctx context.Context, id entities.SessionID) error {
 	delete(m.sessions, id)
 
 	return nil
-}
-
-func (m *MockSessionRepository) DeactivateByToken(
-	ctx context.Context,
-	token entities.SessionToken,
-) error {
-	return nil
-}
-
-func (m *MockSessionRepository) DeactivateByUserID(
-	ctx context.Context,
-	userID entities.UserID,
-) error {
-	return nil
-}
-
-func (m *MockSessionRepository) CleanupExpired(ctx context.Context) (int64, error) {
-	return 0, nil
 }
 
 func (m *MockSessionRepository) GetActiveSessions(

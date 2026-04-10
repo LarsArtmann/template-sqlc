@@ -3,6 +3,7 @@ package sqlite
 import (
 	"database/sql"
 	stderrors "errors"
+	"strings"
 
 	apperrors "github.com/LarsArtmann/template-sqlc/pkg/errors"
 )
@@ -30,40 +31,33 @@ func HandleDBError(
 	}
 }
 
-// IsSQLiteUniqueConstraintError checks if error is a SQLite UNIQUE constraint violation.
-func IsSQLiteUniqueConstraintError(err error) bool {
+// isNilOrErrorMsgContains checks if the error message contains any of the given substrings.
+func isNilOrErrorMsgContains(err error, substrs ...string) bool {
 	if err == nil {
 		return false
 	}
 
 	msg := err.Error()
 
-	return contains(msg, "UNIQUE constraint failed") ||
-		contains(msg, "is not unique")
-}
-
-// IsSQLiteSessionTokenConstraintError checks if error is a session token constraint violation.
-func IsSQLiteSessionTokenConstraintError(err error) bool {
-	if err == nil {
-		return false
-	}
-
-	msg := err.Error()
-
-	return contains(msg, "UNIQUE constraint failed: sessions.token") ||
-		contains(msg, "session token already exists")
-}
-
-func contains(s, substr string) bool {
-	return len(s) >= len(substr) && (s == substr || len(s) > 0 && containsHelper(s, substr))
-}
-
-func containsHelper(s, substr string) bool {
-	for i := 0; i <= len(s)-len(substr); i++ {
-		if s[i:i+len(substr)] == substr {
+	for _, substr := range substrs {
+		if strings.Contains(msg, substr) {
 			return true
 		}
 	}
 
 	return false
+}
+
+// IsSQLiteUniqueConstraintError checks if error is a SQLite UNIQUE constraint violation.
+func IsSQLiteUniqueConstraintError(err error) bool {
+	return isNilOrErrorMsgContains(err, "UNIQUE constraint failed", "is not unique")
+}
+
+// IsSQLiteSessionTokenConstraintError checks if error is a session token constraint violation.
+func IsSQLiteSessionTokenConstraintError(err error) bool {
+	return isNilOrErrorMsgContains(
+		err,
+		"UNIQUE constraint failed: sessions.token",
+		"session token already exists",
+	)
 }

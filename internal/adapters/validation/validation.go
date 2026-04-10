@@ -5,9 +5,14 @@ import (
 	"github.com/LarsArtmann/template-sqlc/pkg/errors"
 )
 
+const (
+	maxPaginationLimit = 1000
+	maxSearchLimit    = 100
+)
+
 // ValidatePagination validates pagination parameters.
 func ValidatePagination(limit, offset int) error {
-	if limit <= 0 || limit > 1000 {
+	if !isValidPaginationLimit(limit) {
 		return errors.NewValidationError("limit", "must be between 1 and 1000")
 	}
 
@@ -16,6 +21,10 @@ func ValidatePagination(limit, offset int) error {
 	}
 
 	return nil
+}
+
+func isValidPaginationLimit(limit int) bool {
+	return limit > 0 && limit <= maxPaginationLimit
 }
 
 // ValidateTags validates tags parameter.
@@ -33,7 +42,7 @@ func ValidateTags(tags []string) error {
 
 // ValidateSearchQuery validates search query and limit.
 func ValidateSearchQuery(query string, limit int) error {
-	if len(query) == 0 {
+	if query == "" {
 		return errors.NewValidationError("query", "cannot be empty")
 	}
 
@@ -41,11 +50,15 @@ func ValidateSearchQuery(query string, limit int) error {
 		return errors.NewValidationError("query", "cannot exceed 500 characters")
 	}
 
-	if limit <= 0 || limit > 100 {
+	if !isValidSearchLimit(limit) {
 		return errors.NewValidationError("limit", "must be between 1 and 100")
 	}
 
 	return nil
+}
+
+func isValidSearchLimit(limit int) bool {
+	return limit > 0 && limit <= maxSearchLimit
 }
 
 // Validate validates an entity using its IsValid method.
