@@ -77,6 +77,7 @@ func (c *SQLiteUUIDConverter) DomainToDB(domain uuid.UUID) any {
 	if domain == uuid.Nil {
 		return nil
 	}
+
 	return domain.String()
 }
 
@@ -84,6 +85,7 @@ func (c *SQLiteUUIDConverter) DBToDomain(db any) (uuid.UUID, error) {
 	if db == nil {
 		return uuid.Nil, nil
 	}
+
 	return parseUUIDFromAny(db)
 }
 
@@ -100,6 +102,7 @@ func (c *PostgresUUIDConverter) DBToDomain(db any) (uuid.UUID, error) {
 	if db == nil {
 		return uuid.Nil, nil
 	}
+
 	return parseUUIDFromAny(db)
 }
 
@@ -116,6 +119,7 @@ func (c *MySQLUUIDConverter) DBToDomain(db any) (uuid.UUID, error) {
 	if db == nil {
 		return uuid.Nil, nil
 	}
+
 	return parseUUIDFromAny(db)
 }
 
@@ -128,6 +132,7 @@ func (c *SQLiteTimeConverter) DomainToDB(domain time.Time) any {
 	if domain.IsZero() {
 		return nil
 	}
+
 	return domain
 }
 
@@ -135,12 +140,15 @@ func (c *SQLiteTimeConverter) DBToDomain(db any) (time.Time, error) {
 	if db == nil {
 		return time.Time{}, nil
 	}
+
 	if t, ok := db.(time.Time); ok {
 		return t, nil
 	}
+
 	if str, ok := db.(string); ok {
 		return time.Parse(time.RFC3339, str)
 	}
+
 	return time.Time{}, NewConversionError("expected time or string", db)
 }
 
@@ -155,6 +163,7 @@ func (c *SQLiteBoolConverter) DBToDomain(db any) (bool, error) {
 	if db == nil {
 		return false, nil
 	}
+
 	switch v := db.(type) {
 	case bool:
 		return v, nil
@@ -262,6 +271,7 @@ func convertEnumString[T enum](db string, defaultVal T, typeName string) (T, err
 	if !val.IsValid() {
 		return defaultVal, NewConversionError("invalid "+typeName, db)
 	}
+
 	return val, nil
 }
 
@@ -298,6 +308,7 @@ func (c *DefaultSessionTokenConverter) DBToDomain(db any) (entities.SessionToken
 	if err != nil {
 		return entities.SessionToken{}, err
 	}
+
 	return entities.SessionToken(tokenUUID), nil
 }
 
@@ -350,6 +361,7 @@ func SafeString(value any) string {
 	if value == nil {
 		return ""
 	}
+
 	switch v := value.(type) {
 	case string:
 		return v

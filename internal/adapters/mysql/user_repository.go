@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/LarsArtmann/template-sqlc/internal/adapters"
-	"github.com/LarsArtmann/template-sqlc/internal/adapters/validation"
 	"github.com/LarsArtmann/template-sqlc/internal/domain/entities"
 	"github.com/LarsArtmann/template-sqlc/internal/domain/repositories"
 )
@@ -13,6 +12,7 @@ import (
 // This adapts MySQL-specific types to domain interfaces.
 type MySQLUserRepository struct {
 	*adapters.NotImplementedUserRepository
+
 	db         any
 	converters any
 }
@@ -33,62 +33,40 @@ func (r *MySQLUserRepository) Delete(ctx context.Context, id entities.UserID) er
 
 // List retrieves users with pagination from MySQL.
 func (r *MySQLUserRepository) List(
-	_ context.Context,
-	_ entities.UserStatus,
+	ctx context.Context,
+	status entities.UserStatus,
 	limit, offset int,
 ) ([]*entities.User, error) {
-	err := validation.ValidatePagination(limit, offset)
-	if err != nil {
-		return nil, err
-	}
-
-	return nil, r.NotImplemented("List")
+	return adapters.ListWithPagination(r, ctx, status, limit, offset, "List")
 }
 
 // Search searches users by query in MySQL using FULLTEXT.
 func (r *MySQLUserRepository) Search(
-	_ context.Context,
+	ctx context.Context,
 	query string,
-	_ entities.UserStatus,
+	status entities.UserStatus,
 	limit int,
 ) ([]*entities.User, error) {
-	err := validation.ValidateSearchQuery(query, limit)
-	if err != nil {
-		return nil, err
-	}
-
-	return nil, r.NotImplemented("Search")
+	return adapters.SearchWithValidation(r, ctx, query, status, limit, "Search")
 }
 
 // SearchByTags searches users by tags in MySQL using JSON operations.
 func (r *MySQLUserRepository) SearchByTags(
-	_ context.Context,
+	ctx context.Context,
 	tags []string,
-	_ entities.UserStatus,
+	status entities.UserStatus,
 	limit, offset int,
 ) ([]*entities.User, error) {
-	err := validation.ValidateTags(tags)
-	if err != nil {
-		return nil, err
-	}
-
-	if offset < 0 {
-		offset = 0
-	}
-	_ = offset
-
-	return nil, r.NotImplemented("SearchByTags")
+	return adapters.SearchByTagsWithValidation(r, ctx, tags, status, limit, offset, "SearchByTags")
 }
 
 // ChangeStatus changes user status in MySQL.
 func (r *MySQLUserRepository) ChangeStatus(
-	_ context.Context,
-	_ entities.UserID,
+	ctx context.Context,
+	id entities.UserID,
 	status entities.UserStatus,
 ) error {
-	return validation.ValidateAndExecute(status, "status", "invalid user status", func() error {
-		return r.NotImplemented("ChangeStatus")
-	})
+	return adapters.ChangeStatusWithValidation(r, ctx, id, status, "ChangeStatus")
 }
 
 // Activate activates a user in MySQL.
@@ -108,11 +86,9 @@ func (r *MySQLUserRepository) Suspend(ctx context.Context, id entities.UserID) e
 
 // ChangeRole changes user role in MySQL.
 func (r *MySQLUserRepository) ChangeRole(
-	_ context.Context,
-	_ entities.UserID,
+	ctx context.Context,
+	id entities.UserID,
 	role entities.UserRole,
 ) error {
-	return validation.ValidateAndExecute(role, "role", "invalid user role", func() error {
-		return r.NotImplemented("ChangeRole")
-	})
+	return adapters.ChangeRoleWithValidation(r, ctx, id, role, "ChangeRole")
 }

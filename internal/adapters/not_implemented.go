@@ -15,6 +15,7 @@ type NotImplementedRepository struct{}
 // NotImplementedUserRepository provides stub implementations for UserRepository methods.
 type NotImplementedUserRepository struct {
 	NotImplementedRepository
+
 	dbName string
 }
 
@@ -33,22 +34,34 @@ func (r *NotImplementedUserRepository) Create(_ context.Context, _ *entities.Use
 }
 
 // GetByID is a stub implementation.
-func (r *NotImplementedUserRepository) GetByID(_ context.Context, _ entities.UserID) (*entities.User, error) {
+func (r *NotImplementedUserRepository) GetByID(
+	_ context.Context,
+	_ entities.UserID,
+) (*entities.User, error) {
 	return nil, r.NotImplemented("GetByID")
 }
 
 // GetByUUID is a stub implementation.
-func (r *NotImplementedUserRepository) GetByUUID(_ context.Context, _ entities.UuID) (*entities.User, error) {
+func (r *NotImplementedUserRepository) GetByUUID(
+	_ context.Context,
+	_ entities.UuID,
+) (*entities.User, error) {
 	return nil, r.NotImplemented("GetByUUID")
 }
 
 // GetByEmail is a stub implementation.
-func (r *NotImplementedUserRepository) GetByEmail(_ context.Context, _ entities.Email) (*entities.User, error) {
+func (r *NotImplementedUserRepository) GetByEmail(
+	_ context.Context,
+	_ entities.Email,
+) (*entities.User, error) {
 	return nil, r.NotImplemented("GetByEmail")
 }
 
 // GetByUsername is a stub implementation.
-func (r *NotImplementedUserRepository) GetByUsername(_ context.Context, _ entities.Username) (*entities.User, error) {
+func (r *NotImplementedUserRepository) GetByUsername(
+	_ context.Context,
+	_ entities.Username,
+) (*entities.User, error) {
 	return nil, r.NotImplemented("GetByUsername")
 }
 
@@ -92,7 +105,9 @@ func (r *NotImplementedUserRepository) SearchByTags(
 }
 
 // CountByStatus is a stub implementation.
-func (r *NotImplementedUserRepository) CountByStatus(_ context.Context) (map[entities.UserStatus]int64, error) {
+func (r *NotImplementedUserRepository) CountByStatus(
+	_ context.Context,
+) (map[entities.UserStatus]int64, error) {
 	return nil, r.NotImplemented("CountByStatus")
 }
 
@@ -157,12 +172,13 @@ func (r *NotImplementedUserRepository) ChangeRole(
 	return r.NotImplemented("ChangeRole")
 }
 
-// Ensure NotImplementedUserRepository implements UserRepository
+// Ensure NotImplementedUserRepository implements UserRepository.
 var _ repositories.UserRepository = (*NotImplementedUserRepository)(nil)
 
 // NotImplementedSessionRepository provides stub implementations for SessionRepository methods.
 type NotImplementedSessionRepository struct {
 	NotImplementedRepository
+
 	dbName string
 }
 
@@ -181,7 +197,10 @@ func (r *NotImplementedSessionRepository) Create(_ context.Context, _ *entities.
 }
 
 // GetByToken is a stub implementation.
-func (r *NotImplementedSessionRepository) GetByToken(_ context.Context, _ entities.SessionToken) (*entities.UserSession, error) {
+func (r *NotImplementedSessionRepository) GetByToken(
+	_ context.Context,
+	_ entities.SessionToken,
+) (*entities.UserSession, error) {
 	return nil, r.NotImplemented("GetByToken")
 }
 
@@ -205,12 +224,18 @@ func (r *NotImplementedSessionRepository) Delete(_ context.Context, _ entities.S
 }
 
 // DeactivateByToken is a stub implementation.
-func (r *NotImplementedSessionRepository) DeactivateByToken(_ context.Context, _ entities.SessionToken) error {
+func (r *NotImplementedSessionRepository) DeactivateByToken(
+	_ context.Context,
+	_ entities.SessionToken,
+) error {
 	return r.NotImplemented("DeactivateByToken")
 }
 
 // DeactivateByUserID is a stub implementation.
-func (r *NotImplementedSessionRepository) DeactivateByUserID(_ context.Context, _ entities.UserID) error {
+func (r *NotImplementedSessionRepository) DeactivateByUserID(
+	_ context.Context,
+	_ entities.UserID,
+) error {
 	return r.NotImplemented("DeactivateByUserID")
 }
 
@@ -220,14 +245,19 @@ func (r *NotImplementedSessionRepository) CleanupExpired(_ context.Context) (int
 }
 
 // GetActiveSessions is a stub implementation.
-func (r *NotImplementedSessionRepository) GetActiveSessions(_ context.Context, _ entities.UserID) (int64, error) {
+func (r *NotImplementedSessionRepository) GetActiveSessions(
+	_ context.Context,
+	_ entities.UserID,
+) (int64, error) {
 	return 0, r.NotImplemented("GetActiveSessions")
 }
 
 // GetSessionStats is a stub implementation.
-func (r *NotImplementedSessionRepository) GetSessionStats(_ context.Context) (*entities.SessionStats, error) {
+func (r *NotImplementedSessionRepository) GetSessionStats(
+	_ context.Context,
+) (*entities.SessionStats, error) {
 	return nil, r.NotImplemented("GetSessionStats")
 }
 
-// Ensure NotImplementedSessionRepository implements SessionRepository
+// Ensure NotImplementedSessionRepository implements SessionRepository.
 var _ repositories.SessionRepository = (*NotImplementedSessionRepository)(nil)

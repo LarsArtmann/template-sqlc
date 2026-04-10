@@ -128,6 +128,7 @@ func (MockUserRepositoryStub) SearchByTags(
 // MockUserRepository implements UserRepository for testing.
 type MockUserRepository struct {
 	MockUserRepositoryStub
+
 	users                 map[entities.UserID]*entities.User
 	passwordVerifications map[string]string
 	idCounter             entities.UserID
@@ -280,6 +281,7 @@ func (MockSessionRepositoryStub) CleanupExpired(context.Context) (int64, error) 
 // MockSessionRepository implements SessionRepository for testing.
 type MockSessionRepository struct {
 	MockSessionRepositoryStub
+
 	sessions  map[entities.SessionID]*entities.UserSession
 	idCounter entities.SessionID
 }

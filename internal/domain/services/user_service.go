@@ -42,6 +42,14 @@ func NewUserService(
 	}
 }
 
+// publishEvent publishes an event and logs a warning if it fails.
+func (s *UserService) publishEvent(event *events.UserEvent) {
+	err := s.eventPub.Publish(event)
+	if err != nil {
+		fmt.Printf("warning: failed to publish event: %v\n", err)
+	}
+}
+
 // CreateUser creates a new user with business logic validation.
 func (s *UserService) CreateUser(
 	ctx context.Context,
@@ -165,10 +173,7 @@ func (s *UserService) publishUserCreatedEvent(user *entities.User, de *domainEnt
 		user.Status().String(),
 	)
 
-	err := s.eventPub.Publish(event)
-	if err != nil {
-		fmt.Printf("warning: failed to publish event: %v\n", err)
-	}
+	s.publishEvent(event)
 }
 
 // GetUser retrieves a user by ID with business logic checks.
@@ -206,11 +211,7 @@ func (s *UserService) UpdateUser(
 
 	if len(changes) > 0 {
 		event := events.UserUpdated(user.ID(), changes, user.ID())
-
-		err := s.eventPub.Publish(event)
-		if err != nil {
-			fmt.Printf("warning: failed to publish event: %v\n", err)
-		}
+		s.publishEvent(event)
 	}
 
 	return user, nil
@@ -332,9 +333,7 @@ func (s *UserService) AuthenticateUser(
 
 	// Publish login event
 	event := events.UserLoggedIn(user.ID(), ipAddress, userAgent, "unknown")
-	if err := s.eventPub.Publish(event); err != nil {
-		fmt.Printf("warning: failed to publish event: %v\n", err)
-	}
+	s.publishEvent(event)
 
 	return session, nil
 }

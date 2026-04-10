@@ -138,144 +138,134 @@ func (r *WorkingSQLiteUserRepository) GetByUUID(
 	uuid entities.UuID,
 ) (*entities.User, error) {
 	// Implementation following same pattern as GetByID
-	return nil, fmt.Errorf("implementation in progress - get by UUID %s", uuid)
+	stubPanic()
+
+	return nil, nil
 }
 
 // GetByEmail retrieves a user by email from SQLite.
 func (r *WorkingSQLiteUserRepository) GetByEmail(
-	ctx context.Context,
-	email entities.Email,
+	_ context.Context,
+	_ entities.Email,
 ) (*entities.User, error) {
-	return r.notImplementedGetBy("email", email.String())
+	stubPanic()
+
+	return nil, nil
 }
 
 // GetByUsername retrieves a user by username from SQLite.
 func (r *WorkingSQLiteUserRepository) GetByUsername(
-	ctx context.Context,
-	username entities.Username,
+	_ context.Context,
+	_ entities.Username,
 ) (*entities.User, error) {
-	return r.notImplementedGetBy("username", username.String())
-}
+	stubPanic()
 
-func (r *WorkingSQLiteUserRepository) notImplementedGetBy(
-	fieldName, value string,
-) (*entities.User, error) {
-	return nil, fmt.Errorf("implementation in progress - get by %s %s", fieldName, value)
+	return nil, nil
 }
 
 // Update updates an existing user in SQLite.
-func (r *WorkingSQLiteUserRepository) Update(ctx context.Context, user *entities.User) error {
-	// Implementation with UPDATE query
-	return fmt.Errorf("implementation in progress - update user ID %d", user.ID())
+func (r *WorkingSQLiteUserRepository) Update(_ context.Context, _ *entities.User) error {
+	stubPanic()
+
+	return nil
 }
 
 // Delete soft deletes a user from SQLite.
-func (r *WorkingSQLiteUserRepository) Delete(ctx context.Context, id entities.UserID) error {
-	return notImplemented("delete user", id)
+func (r *WorkingSQLiteUserRepository) Delete(_ context.Context, _ entities.UserID) error {
+	stubPanic()
+
+	return nil
 }
 
 // List retrieves users with pagination from SQLite.
 func (r *WorkingSQLiteUserRepository) List(
-	ctx context.Context,
-	status entities.UserStatus,
-	limit, offset int,
+	_ context.Context,
+	_ entities.UserStatus,
+	_, _ int,
 ) ([]*entities.User, error) {
-	// Implementation with LIMIT and OFFSET
-	return nil, fmt.Errorf(
-		"implementation in progress - list users with status %s, limit %d, offset %d",
-		status.String(),
-		limit,
-		offset,
-	)
+	stubPanic()
+
+	return nil, nil
 }
 
 // Search searches users by query in SQLite.
 func (r *WorkingSQLiteUserRepository) Search(
-	ctx context.Context,
-	query string,
-	status entities.UserStatus,
-	limit int,
+	_ context.Context,
+	_ string,
+	_ entities.UserStatus,
+	_ int,
 ) ([]*entities.User, error) {
-	// Implementation with LIKE or FTS5
-	return nil, fmt.Errorf(
-		"implementation in progress - search users with query '%s', status %s, limit %d",
-		query,
-		status.String(),
-		limit,
-	)
+	stubPanic()
+
+	return nil, nil
 }
 
 // SearchByTags searches users by tags in SQLite.
 func (r *WorkingSQLiteUserRepository) SearchByTags(
-	ctx context.Context,
-	tags []string,
-	status entities.UserStatus,
-	limit, offset int,
+	_ context.Context,
+	_ []string,
+	_ entities.UserStatus,
+	_, _ int,
 ) ([]*entities.User, error) {
-	// Implementation with JSON operations
-	return nil, fmt.Errorf(
-		"implementation in progress - search users by tags %v, status %s, limit %d, offset %d",
-		tags,
-		status.String(),
-		limit,
-		offset,
-	)
+	stubPanic()
+
+	return nil, nil
 }
 
 // CountByStatus counts users by status in SQLite.
 func (r *WorkingSQLiteUserRepository) CountByStatus(
-	ctx context.Context,
+	_ context.Context,
 ) (map[entities.UserStatus]int64, error) {
-	// Implementation with GROUP BY
-	return nil, stderrors.New("implementation in progress - count users by status")
+	stubPanic()
+
+	return nil, nil
 }
 
 // GetStats retrieves user statistics from SQLite.
-func (r *WorkingSQLiteUserRepository) GetStats(ctx context.Context) (*entities.UserStats, error) {
-	// Implementation with aggregate functions
-	return nil, stderrors.New("implementation in progress - get user stats")
+func (r *WorkingSQLiteUserRepository) GetStats(_ context.Context) (*entities.UserStats, error) {
+	stubPanic()
+
+	return nil, nil
 }
 
 // VerifyCredentials verifies user credentials in SQLite.
 func (r *WorkingSQLiteUserRepository) VerifyCredentials(
-	ctx context.Context,
-	email entities.Email,
-	password entities.PasswordHash,
+	_ context.Context,
+	_ entities.Email,
+	_ entities.PasswordHash,
 ) (*entities.User, error) {
-	// Implementation with WHERE clause
-	return nil, fmt.Errorf(
-		"implementation in progress - verify credentials for email %s",
-		email.String(),
-	)
+	stubPanic()
+
+	return nil, nil
 }
 
 // UpdatePassword updates user password in SQLite.
 func (r *WorkingSQLiteUserRepository) UpdatePassword(
-	ctx context.Context,
-	id entities.UserID,
-	password entities.PasswordHash,
+	_ context.Context,
+	_ entities.UserID,
+	_ entities.PasswordHash,
 ) error {
-	// Implementation with UPDATE password_hash
-	return fmt.Errorf("implementation in progress - update password for user ID %d", id)
+	stubPanic()
+
+	return nil
 }
 
 // MarkVerified marks user as verified in SQLite.
-func (r *WorkingSQLiteUserRepository) MarkVerified(ctx context.Context, id entities.UserID) error {
-	return notImplemented("mark user verified", id)
-}
+func (r *WorkingSQLiteUserRepository) MarkVerified(_ context.Context, _ entities.UserID) error {
+	stubPanic()
 
-// notImplemented returns an error indicating the method is not yet implemented.
-func notImplemented(method string, id entities.UserID) error {
-	return fmt.Errorf("implementation in progress - %s for user ID %d", method, id)
+	return nil
 }
 
 // ChangeStatus changes user status in SQLite.
 func (r *WorkingSQLiteUserRepository) ChangeStatus(
-	ctx context.Context,
-	id entities.UserID,
-	status entities.UserStatus,
+	_ context.Context,
+	_ entities.UserID,
+	_ entities.UserStatus,
 ) error {
-	return notImplemented("change status to "+status.String(), id)
+	stubPanic()
+
+	return nil
 }
 
 // Activate activates a user in SQLite.
@@ -295,9 +285,11 @@ func (r *WorkingSQLiteUserRepository) Suspend(ctx context.Context, id entities.U
 
 // ChangeRole changes user role in SQLite.
 func (r *WorkingSQLiteUserRepository) ChangeRole(
-	ctx context.Context,
-	id entities.UserID,
-	role entities.UserRole,
+	_ context.Context,
+	_ entities.UserID,
+	_ entities.UserRole,
 ) error {
-	return notImplemented("change role to "+role.String(), id)
+	stubPanic()
+
+	return nil
 }

@@ -26,32 +26,56 @@ func NewSQLiteUserRepository(db any) repositories.UserRepository {
 
 // Create saves a new user to SQLite.
 func (r *SQLiteUserRepository) Create(_ context.Context, _ *entities.User) error {
-	panic("implement me: use actual sqlc generated code")
+	stubPanic()
+
+	return nil
 }
 
 // GetByID retrieves a user by ID from SQLite.
-func (r *SQLiteUserRepository) GetByID(_ context.Context, _ entities.UserID) (*entities.User, error) {
-	panic("implement me: use actual sqlc generated code")
+func (r *SQLiteUserRepository) GetByID(
+	_ context.Context,
+	_ entities.UserID,
+) (*entities.User, error) {
+	stubPanic()
+
+	return nil, nil
 }
 
 // GetByUUID retrieves a user by UUID from SQLite.
-func (r *SQLiteUserRepository) GetByUUID(_ context.Context, _ entities.UuID) (*entities.User, error) {
-	panic("implement me: use actual sqlc generated code")
+func (r *SQLiteUserRepository) GetByUUID(
+	_ context.Context,
+	_ entities.UuID,
+) (*entities.User, error) {
+	stubPanic()
+
+	return nil, nil
 }
 
 // GetByEmail retrieves a user by email from SQLite.
-func (r *SQLiteUserRepository) GetByEmail(_ context.Context, _ entities.Email) (*entities.User, error) {
-	panic("implement me: use actual sqlc generated code")
+func (r *SQLiteUserRepository) GetByEmail(
+	_ context.Context,
+	_ entities.Email,
+) (*entities.User, error) {
+	stubPanic()
+
+	return nil, nil
 }
 
 // GetByUsername retrieves a user by username from SQLite.
-func (r *SQLiteUserRepository) GetByUsername(_ context.Context, _ entities.Username) (*entities.User, error) {
-	panic("implement me: use actual sqlc generated code")
+func (r *SQLiteUserRepository) GetByUsername(
+	_ context.Context,
+	_ entities.Username,
+) (*entities.User, error) {
+	stubPanic()
+
+	return nil, nil
 }
 
 // Update updates an existing user in SQLite.
 func (r *SQLiteUserRepository) Update(_ context.Context, _ *entities.User) error {
-	panic("implement me: use actual sqlc generated code")
+	stubPanic()
+
+	return nil
 }
 
 // Delete soft deletes a user from SQLite.
@@ -70,7 +94,9 @@ func (r *SQLiteUserRepository) List(
 		return nil, err
 	}
 
-	panic("implement me: use actual sqlc generated code")
+	stubPanic()
+
+	return nil, nil
 }
 
 // Search searches users by query in SQLite.
@@ -85,7 +111,9 @@ func (r *SQLiteUserRepository) Search(
 		return nil, err
 	}
 
-	panic("implement me: use actual sqlc generated code")
+	stubPanic()
+
+	return nil, nil
 }
 
 // SearchByTags searches users by tags in SQLite.
@@ -103,19 +131,28 @@ func (r *SQLiteUserRepository) SearchByTags(
 	if offset < 0 {
 		offset = 0
 	}
+
 	_ = offset
 
-	panic("implement me: use actual sqlc generated code")
+	stubPanic()
+
+	return nil, nil
 }
 
 // CountByStatus counts users by status in SQLite.
-func (r *SQLiteUserRepository) CountByStatus(_ context.Context) (map[entities.UserStatus]int64, error) {
-	panic("implement me: use actual sqlc generated code")
+func (r *SQLiteUserRepository) CountByStatus(
+	_ context.Context,
+) (map[entities.UserStatus]int64, error) {
+	stubPanic()
+
+	return nil, nil
 }
 
 // GetStats retrieves user statistics from SQLite.
 func (r *SQLiteUserRepository) GetStats(_ context.Context) (*entities.UserStats, error) {
-	panic("implement me: use actual sqlc generated code")
+	stubPanic()
+
+	return nil, nil
 }
 
 // VerifyCredentials verifies user credentials in SQLite.
@@ -124,7 +161,9 @@ func (r *SQLiteUserRepository) VerifyCredentials(
 	_ entities.Email,
 	_ entities.PasswordHash,
 ) (*entities.User, error) {
-	panic("implement me: use actual sqlc generated code")
+	stubPanic()
+
+	return nil, nil
 }
 
 // UpdatePassword updates user password in SQLite.
@@ -133,7 +172,9 @@ func (r *SQLiteUserRepository) UpdatePassword(
 	_ entities.UserID,
 	_ entities.PasswordHash,
 ) error {
-	panic("implement me: use actual sqlc generated code")
+	stubPanic()
+
+	return nil
 }
 
 // MarkVerified marks user as verified in SQLite.
@@ -148,7 +189,9 @@ func (r *SQLiteUserRepository) ChangeStatus(
 	status entities.UserStatus,
 ) error {
 	return validation.ValidateAndExecute(status, "status", "invalid user status", func() error {
-		panic("implement me: use actual sqlc generated code")
+		stubPanic()
+
+		return nil
 	})
 }
 
@@ -174,6 +217,8 @@ func (r *SQLiteUserRepository) ChangeRole(
 	role entities.UserRole,
 ) error {
 	return validation.ValidateAndExecute(role, "role", "invalid user role", func() error {
-		panic("implement me: use actual sqlc generated code")
+		stubPanic()
+
+		return nil
 	})
 }

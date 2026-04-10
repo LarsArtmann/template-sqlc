@@ -24,7 +24,9 @@ func NewSQLiteSessionRepository(db any) repositories.SessionRepository {
 
 // Create saves a new session to SQLite.
 func (r *SQLiteSessionRepository) Create(_ context.Context, _ *entities.UserSession) error {
-	panic("implement me: use actual sqlc generated code")
+	stubPanic()
+
+	return nil
 }
 
 // GetByToken retrieves a session by token from SQLite.
@@ -32,7 +34,9 @@ func (r *SQLiteSessionRepository) GetByToken(
 	_ context.Context,
 	_ entities.SessionToken,
 ) (*entities.UserSession, error) {
-	panic("implement me: use actual sqlc generated code")
+	stubPanic()
+
+	return nil, nil
 }
 
 // GetByUserID retrieves sessions by user ID from SQLite.
@@ -41,12 +45,16 @@ func (r *SQLiteSessionRepository) GetByUserID(
 	_ entities.UserID,
 	_ bool,
 ) ([]*entities.UserSession, error) {
-	panic("implement me: use actual sqlc generated code")
+	stubPanic()
+
+	return nil, nil
 }
 
 // Update updates a session in SQLite.
 func (r *SQLiteSessionRepository) Update(_ context.Context, _ *entities.UserSession) error {
-	panic("implement me: use actual sqlc generated code")
+	stubPanic()
+
+	return nil
 }
 
 // Delete removes a session from SQLite.
@@ -59,7 +67,9 @@ func (r *SQLiteSessionRepository) DeactivateByToken(
 	_ context.Context,
 	_ entities.SessionToken,
 ) error {
-	panic("implement me: use actual sqlc generated code")
+	stubPanic()
+
+	return nil
 }
 
 // DeactivateByUserID deactivates all sessions for a user in SQLite.
@@ -72,7 +82,9 @@ func (r *SQLiteSessionRepository) DeactivateByUserID(
 
 // CleanupExpired removes expired sessions from SQLite.
 func (r *SQLiteSessionRepository) CleanupExpired(_ context.Context) (int64, error) {
-	panic("implement me: use actual sqlc generated code")
+	stubPanic()
+
+	return 0, nil
 }
 
 // GetActiveSessions returns count of active sessions for a user in SQLite.
@@ -80,12 +92,16 @@ func (r *SQLiteSessionRepository) GetActiveSessions(
 	_ context.Context,
 	_ entities.UserID,
 ) (int64, error) {
-	panic("implement me: use actual sqlc generated code")
+	stubPanic()
+
+	return 0, nil
 }
 
 // GetSessionStats returns session statistics from SQLite.
 func (r *SQLiteSessionRepository) GetSessionStats(
 	_ context.Context,
 ) (*entities.SessionStats, error) {
-	panic("implement me: use actual sqlc generated code")
+	stubPanic()
+
+	return nil, nil
 }
