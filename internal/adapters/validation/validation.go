@@ -48,11 +48,6 @@ func ValidateSearchQuery(query string, limit int) error {
 	return nil
 }
 
-// Validatable is an interface for entities that can validate themselves.
-type Validatable interface {
-	IsValid() bool
-}
-
 // Validate validates an entity using its IsValid method.
 func Validate[T interface{ IsValid() bool }](entity T, fieldName, invalidMessage string) error {
 	if !entity.IsValid() {
@@ -60,4 +55,18 @@ func Validate[T interface{ IsValid() bool }](entity T, fieldName, invalidMessage
 	}
 
 	return nil
+}
+
+// ValidateAndExecute validates an entity and executes the update function if validation passes.
+func ValidateAndExecute[T interface{ IsValid() bool }](
+	entity T,
+	fieldName, invalidMessage string,
+	updateFn func() error,
+) error {
+	err := Validate(entity, fieldName, invalidMessage)
+	if err != nil {
+		return err
+	}
+
+	return updateFn()
 }

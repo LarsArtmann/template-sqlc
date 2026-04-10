@@ -164,6 +164,7 @@ func (s *UserService) publishUserCreatedEvent(user *entities.User, de *domainEnt
 		user.Role().String(),
 		user.Status().String(),
 	)
+
 	err := s.eventPub.Publish(event)
 	if err != nil {
 		fmt.Printf("warning: failed to publish event: %v\n", err)
@@ -205,6 +206,7 @@ func (s *UserService) UpdateUser(
 
 	if len(changes) > 0 {
 		event := events.UserUpdated(user.ID(), changes, user.ID())
+
 		err := s.eventPub.Publish(event)
 		if err != nil {
 			fmt.Printf("warning: failed to publish event: %v\n", err)

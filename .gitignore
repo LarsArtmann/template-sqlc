@@ -65,3 +65,5 @@ testdata/*.db
 .claude/settings.local.json
 # Dependencies
 node_modules/
+# Build artifacts
+/template-sqlc

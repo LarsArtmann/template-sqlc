@@ -26,18 +26,9 @@ type MySQLUserRepository struct {
 // NewMySQLUserRepository creates a new MySQL user repository.
 func NewMySQLUserRepository(db *sql.DB) repositories.UserRepository {
 	return &MySQLUserRepository{
-		db:     db,
-		mapper: mappers.NewUserMapper(),
-		converters: &converters.ConverterSet{
-			UUID:     converters.NewUUIDConverter("mysql"),
-			Time:     converters.NewTimeConverter("mysql"),
-			Bool:     converters.NewBoolConverter("mysql"),
-			Email:    converters.NewDefaultEmailConverter(),
-			Username: converters.NewDefaultUsernameConverter(),
-			Password: converters.NewDefaultPasswordHashConverter(),
-			Status:   converters.NewDefaultUserStatusConverter(),
-			Role:     converters.NewDefaultUserRoleConverter(),
-		},
+		db:         db,
+		mapper:     mappers.NewUserMapper(),
+		converters: converters.NewConverterSet(converters.DbTypeMySQL),
 	}
 }
 
@@ -243,43 +234,13 @@ func (r *MySQLUserRepository) MarkVerified(ctx context.Context, id entities.User
 	return entities.StubNotImplemented("MarkVerified", "MySQL")
 }
 
-// validateAndUpdateStatus validates and updates user status.
-func (r *MySQLUserRepository) validateAndUpdateStatus(
-	_ context.Context,
-	_ entities.UserID,
-	status entities.UserStatus,
-	updateFn func() error,
-) error {
-	err := validation.Validate(status, "status", "invalid user status")
-	if err != nil {
-		return err
-	}
-
-	return updateFn()
-}
-
-// validateAndUpdateRole validates and updates user role.
-func (r *MySQLUserRepository) validateAndUpdateRole(
-	_ context.Context,
-	_ entities.UserID,
-	role entities.UserRole,
-	updateFn func() error,
-) error {
-	err := validation.Validate(role, "role", "invalid user role")
-	if err != nil {
-		return err
-	}
-
-	return updateFn()
-}
-
 // ChangeStatus changes user status in MySQL.
 func (r *MySQLUserRepository) ChangeStatus(
 	ctx context.Context,
 	id entities.UserID,
 	status entities.UserStatus,
 ) error {
-	return r.validateAndUpdateStatus(ctx, id, status, func() error {
+	return validation.ValidateAndExecute(status, "status", "invalid user status", func() error {
 		panic("implement me: use actual sqlc generated code for MySQL")
 	})
 }
@@ -305,7 +266,7 @@ func (r *MySQLUserRepository) ChangeRole(
 	id entities.UserID,
 	role entities.UserRole,
 ) error {
-	return r.validateAndUpdateRole(ctx, id, role, func() error {
+	return validation.ValidateAndExecute(role, "role", "invalid user role", func() error {
 		panic("implement me: use actual sqlc generated code for MySQL")
 	})
 }

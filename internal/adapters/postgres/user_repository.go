@@ -26,18 +26,9 @@ type PostgresUserRepository struct {
 // NewPostgresUserRepository creates a new PostgreSQL user repository.
 func NewPostgresUserRepository(pool *pgxpool.Pool) repositories.UserRepository {
 	return &PostgresUserRepository{
-		pool:   pool,
-		mapper: mappers.NewUserMapper(),
-		converters: &converters.ConverterSet{
-			UUID:     converters.NewUUIDConverter("postgres"),
-			Time:     converters.NewTimeConverter("postgres"),
-			Bool:     converters.NewBoolConverter("postgres"),
-			Email:    converters.NewDefaultEmailConverter(),
-			Username: converters.NewDefaultUsernameConverter(),
-			Password: converters.NewDefaultPasswordHashConverter(),
-			Status:   converters.NewDefaultUserStatusConverter(),
-			Role:     converters.NewDefaultUserRoleConverter(),
-		},
+		pool:       pool,
+		mapper:     mappers.NewUserMapper(),
+		converters: converters.NewConverterSet(converters.DbTypePostgres),
 	}
 }
 
@@ -238,43 +229,13 @@ func (r *PostgresUserRepository) MarkVerified(ctx context.Context, id entities.U
 	return entities.StubNotImplemented("MarkVerified", "PostgreSQL")
 }
 
-// validateAndUpdateStatus validates and updates user status.
-func (r *PostgresUserRepository) validateAndUpdateStatus(
-	_ context.Context,
-	_ entities.UserID,
-	status entities.UserStatus,
-	updateFn func() error,
-) error {
-	err := validation.Validate(status, "status", "invalid user status")
-	if err != nil {
-		return err
-	}
-
-	return updateFn()
-}
-
-// validateAndUpdateRole validates and updates user role.
-func (r *PostgresUserRepository) validateAndUpdateRole(
-	_ context.Context,
-	_ entities.UserID,
-	role entities.UserRole,
-	updateFn func() error,
-) error {
-	err := validation.Validate(role, "role", "invalid user role")
-	if err != nil {
-		return err
-	}
-
-	return updateFn()
-}
-
 // ChangeStatus changes user status in PostgreSQL.
 func (r *PostgresUserRepository) ChangeStatus(
 	ctx context.Context,
 	id entities.UserID,
 	status entities.UserStatus,
 ) error {
-	return r.validateAndUpdateStatus(ctx, id, status, func() error {
+	return validation.ValidateAndExecute(status, "status", "invalid user status", func() error {
 		panic("implement me: use actual sqlc generated code for PostgreSQL")
 	})
 }
@@ -300,7 +261,7 @@ func (r *PostgresUserRepository) ChangeRole(
 	id entities.UserID,
 	role entities.UserRole,
 ) error {
-	return r.validateAndUpdateRole(ctx, id, role, func() error {
+	return validation.ValidateAndExecute(role, "role", "invalid user role", func() error {
 		panic("implement me: use actual sqlc generated code for PostgreSQL")
 	})
 }

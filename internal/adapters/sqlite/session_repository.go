@@ -16,18 +16,14 @@ import (
 type SQLiteSessionRepository struct {
 	db         *sql.DB
 	mapper     mappers.UserMapper
-	converters *ConverterSet
+	converters *converters.ConverterSet
 }
 
 // NewSQLiteSessionRepository creates a new SQLite session repository.
 func NewSQLiteSessionRepository(db *sql.DB) repositories.SessionRepository {
 	return &SQLiteSessionRepository{
-		db: db,
-		converters: &ConverterSet{
-			SessionToken: converters.NewDefaultSessionTokenConverter(),
-			Time:         converters.NewTimeConverter("sqlite"),
-			Bool:         converters.NewBoolConverter("sqlite"),
-		},
+		db:         db,
+		converters: converters.NewConverterSet(converters.DbTypeSQLite),
 	}
 }
 

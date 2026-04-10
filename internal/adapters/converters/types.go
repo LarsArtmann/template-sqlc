@@ -406,14 +406,30 @@ func (c *DefaultSessionTokenConverter) DBToDomain(db any) (entities.SessionToken
 
 // ConverterSet holds all type converters for user repository operations.
 type ConverterSet struct {
-	UUID     UUIDConverter
-	Time     TimeConverter
-	Bool     BoolConverter
-	Email    EmailConverter
-	Username UsernameConverter
-	Password PasswordHashConverter
-	Status   UserStatusConverter
-	Role     UserRoleConverter
+	UUID         UUIDConverter
+	Time         TimeConverter
+	Bool         BoolConverter
+	Email        EmailConverter
+	Username     UsernameConverter
+	Password     PasswordHashConverter
+	Status       UserStatusConverter
+	Role         UserRoleConverter
+	SessionToken SessionTokenConverter
+}
+
+// NewConverterSet creates a new ConverterSet for the specified database type.
+func NewConverterSet(database string) *ConverterSet {
+	return &ConverterSet{
+		UUID:         NewUUIDConverter(database),
+		Time:         NewTimeConverter(database),
+		Bool:         NewBoolConverter(database),
+		Email:        NewDefaultEmailConverter(),
+		Username:     NewDefaultUsernameConverter(),
+		Password:     NewDefaultPasswordHashConverter(),
+		Status:       NewDefaultUserStatusConverter(),
+		Role:         NewDefaultUserRoleConverter(),
+		SessionToken: NewDefaultSessionTokenConverter(),
+	}
 }
 
 // Helper functions

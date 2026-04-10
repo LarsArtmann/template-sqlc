@@ -18,24 +18,15 @@ import (
 type WorkingSQLiteUserRepository struct {
 	db         *sql.DB
 	mapper     mappers.UserMapper
-	converters *ConverterSet
+	converters *converters.ConverterSet
 }
 
 // NewWorkingSQLiteUserRepository creates a new working SQLite user repository.
 func NewWorkingSQLiteUserRepository(db *sql.DB) repositories.UserRepository {
 	return &WorkingSQLiteUserRepository{
-		db:     db,
-		mapper: mappers.UserMapper{},
-		converters: &ConverterSet{
-			UUID:     converters.NewUUIDConverter("sqlite"),
-			Time:     converters.NewTimeConverter("sqlite"),
-			Bool:     converters.NewBoolConverter("sqlite"),
-			Email:    converters.NewDefaultEmailConverter(),
-			Username: converters.NewDefaultUsernameConverter(),
-			Password: converters.NewDefaultPasswordHashConverter(),
-			Status:   converters.NewDefaultUserStatusConverter(),
-			Role:     converters.NewDefaultUserRoleConverter(),
-		},
+		db:         db,
+		mapper:     mappers.UserMapper{},
+		converters: converters.NewConverterSet(converters.DbTypeSQLite),
 	}
 }
 

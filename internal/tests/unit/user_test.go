@@ -32,10 +32,8 @@ func runValidatableTests[T Validatable](t *testing.T, tests []ValidatableTestCas
 	}
 }
 
-// validUserTestCase creates a valid user test case with the given field values.
-func validUserTestCase(
-	name, email, username, password, firstName, lastName, status, role string,
-) struct {
+// UserCreationTestCase is a test case for user creation validation.
+type UserCreationTestCase struct {
 	name        string
 	email       string
 	username    string
@@ -46,19 +44,13 @@ func validUserTestCase(
 	role        string
 	expectError bool
 	errorType   error
-} {
-	return struct {
-		name        string
-		email       string
-		username    string
-		password    string
-		firstName   string
-		lastName    string
-		status      string
-		role        string
-		expectError bool
-		errorType   error
-	}{
+}
+
+// validUserTestCase creates a valid user test case with the given field values.
+func validUserTestCase(
+	name, email, username, password, firstName, lastName, status, role string,
+) UserCreationTestCase {
+	return UserCreationTestCase{
 		name:        name,
 		email:       email,
 		username:    username,
@@ -94,18 +86,7 @@ func testEntityValidation[T valueObject](
 }
 
 func TestUserCreation(t *testing.T) {
-	tests := []struct {
-		name        string
-		email       string
-		username    string
-		password    string
-		firstName   string
-		lastName    string
-		status      string
-		role        string
-		expectError bool
-		errorType   error
-	}{
+	tests := []UserCreationTestCase{
 		validUserTestCase(
 			"valid user",
 			"test@example.com",
@@ -374,18 +355,7 @@ func TestUserID(t *testing.T) {
 }
 
 // generateInvalidStatusTestCase creates a test case for invalid status validation.
-func generateInvalidStatusTestCase(invalidStatus string, expectedError error) struct {
-	name        string
-	email       string
-	username    string
-	password    string
-	firstName   string
-	lastName    string
-	status      string
-	role        string
-	expectError bool
-	errorType   error
-} {
+func generateInvalidStatusTestCase(invalidStatus string, expectedError error) UserCreationTestCase {
 	base := validUserTestCase(
 		"invalid status",
 		"test@example.com",
@@ -403,18 +373,7 @@ func generateInvalidStatusTestCase(invalidStatus string, expectedError error) st
 }
 
 // generateInvalidRoleTestCase creates a test case for invalid role validation.
-func generateInvalidRoleTestCase(invalidRole string, expectedError error) struct {
-	name        string
-	email       string
-	username    string
-	password    string
-	firstName   string
-	lastName    string
-	status      string
-	role        string
-	expectError bool
-	errorType   error
-} {
+func generateInvalidRoleTestCase(invalidRole string, expectedError error) UserCreationTestCase {
 	base := validUserTestCase(
 		"invalid role",
 		"test@example.com",

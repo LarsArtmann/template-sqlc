@@ -18,36 +18,14 @@ import (
 type SQLiteUserRepository struct {
 	db         *sql.DB
 	mapper     mappers.UserMapper
-	converters *ConverterSet
-}
-
-// ConverterSet holds all type converters for SQLite.
-type ConverterSet struct {
-	UUID         converters.UUIDConverter
-	Time         converters.TimeConverter
-	Bool         converters.BoolConverter
-	Email        *converters.DefaultEmailConverter
-	Username     *converters.DefaultUsernameConverter
-	Password     *converters.DefaultPasswordHashConverter
-	Status       *converters.DefaultUserStatusConverter
-	Role         *converters.DefaultUserRoleConverter
-	SessionToken *converters.DefaultSessionTokenConverter
+	converters *converters.ConverterSet
 }
 
 // NewSQLiteUserRepository creates a new SQLite user repository.
 func NewSQLiteUserRepository(db *sql.DB) repositories.UserRepository {
 	return &SQLiteUserRepository{
-		db: db,
-		converters: &ConverterSet{
-			UUID:     converters.NewUUIDConverter("sqlite"),
-			Time:     converters.NewTimeConverter("sqlite"),
-			Bool:     converters.NewBoolConverter("sqlite"),
-			Email:    converters.NewDefaultEmailConverter(),
-			Username: converters.NewDefaultUsernameConverter(),
-			Password: converters.NewDefaultPasswordHashConverter(),
-			Status:   converters.NewDefaultUserStatusConverter(),
-			Role:     converters.NewDefaultUserRoleConverter(),
-		},
+		db:         db,
+		converters: converters.NewConverterSet(converters.DbTypeSQLite),
 	}
 }
 
@@ -253,43 +231,13 @@ func (r *SQLiteUserRepository) MarkVerified(ctx context.Context, id entities.Use
 	return entities.StubNotImplemented("MarkVerified", "SQLite")
 }
 
-// validateAndUpdateStatus validates and updates user status.
-func (r *SQLiteUserRepository) validateAndUpdateStatus(
-	_ context.Context,
-	_ entities.UserID,
-	status entities.UserStatus,
-	updateFn func() error,
-) error {
-	err := validation.Validate(status, "status", "invalid user status")
-	if err != nil {
-		return err
-	}
-
-	return updateFn()
-}
-
-// validateAndUpdateRole validates and updates user role.
-func (r *SQLiteUserRepository) validateAndUpdateRole(
-	_ context.Context,
-	_ entities.UserID,
-	role entities.UserRole,
-	updateFn func() error,
-) error {
-	err := validation.Validate(role, "role", "invalid user role")
-	if err != nil {
-		return err
-	}
-
-	return updateFn()
-}
-
 // ChangeStatus changes user status in SQLite.
 func (r *SQLiteUserRepository) ChangeStatus(
 	ctx context.Context,
 	id entities.UserID,
 	status entities.UserStatus,
 ) error {
-	return r.validateAndUpdateStatus(ctx, id, status, func() error {
+	return validation.ValidateAndExecute(status, "status", "invalid user status", func() error {
 		panic("implement me: use actual sqlc generated code")
 	})
 }
@@ -315,7 +263,7 @@ func (r *SQLiteUserRepository) ChangeRole(
 	id entities.UserID,
 	role entities.UserRole,
 ) error {
-	return r.validateAndUpdateRole(ctx, id, role, func() error {
+	return validation.ValidateAndExecute(role, "role", "invalid user role", func() error {
 		panic("implement me: use actual sqlc generated code")
 	})
 }
