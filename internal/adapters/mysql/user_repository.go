@@ -21,8 +21,8 @@ type MySQLUserRepository struct {
 func NewMySQLUserRepository(db any) repositories.UserRepository {
 	return &MySQLUserRepository{
 		NotImplementedUserRepository: adapters.NewNotImplementedUserRepository("MySQL"),
-		db:         db,
-		converters: nil,
+		db:                           db,
+		converters:                   nil,
 	}
 }
 

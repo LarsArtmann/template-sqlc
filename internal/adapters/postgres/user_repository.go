@@ -21,8 +21,8 @@ type PostgresUserRepository struct {
 func NewPostgresUserRepository(pool any) repositories.UserRepository {
 	return &PostgresUserRepository{
 		NotImplementedUserRepository: adapters.NewNotImplementedUserRepository("PostgreSQL"),
-		pool:       pool,
-		converters: nil,
+		pool:                         pool,
+		converters:                   nil,
 	}
 }
 

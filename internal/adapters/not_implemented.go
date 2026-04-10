@@ -66,7 +66,7 @@ func (r *NotImplementedUserRepository) Delete(_ context.Context, _ entities.User
 func (r *NotImplementedUserRepository) List(
 	_ context.Context,
 	_ entities.UserStatus,
-	_ int, _ int,
+	_, _ int,
 ) ([]*entities.User, error) {
 	return nil, r.NotImplemented("List")
 }
@@ -86,7 +86,7 @@ func (r *NotImplementedUserRepository) SearchByTags(
 	_ context.Context,
 	_ []string,
 	_ entities.UserStatus,
-	_ int, _ int,
+	_, _ int,
 ) ([]*entities.User, error) {
 	return nil, r.NotImplemented("SearchByTags")
 }

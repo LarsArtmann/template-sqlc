@@ -7,7 +7,7 @@ import (
 
 const (
 	maxPaginationLimit = 1000
-	maxSearchLimit    = 100
+	maxSearchLimit     = 100
 )
 
 // ValidatePagination validates pagination parameters.

@@ -196,8 +196,8 @@ func NewUUIDConverter(database string) UUIDConverter {
 	}
 }
 
-func NewTimeConverter(_ string) TimeConverter     { return NewSQLiteTimeConverter() }
-func NewBoolConverter(_ string) BoolConverter       { return NewSQLiteBoolConverter() }
+func NewTimeConverter(_ string) TimeConverter { return NewSQLiteTimeConverter() }
+func NewBoolConverter(_ string) BoolConverter { return NewSQLiteBoolConverter() }
 
 // Default converters
 
@@ -215,7 +215,9 @@ type DefaultUsernameConverter struct{}
 
 func NewDefaultUsernameConverter() *DefaultUsernameConverter { return &DefaultUsernameConverter{} }
 
-func (c *DefaultUsernameConverter) DomainToDB(domain entities.Username) string { return domain.String() }
+func (c *DefaultUsernameConverter) DomainToDB(domain entities.Username) string {
+	return domain.String()
+}
 
 func (c *DefaultUsernameConverter) DBToDomain(db string) (entities.Username, error) {
 	return convertSimpleValue(db, entities.NewUsername)
@@ -223,9 +225,13 @@ func (c *DefaultUsernameConverter) DBToDomain(db string) (entities.Username, err
 
 type DefaultPasswordHashConverter struct{}
 
-func NewDefaultPasswordHashConverter() *DefaultPasswordHashConverter { return &DefaultPasswordHashConverter{} }
+func NewDefaultPasswordHashConverter() *DefaultPasswordHashConverter {
+	return &DefaultPasswordHashConverter{}
+}
 
-func (c *DefaultPasswordHashConverter) DomainToDB(domain entities.PasswordHash) string { return domain.String() }
+func (c *DefaultPasswordHashConverter) DomainToDB(domain entities.PasswordHash) string {
+	return domain.String()
+}
 
 func (c *DefaultPasswordHashConverter) DBToDomain(db string) (entities.PasswordHash, error) {
 	return convertSimpleValue(db, entities.NewPasswordHash)
@@ -233,9 +239,13 @@ func (c *DefaultPasswordHashConverter) DBToDomain(db string) (entities.PasswordH
 
 type DefaultUserStatusConverter struct{}
 
-func NewDefaultUserStatusConverter() *DefaultUserStatusConverter { return &DefaultUserStatusConverter{} }
+func NewDefaultUserStatusConverter() *DefaultUserStatusConverter {
+	return &DefaultUserStatusConverter{}
+}
 
-func (c *DefaultUserStatusConverter) DomainToDB(domain entities.UserStatus) string { return domain.String() }
+func (c *DefaultUserStatusConverter) DomainToDB(domain entities.UserStatus) string {
+	return domain.String()
+}
 
 func (c *DefaultUserStatusConverter) DBToDomain(db string) (entities.UserStatus, error) {
 	return convertEnumString(db, entities.UserStatusActive, "user status")
@@ -265,7 +275,9 @@ type DefaultUserRoleConverter struct{}
 
 func NewDefaultUserRoleConverter() *DefaultUserRoleConverter { return &DefaultUserRoleConverter{} }
 
-func (c *DefaultUserRoleConverter) DomainToDB(domain entities.UserRole) string { return domain.String() }
+func (c *DefaultUserRoleConverter) DomainToDB(domain entities.UserRole) string {
+	return domain.String()
+}
 
 func (c *DefaultUserRoleConverter) DBToDomain(db string) (entities.UserRole, error) {
 	return convertEnumString(db, entities.UserRoleUser, "user role")
@@ -273,7 +285,9 @@ func (c *DefaultUserRoleConverter) DBToDomain(db string) (entities.UserRole, err
 
 type DefaultSessionTokenConverter struct{}
 
-func NewDefaultSessionTokenConverter() *DefaultSessionTokenConverter { return &DefaultSessionTokenConverter{} }
+func NewDefaultSessionTokenConverter() *DefaultSessionTokenConverter {
+	return &DefaultSessionTokenConverter{}
+}
 
 func (c *DefaultSessionTokenConverter) DomainToDB(domain entities.SessionToken) any {
 	return domain.UUID().String()
