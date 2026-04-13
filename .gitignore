@@ -67,3 +67,5 @@ testdata/*.db
 node_modules/
 # Build artifacts
 /template-sqlc
+Copy/paste detection report
+/report/jscpd-report.json
