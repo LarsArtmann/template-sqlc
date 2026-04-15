@@ -102,7 +102,3 @@ func ChangeRoleWithValidation[T NotImplementedMethods](
 	})
 }
 
-// PanicStub returns a panic with a message indicating the method needs implementation.
-func PanicStub(methodName string) {
-	panic("implement me: use actual sqlc generated code")
-}

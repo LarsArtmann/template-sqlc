@@ -3,8 +3,8 @@ package sqlite
 import (
 	"context"
 
+	"github.com/LarsArtmann/template-sqlc/internal/adapters"
 	"github.com/LarsArtmann/template-sqlc/internal/adapters/converters"
-	"github.com/LarsArtmann/template-sqlc/internal/adapters/validation"
 	"github.com/LarsArtmann/template-sqlc/internal/domain/entities"
 	"github.com/LarsArtmann/template-sqlc/internal/domain/repositories"
 )
@@ -12,6 +12,8 @@ import (
 // SQLiteUserRepository implements UserRepository for SQLite
 // This adapts SQLite-specific types to domain interfaces.
 type SQLiteUserRepository struct {
+	*adapters.NotImplementedUserRepository
+
 	db         any
 	converters *converters.ConverterSet
 }
@@ -19,180 +21,48 @@ type SQLiteUserRepository struct {
 // NewSQLiteUserRepository creates a new SQLite user repository.
 func NewSQLiteUserRepository(db any) repositories.UserRepository {
 	return &SQLiteUserRepository{
-		db:         db,
-		converters: converters.NewConverterSet(converters.DbTypeSQLite),
+		NotImplementedUserRepository: adapters.NewNotImplementedUserRepository("SQLite"),
+		db:                           db,
+		converters:                   converters.NewConverterSet(converters.DbTypeSQLite),
 	}
-}
-
-// Create saves a new user to SQLite.
-func (r *SQLiteUserRepository) Create(_ context.Context, _ *entities.User) error {
-	stubPanic()
-
-	return nil
-}
-
-// GetByID retrieves a user by ID from SQLite.
-func (r *SQLiteUserRepository) GetByID(
-	_ context.Context,
-	_ entities.UserID,
-) (*entities.User, error) {
-	stubPanic()
-
-	return nil, nil
-}
-
-// GetByUUID retrieves a user by UUID from SQLite.
-func (r *SQLiteUserRepository) GetByUUID(
-	_ context.Context,
-	_ entities.UuID,
-) (*entities.User, error) {
-	stubPanic()
-
-	return nil, nil
-}
-
-// GetByEmail retrieves a user by email from SQLite.
-func (r *SQLiteUserRepository) GetByEmail(
-	_ context.Context,
-	_ entities.Email,
-) (*entities.User, error) {
-	stubPanic()
-
-	return nil, nil
-}
-
-// GetByUsername retrieves a user by username from SQLite.
-func (r *SQLiteUserRepository) GetByUsername(
-	_ context.Context,
-	_ entities.Username,
-) (*entities.User, error) {
-	stubPanic()
-
-	return nil, nil
-}
-
-// Update updates an existing user in SQLite.
-func (r *SQLiteUserRepository) Update(_ context.Context, _ *entities.User) error {
-	stubPanic()
-
-	return nil
-}
-
-// Delete soft deletes a user from SQLite.
-func (r *SQLiteUserRepository) Delete(_ context.Context, _ entities.UserID) error {
-	return nil
 }
 
 // List retrieves users with pagination from SQLite.
 func (r *SQLiteUserRepository) List(
-	_ context.Context,
-	_ entities.UserStatus,
+	ctx context.Context,
+	status entities.UserStatus,
 	limit, offset int,
 ) ([]*entities.User, error) {
-	err := validation.ValidatePagination(limit, offset)
-	if err != nil {
-		return nil, err
-	}
-
-	stubPanic()
-
-	return nil, nil
+	return adapters.ListWithPagination(r, ctx, status, limit, offset, "List")
 }
 
 // Search searches users by query in SQLite.
 func (r *SQLiteUserRepository) Search(
-	_ context.Context,
+	ctx context.Context,
 	query string,
-	_ entities.UserStatus,
+	status entities.UserStatus,
 	limit int,
 ) ([]*entities.User, error) {
-	err := validation.ValidateSearchQuery(query, limit)
-	if err != nil {
-		return nil, err
-	}
-
-	stubPanic()
-
-	return nil, nil
+	return adapters.SearchWithValidation(r, ctx, query, status, limit, "Search")
 }
 
 // SearchByTags searches users by tags in SQLite.
 func (r *SQLiteUserRepository) SearchByTags(
-	_ context.Context,
+	ctx context.Context,
 	tags []string,
-	_ entities.UserStatus,
+	status entities.UserStatus,
 	limit, offset int,
 ) ([]*entities.User, error) {
-	err := validation.ValidateTags(tags)
-	if err != nil {
-		return nil, err
-	}
-
-	if offset < 0 {
-		offset = 0
-	}
-
-	_ = offset
-
-	stubPanic()
-
-	return nil, nil
-}
-
-// CountByStatus counts users by status in SQLite.
-func (r *SQLiteUserRepository) CountByStatus(
-	_ context.Context,
-) (map[entities.UserStatus]int64, error) {
-	stubPanic()
-
-	return nil, nil
-}
-
-// GetStats retrieves user statistics from SQLite.
-func (r *SQLiteUserRepository) GetStats(_ context.Context) (*entities.UserStats, error) {
-	stubPanic()
-
-	return nil, nil
-}
-
-// VerifyCredentials verifies user credentials in SQLite.
-func (r *SQLiteUserRepository) VerifyCredentials(
-	_ context.Context,
-	_ entities.Email,
-	_ entities.PasswordHash,
-) (*entities.User, error) {
-	stubPanic()
-
-	return nil, nil
-}
-
-// UpdatePassword updates user password in SQLite.
-func (r *SQLiteUserRepository) UpdatePassword(
-	_ context.Context,
-	_ entities.UserID,
-	_ entities.PasswordHash,
-) error {
-	stubPanic()
-
-	return nil
-}
-
-// MarkVerified marks user as verified in SQLite.
-func (r *SQLiteUserRepository) MarkVerified(_ context.Context, _ entities.UserID) error {
-	return entities.StubNotImplemented("MarkVerified", "SQLite")
+	return adapters.SearchByTagsWithValidation(r, ctx, tags, status, limit, offset, "SearchByTags")
 }
 
 // ChangeStatus changes user status in SQLite.
 func (r *SQLiteUserRepository) ChangeStatus(
-	_ context.Context,
-	_ entities.UserID,
+	ctx context.Context,
+	id entities.UserID,
 	status entities.UserStatus,
 ) error {
-	return validation.ValidateAndExecute(status, "status", "invalid user status", func() error {
-		stubPanic()
-
-		return nil
-	})
+	return adapters.ChangeStatusWithValidation(r, ctx, id, status, "ChangeStatus")
 }
 
 // Activate activates a user in SQLite.
@@ -212,13 +82,9 @@ func (r *SQLiteUserRepository) Suspend(ctx context.Context, id entities.UserID) 
 
 // ChangeRole changes user role in SQLite.
 func (r *SQLiteUserRepository) ChangeRole(
-	_ context.Context,
-	_ entities.UserID,
+	ctx context.Context,
+	id entities.UserID,
 	role entities.UserRole,
 ) error {
-	return validation.ValidateAndExecute(role, "role", "invalid user role", func() error {
-		stubPanic()
-
-		return nil
-	})
+	return adapters.ChangeRoleWithValidation(r, ctx, id, role, "ChangeRole")
 }
