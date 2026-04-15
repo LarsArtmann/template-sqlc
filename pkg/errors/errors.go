@@ -109,7 +109,7 @@ func NewAppErrorWithDetails(
 // newBadRequestError creates an AppError with http.StatusBadRequest.
 func newBadRequestError(code ErrorCode, message string, kvPairs ...string) *AppError {
 	details := make(map[string]any)
-	for i := 0; i < len(kvPairs); i += 2 {
+	for i := 0; i+1 < len(kvPairs); i += 2 {
 		details[kvPairs[i]] = kvPairs[i+1]
 	}
 
