@@ -166,25 +166,3 @@ func FormatTime(t time.Time) string {
 	return t.Format(time.RFC3339)
 }
 
-// ParseBool safely parses boolean from various database formats.
-func ParseBool(value any) bool {
-	switch v := value.(type) {
-	case bool:
-		return v
-	case int64:
-		return v != 0
-	case int:
-		return v != 0
-	case string:
-		return v == "true" || v == "1"
-	case nil:
-		return false
-	default:
-		return false
-	}
-}
-
-// FormatBool safely formats boolean to database format.
-func FormatBool(b bool) any {
-	return b
-}
