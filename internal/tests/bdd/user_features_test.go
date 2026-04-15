@@ -23,7 +23,7 @@ import (
 
 // TestPasswordHash is a bcrypt hash for "test_password" used in tests.
 //
-//nolint:gosec,G101 // This is a test constant, not a production secret.
+//nolint:gosec // This is a test constant, not a production secret.
 const TestPasswordHash = "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZRGdjGj/n3.rsQ5pPjZ5yVlWK5WAe"
 
 // UserFeaturesTestSuite contains BDD tests for user functionality.
