@@ -311,8 +311,9 @@ func (m *Metrics) StartServer(addr string) error {
 	})
 
 	m.server = &http.Server{
-		Addr:    addr,
-		Handler: mux,
+		Addr:              addr,
+		Handler:           mux,
+		ReadHeaderTimeout: 10 * time.Second,
 	}
 
 	return m.server.ListenAndServe()
