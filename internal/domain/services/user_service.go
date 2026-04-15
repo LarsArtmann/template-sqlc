@@ -441,6 +441,58 @@ func (s *UserService) ChangeUserRole(
 	return user, nil
 }
 
+// VerifyUser verifies a user account with event publishing.
+func (s *UserService) VerifyUser(
+	ctx context.Context,
+	userID entities.UserID,
+) (*entities.User, error) {
+	user, err := s.userRepo.GetByID(ctx, userID)
+	if err != nil {
+		return nil, fmt.Errorf("user %s not found: %w", userID, err)
+	}
+
+	user.Verify()
+
+	if err := s.userRepo.Update(ctx, user); err != nil {
+		return nil, fmt.Errorf("failed to verify user %s: %w", userID, err)
+	}
+
+	event := events.UserVerified(user.ID(), "admin")
+	s.publishEvent(event)
+
+	return user, nil
+}
+
+// DeactivateUser deactivates a user account with event publishing.
+func (s *UserService) DeactivateUser(
+	ctx context.Context,
+	userID entities.UserID,
+) (*entities.User, error) {
+	user, err := s.userRepo.GetByID(ctx, userID)
+	if err != nil {
+		return nil, fmt.Errorf("user %s not found: %w", userID, err)
+	}
+
+	if err := user.ChangeStatus(entities.UserStatusInactive); err != nil {
+		return nil, fmt.Errorf("failed to deactivate user %s: %w", userID, err)
+	}
+
+	if err := s.userRepo.Update(ctx, user); err != nil {
+		return nil, fmt.Errorf("failed to save deactivated user %s: %w", userID, err)
+	}
+
+	changes := map[string]any{
+		"status": map[string]any{
+			"old": "active",
+			"new": "inactive",
+		},
+	}
+	event := events.UserUpdated(user.ID(), changes, userID)
+	s.publishEvent(event)
+
+	return user, nil
+}
+
 // GetUserStats returns user statistics.
 func (s *UserService) GetUserStats(ctx context.Context) (*entities.UserStats, error) {
 	stats, err := s.userRepo.GetStats(ctx)

@@ -398,11 +398,11 @@ func (s *UserFeaturesTestSuite) verifyUserAccount() error {
 		return errors.New("no current user to verify")
 	}
 
-	err := s.userRepo.MarkVerified(context.Background(), s.currentUser.ID())
+	user, err := s.userService.VerifyUser(context.Background(), s.currentUser.ID())
 	s.lastError = err
 
 	if err == nil {
-		s.currentUser.Verify()
+		s.currentUser = user
 	}
 
 	return nil
@@ -413,11 +413,11 @@ func (s *UserFeaturesTestSuite) deactivateUserAccount() error {
 		return errors.New("no current user to deactivate")
 	}
 
-	err := s.userRepo.Deactivate(context.Background(), s.currentUser.ID())
+	user, err := s.userService.DeactivateUser(context.Background(), s.currentUser.ID())
 	s.lastError = err
 
 	if err == nil {
-		_ = s.currentUser.ChangeStatus(entities.UserStatusInactive)
+		s.currentUser = user
 	}
 
 	return nil
