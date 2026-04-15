@@ -123,13 +123,17 @@ linters:
     - wrapcheck
     - wsl_v5
     - zerologlint
+  exclusions:
+    paths:
+      - internal/db/mysql
+      - internal/db/sqlite
+      - internal/db/postgres
 formatters:
   enable:
     - gci
     - goimports
     - gofumpt
     - golines
-issues:
   exclusions:
     paths:
       - internal/db/mysql
