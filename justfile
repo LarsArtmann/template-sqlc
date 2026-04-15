@@ -18,8 +18,8 @@ validate-all db="": # Validate all database configurations
     if [ -z "$db" ]; then
         echo "🔍 Validating all database configurations..."
         for db in sqlite postgres mysql; do
-    echo "Validating $db configuration..."
-    sqlc -f sqlc.yaml -y sql/$db/queries -y sql/$db/schema compile || exit 1
+            echo "Validating $db configuration..."
+            sqlc -f sqlc.yaml -y sql/$db/queries -y sql/$db/schema compile || exit 1
         done
     else
         echo "🔍 Validating $db configuration..."
@@ -72,12 +72,18 @@ clean: # Clean generated files
     rm -f *.test *.out
     echo "✅ Cleaned generated files"
 
-# Testing targets
-test: validate # Run all tests
-    echo "🧪 Running tests..."
-    echo "✅ All tests passed"
+# Build targets
+build: # Build the project
+    go build ./...
 
-# Development targets
+# Testing targets
+test: build # Run all tests
+    go test ./...
+
+lint: # Run Go linter
+    golangci-lint run ./...
+
+lint-sql: # Lint SQL files
 install-deps: # Install development dependencies
     #!/usr/bin/env bash
     echo "📦 Installing dependencies..."
@@ -116,13 +122,15 @@ docs: # Generate documentation
 
 # Release targets
 version: # Show version information
-	echo "📋 Version information:"
-	@if command -v sqlc >/dev/null 2>&1; then sqlc version; else echo "sqlc: not installed"; fi
-	@if command -v yq >/dev/null 2>&1; then yq --version; else echo "yq: not installed"; fi
-	@echo "Template version: $$(git describe --tags --always --dirty 2>/dev/null || echo 'unknown')"
+    #!/usr/bin/env bash
+    echo "📋 Version information:"
+    if command -v sqlc >/dev/null 2>&1; then sqlc version; else echo "sqlc: not installed"; fi
+    if command -v yq >/dev/null 2>&1; then yq --version; else echo "yq: not installed"; fi
+    echo "Template version: $$(git describe --tags --always --dirty 2>/dev/null || echo 'unknown')"
 
 # Security targets
 security-audit: # Audit configuration for security issues
+    #!/usr/bin/env bash
     echo "🔒 Running security audit..."
     echo "Checking for potential security issues..."
     if grep -q "password" sqlc.yaml; then
@@ -150,16 +158,6 @@ format: # Format SQL files
     if command -v sqlfluff >/dev/null 2>&1; then
         find sql/ -name "*.sql" -exec sqlfluff format {} \;
         echo "✅ SQL files formatted"
-    else
-        echo "sqlfluff not found. Install with: pip install sqlfluff"
-    fi
-
-# Lint targets
-lint: # Lint SQL files
-    #!/usr/bin/env bash
-    echo "🔍 Linting SQL files..."
-    if command -v sqlfluff >/dev/null 2>&1; then
-        sqlfluff lint sql/
     else
         echo "sqlfluff not found. Install with: pip install sqlfluff"
     fi
