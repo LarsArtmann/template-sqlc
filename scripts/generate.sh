@@ -29,15 +29,29 @@ import (
 // DBTX is imported from shared package
 type DBTX = shared.DBTX
 
-// Queries struct - embeds shared.BaseQueries for the db field
+// Queries struct - embeds shared.BaseQueries and has db field for DBTX access
 type Queries struct {
 	*shared.BaseQueries
+	db DBTX
 }
 
 // New returns a new Queries instance
 func New(db DBTX) *Queries {
-	return &Queries{BaseQueries: shared.NewBase(db)}
+	return &Queries{
+		db:           db,
+		BaseQueries:  shared.NewBase(db),
+	}
 }
 EOFILE
+
+# Fix MySQL duplicate json imports (sqlc bug)
+# The generated code imports both "encoding/json" and "json"
+for file in internal/db/mysql/models.go internal/db/mysql/user.sql.go; do
+	if [ -f "$file" ]; then
+		# Remove lines containing just "json" import
+		grep -v '^\s*"json"$' "$file" > "$file.tmp" || true
+		mv "$file.tmp" "$file"
+	fi
+done
 
 echo "Code generation and deduplication complete"
