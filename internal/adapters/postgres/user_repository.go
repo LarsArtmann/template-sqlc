@@ -4,8 +4,10 @@ import (
 	"context"
 
 	"github.com/LarsArtmann/template-sqlc/internal/adapters"
+	"github.com/LarsArtmann/template-sqlc/internal/adapters/converters"
 	"github.com/LarsArtmann/template-sqlc/internal/domain/entities"
 	"github.com/LarsArtmann/template-sqlc/internal/domain/repositories"
+	"github.com/jackc/pgx/v5"
 )
 
 // PostgresUserRepository implements UserRepository for PostgreSQL
@@ -13,16 +15,16 @@ import (
 type PostgresUserRepository struct {
 	*adapters.NotImplementedUserRepository
 
-	pool       any
-	converters any
+	pool       pgx.Tx
+	converters *converters.ConverterSet
 }
 
 // NewPostgresUserRepository creates a new PostgreSQL user repository.
-func NewPostgresUserRepository(pool any) repositories.UserRepository {
+func NewPostgresUserRepository(pool pgx.Tx) repositories.UserRepository {
 	return &PostgresUserRepository{
 		NotImplementedUserRepository: adapters.NewNotImplementedUserRepository("PostgreSQL"),
 		pool:                         pool,
-		converters:                   nil,
+		converters:                   converters.NewConverterSet(converters.DbTypePostgres),
 	}
 }
 

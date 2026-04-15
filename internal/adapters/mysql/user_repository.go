@@ -4,6 +4,8 @@ import (
 	"context"
 
 	"github.com/LarsArtmann/template-sqlc/internal/adapters"
+	"github.com/LarsArtmann/template-sqlc/internal/adapters/converters"
+	"github.com/LarsArtmann/template-sqlc/internal/db/shared"
 	"github.com/LarsArtmann/template-sqlc/internal/domain/entities"
 	"github.com/LarsArtmann/template-sqlc/internal/domain/repositories"
 )
@@ -13,16 +15,16 @@ import (
 type MySQLUserRepository struct {
 	*adapters.NotImplementedUserRepository
 
-	db         any
-	converters any
+	db         shared.DBTX
+	converters *converters.ConverterSet
 }
 
 // NewMySQLUserRepository creates a new MySQL user repository.
-func NewMySQLUserRepository(db any) repositories.UserRepository {
+func NewMySQLUserRepository(db shared.DBTX) repositories.UserRepository {
 	return &MySQLUserRepository{
 		NotImplementedUserRepository: adapters.NewNotImplementedUserRepository("MySQL"),
 		db:                           db,
-		converters:                   nil,
+		converters:                   converters.NewConverterSet(converters.DbTypeMySQL),
 	}
 }
 

@@ -5,6 +5,7 @@ import (
 
 	"github.com/LarsArtmann/template-sqlc/internal/adapters"
 	"github.com/LarsArtmann/template-sqlc/internal/adapters/converters"
+	"github.com/LarsArtmann/template-sqlc/internal/db/shared"
 	"github.com/LarsArtmann/template-sqlc/internal/domain/entities"
 	"github.com/LarsArtmann/template-sqlc/internal/domain/repositories"
 )
@@ -14,12 +15,12 @@ import (
 type SQLiteUserRepository struct {
 	*adapters.NotImplementedUserRepository
 
-	db         any
+	db         shared.DBTX
 	converters *converters.ConverterSet
 }
 
 // NewSQLiteUserRepository creates a new SQLite user repository.
-func NewSQLiteUserRepository(db any) repositories.UserRepository {
+func NewSQLiteUserRepository(db shared.DBTX) repositories.UserRepository {
 	return &SQLiteUserRepository{
 		NotImplementedUserRepository: adapters.NewNotImplementedUserRepository("SQLite"),
 		db:                           db,

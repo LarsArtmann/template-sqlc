@@ -3,6 +3,7 @@ package sqlite
 import (
 	"github.com/LarsArtmann/template-sqlc/internal/adapters"
 	"github.com/LarsArtmann/template-sqlc/internal/adapters/converters"
+	"github.com/LarsArtmann/template-sqlc/internal/db/shared"
 	"github.com/LarsArtmann/template-sqlc/internal/domain/repositories"
 )
 
@@ -10,12 +11,12 @@ import (
 type SQLiteSessionRepository struct {
 	*adapters.NotImplementedSessionRepository
 
-	db         any
+	db         shared.DBTX
 	converters *converters.ConverterSet
 }
 
 // NewSQLiteSessionRepository creates a new SQLite session repository.
-func NewSQLiteSessionRepository(db any) repositories.SessionRepository {
+func NewSQLiteSessionRepository(db shared.DBTX) repositories.SessionRepository {
 	return &SQLiteSessionRepository{
 		NotImplementedSessionRepository: adapters.NewNotImplementedSessionRepository("SQLite"),
 		db:                              db,
