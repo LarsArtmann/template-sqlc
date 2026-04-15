@@ -330,17 +330,14 @@ func (m *Metrics) Shutdown(ctx context.Context) error {
 
 // Middleware for request tracking.
 func (m *Metrics) Middleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	return http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
 		start := time.Now()
 
-		// Create a response writer wrapper to capture status code
-		wrapped := &responseWriter{ResponseWriter: w, statusCode: http.StatusOK}
+		wrapped := &responseWriter{ResponseWriter: writer, statusCode: http.StatusOK}
 
-		next.ServeHTTP(wrapped, r)
+		next.ServeHTTP(wrapped, req)
 
-		// Record metrics
-		duration := time.Since(start)
-		_ = duration // TODO: Record HTTP metrics if needed
+		m.QueryDuration.Observe(time.Since(start).Seconds())
 	})
 }
 
