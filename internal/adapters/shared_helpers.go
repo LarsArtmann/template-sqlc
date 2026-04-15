@@ -101,4 +101,3 @@ func ChangeRoleWithValidation[T NotImplementedMethods](
 		return repo.NotImplemented(methodName)
 	})
 }
-
