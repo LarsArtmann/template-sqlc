@@ -157,6 +157,50 @@ linters:
             - github.com/LarsArtmann/template-sqlc
             - github.com/cucumber/godog
             - github.com/stretchr/testify
+    ireturn:
+      allow:
+        - anon
+        - empty
+        - error
+        - stdlib
+        - (or|er)$
+        - repositories\.\w+Repository
+        - prometheus\.(Histogram|Counter|Gauge)
+    tagliatelle:
+      case:
+        rules:
+          json: camel
+    wrapcheck:
+      ignore-sigs:
+        - github.com/LarsArtmann/template-sqlc/internal/adapters/validation.Validate*
+        - github.com/LarsArtmann/template-sqlc/internal/adapters.validation.Validate*
+        - github.com/LarsArtmann/template-sqlc/internal/adapters.ListWithPagination
+        - github.com/LarsArtmann/template-sqlc/internal/adapters.SearchWithValidation
+        - github.com/LarsArtmann/template-sqlc/internal/adapters.SearchByTagsWithValidation
+        - github.com/LarsArtmann/template-sqlc/internal/adapters.ChangeStatusWithValidation
+        - github.com/LarsArtmann/template-sqlc/internal/adapters.ChangeRoleWithValidation
+        - github.com/LarsArtmann/template-sqlc/internal/domain/entities.StubNotImplemented
+      ignore-package-globs:
+        - github.com/LarsArtmann/template-sqlc/internal/adapters/*
+        - github.com/LarsArtmann/template-sqlc/internal/domain/entities
+    exhaustruct:
+      exclude:
+        - .*AppError
+        - .*User$
+        - .*UserSession$
+        - .*SessionDeviceInfo$
+        - .*UserStats$
+        - .*SessionStats$
+        - .*Metrics$
+        - .*MockUserRepository$
+        - .*MockSessionRepository$
+        - .*NotImplementedUserRepository$
+        - .*NotImplementedSessionRepository$
+        - .*BaseQueries$
+        - prometheus\.HistogramOpts
+        - prometheus\.CounterOpts
+        - prometheus\.GaugeOpts
+        - promhttp\.HandlerOpts
   exclusions:
     rules:
       - path: '_test\.go'
