@@ -43,24 +43,6 @@ func NewValidationError(field, message string) *ValidationError {
 	}
 }
 
-// ValidateSearchQuery validates search query parameters
-// Returns nil if valid, otherwise returns a ValidationError.
-func ValidateSearchQuery(query string, limit int) error {
-	if len(query) == 0 {
-		return NewValidationError("query", "cannot be empty")
-	}
-
-	if len(query) > 500 {
-		return NewValidationError("query", "cannot exceed 500 characters")
-	}
-
-	if limit <= 0 || limit > 100 {
-		return NewValidationError("limit", "must be between 1 and 100")
-	}
-
-	return nil
-}
-
 func (e *ValidationError) Error() string {
 	return fmt.Sprintf("validation error on field '%s': %s", e.Field, e.Message)
 }
@@ -104,10 +86,6 @@ func NewConflictError(resource, message string) *ConflictError {
 
 func (e *ConflictError) Error() string {
 	return e.ResourceError.Error()
-}
-
-func newResourceError(resource, message, prefix string) ResourceError {
-	return ResourceError{Resource: resource, Message: message, Prefix: prefix}
 }
 
 // AuthenticationError represents an authentication failure.
@@ -217,6 +195,6 @@ func IsInternalError(err error) bool {
 }
 
 // StubNotImplemented returns an error for stub implementations.
-func StubNotImplemented(method, db string) error {
-	return fmt.Errorf("implement me: use actual sqlc generated code for %s", db)
+func StubNotImplemented(_, db string) error {
+	return errors.New("not implemented: " + db)
 }
