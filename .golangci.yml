@@ -123,7 +123,58 @@ linters:
     - wrapcheck
     - wsl_v5
     - zerologlint
+  settings:
+    depguard:
+      rules:
+        domain:
+          list-mode: lax
+          files:
+            - "internal/domain/**"
+          allow:
+            - $gostd
+            - github.com/LarsArtmann/template-sqlc/internal/domain
+            - github.com/LarsArtmann/template-sqlc/pkg
+            - github.com/google/uuid
+          deny:
+            - pkg: "github.com/LarsArtmann/template-sqlc/internal/adapters"
+              desc: "domain layer must not import adapters (hexagonal architecture)"
+            - pkg: "github.com/LarsArtmann/template-sqlc/internal/db"
+              desc: "domain layer must not import database layer (hexagonal architecture)"
+        main:
+          list-mode: lax
+          allow:
+            - $gostd
+            - github.com/LarsArtmann/template-sqlc
+            - github.com/google/uuid
+            - github.com/jackc/pgx/v5
+            - github.com/prometheus/client_golang
+        test:
+          list-mode: lax
+          files:
+            - "$test"
+          allow:
+            - $gostd
+            - github.com/LarsArtmann/template-sqlc
+            - github.com/cucumber/godog
+            - github.com/stretchr/testify
   exclusions:
+    rules:
+      - path: '_test\.go'
+        linters:
+          - err113
+          - exhaustruct
+          - funlen
+          - gochecknoglobals
+          - gosec
+          - mnd
+          - paralleltest
+          - testpackage
+          - tparallel
+          - varnamelen
+      - path: '_test\.go'
+        text: "error returned from"
+        linters:
+          - wrapcheck
     paths:
       - internal/db/mysql
       - internal/db/sqlite
