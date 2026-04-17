@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"net"
 
 	"github.com/LarsArtmann/template-sqlc/internal/domain/entities"
@@ -46,7 +47,7 @@ func NewUserService(
 func (s *UserService) publishEvent(event *events.UserEvent) {
 	err := s.eventPub.Publish(event)
 	if err != nil {
-		fmt.Printf("warning: failed to publish event: %v\n", err)
+		slog.Warn("failed to publish event", "error", err)
 	}
 }
 
@@ -56,17 +57,19 @@ func (s *UserService) CreateUser(
 	req *CreateUserRequest,
 ) (*entities.User, error) {
 	// Validate request
-	if err := s.validator.ValidateUserCreate(
+	err := s.validator.ValidateUserCreate(
 		req.Email,
 		req.Username,
 		req.FirstName,
 		req.LastName,
-	); err != nil {
+	)
+	if err != nil {
 		return nil, fmt.Errorf("validation failed: %w", err)
 	}
 
 	// Check if user already exists
-	if err := s.checkUserNotExists(ctx, req.Email, req.Username); err != nil {
+	err = s.checkUserNotExists(ctx, req.Email, req.Username)
+	if err != nil {
 		return nil, err
 	}
 
@@ -162,13 +165,13 @@ func (s *UserService) createDomainEntities(req *CreateUserRequest) (*domainEntit
 }
 
 // publishUserCreatedEvent publishes user created event (non-blocking).
-func (s *UserService) publishUserCreatedEvent(user *entities.User, de *domainEntities) {
+func (s *UserService) publishUserCreatedEvent(user *entities.User, created *domainEntities) {
 	event := events.UserCreated(
 		user.ID(),
-		de.Email.String(),
-		de.Username.String(),
-		de.FirstName.String(),
-		de.LastName.String(),
+		created.Email.String(),
+		created.Username.String(),
+		created.FirstName.String(),
+		created.LastName.String(),
 		user.Role().String(),
 		user.Status().String(),
 	)
@@ -328,7 +331,7 @@ func (s *UserService) AuthenticateUser(
 	user.RecordLogin()
 
 	if err := s.userRepo.Update(ctx, user); err != nil {
-		fmt.Printf("warning: failed to update last login: %v\n", err)
+		slog.Warn("failed to update last login", "error", err)
 	}
 
 	// Publish login event
@@ -406,7 +409,7 @@ func (s *UserService) ChangeUserRole(
 	ctx context.Context,
 	userID entities.UserID,
 	newRole entities.UserRole,
-	changedBy string,
+	_ string,
 ) (*entities.User, error) {
 	// Get user
 	user, err := s.userRepo.GetByID(ctx, userID)
@@ -435,7 +438,7 @@ func (s *UserService) ChangeUserRole(
 		entities.UserID(0), // Placeholder - in real impl, pass the admin user ID
 	)
 	if err := s.eventPub.Publish(event); err != nil {
-		fmt.Printf("warning: failed to publish event: %v\n", err)
+		slog.Warn("failed to publish event", "error", err)
 	}
 
 	return user, nil
