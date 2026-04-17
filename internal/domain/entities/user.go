@@ -409,24 +409,24 @@ func (u *User) SetID(id UserID) {
 
 // UserStats represents user statistics.
 type UserStats struct {
-	TotalUsers       int64   `json:"total_users"`
-	ActiveUsers      int64   `json:"active_users"`
-	InactiveUsers    int64   `json:"inactive_users"`
-	SuspendedUsers   int64   `json:"suspended_users"`
-	VerifiedUsers    int64   `json:"verified_users"`
-	UsersWithLogins  int64   `json:"users_with_logins"`
-	NewUsers30d      int64   `json:"new_users_30d"`
-	NewUsers7d       int64   `json:"new_users_7d"`
-	ActivePercentage float64 `json:"active_percentage"`
-	VerificationRate float64 `json:"verification_rate"`
+	TotalUsers       int64   `json:"totalUsers"`
+	ActiveUsers      int64   `json:"activeUsers"`
+	InactiveUsers    int64   `json:"inactiveUsers"`
+	SuspendedUsers   int64   `json:"suspendedUsers"`
+	VerifiedUsers    int64   `json:"verifiedUsers"`
+	UsersWithLogins  int64   `json:"usersWithLogins"`
+	NewUsers30d      int64   `json:"newUsers30d"`
+	NewUsers7d       int64   `json:"newUsers7d"`
+	ActivePercentage float64 `json:"activePercentage"`
+	VerificationRate float64 `json:"verificationRate"`
 }
 
 // SessionStats represents session statistics.
 type SessionStats struct {
-	TotalSessions   int64 `json:"total_sessions"`
-	ActiveSessions  int64 `json:"active_sessions"`
-	ExpiredSessions int64 `json:"expired_sessions"`
-	Sessions24h     int64 `json:"sessions_24h"`
-	Sessions7d      int64 `json:"sessions_7d"`
-	Sessions30d     int64 `json:"sessions_30d"`
+	TotalSessions   int64 `json:"totalSessions"`
+	ActiveSessions  int64 `json:"activeSessions"`
+	ExpiredSessions int64 `json:"expiredSessions"`
+	Sessions24h     int64 `json:"sessions24h"`
+	Sessions7d      int64 `json:"sessions7d"`
+	Sessions30d     int64 `json:"sessions30d"`
 }

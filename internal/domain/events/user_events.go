@@ -10,7 +10,7 @@ import (
 type UserEvent struct {
 	ID        entities.IDID   `json:"id"`
 	Type      EventType       `json:"type"`
-	UserID    entities.UserID `json:"user_id"`
+	UserID    entities.UserID `json:"userId"`
 	Data      any             `json:"data"`
 	Timestamp time.Time       `json:"timestamp"`
 	Version   string          `json:"version"`
@@ -49,44 +49,44 @@ const (
 
 // UserCreatedEvent data for user creation.
 type UserCreatedEvent struct {
-	UserID    entities.UserID `json:"user_id"`
+	UserID    entities.UserID `json:"userId"`
 	Email     string          `json:"email"`
 	Username  string          `json:"username"`
-	FirstName string          `json:"first_name"`
-	LastName  string          `json:"last_name"`
+	FirstName string          `json:"firstName"`
+	LastName  string          `json:"lastName"`
 	Role      string          `json:"role"`
 	Status    string          `json:"status"`
 }
 
 // UserUpdatedEvent data for user updates.
 type UserUpdatedEvent struct {
-	UserID    entities.UserID `json:"user_id"`
+	UserID    entities.UserID `json:"userId"`
 	Changes   map[string]any  `json:"changes"`
-	UpdatedBy entities.UserID `json:"updated_by"`
+	UpdatedBy entities.UserID `json:"updatedBy"`
 }
 
 // UserLoginEvent data for user login.
 type UserLoginEvent struct {
-	UserID    entities.UserID `json:"user_id"`
-	IPAddress string          `json:"ip_address"`
-	UserAgent string          `json:"user_agent"`
+	UserID    entities.UserID `json:"userId"`
+	IPAddress string          `json:"ipAddress"`
+	UserAgent string          `json:"userAgent"`
 	Device    string          `json:"device"`
 	Success   bool            `json:"success"`
 }
 
 // UserVerifiedEvent data for user verification.
 type UserVerifiedEvent struct {
-	UserID    entities.UserID `json:"user_id"`
+	UserID    entities.UserID `json:"userId"`
 	Method    string          `json:"method"`
 	Timestamp time.Time       `json:"timestamp"`
 }
 
 // RoleChangedEvent data for role changes.
 type RoleChangedEvent struct {
-	UserID    entities.UserID `json:"user_id"`
-	OldRole   string          `json:"old_role"`
-	NewRole   string          `json:"new_role"`
-	ChangedBy entities.UserID `json:"changed_by"`
+	UserID    entities.UserID `json:"userId"`
+	OldRole   string          `json:"oldRole"`
+	NewRole   string          `json:"newRole"`
+	ChangedBy entities.UserID `json:"changedBy"`
 }
 
 // NewUserEvent creates a new user domain event.
