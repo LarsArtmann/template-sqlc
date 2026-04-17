@@ -12,14 +12,12 @@ import (
 
 // UserValidator implements user validation logic.
 type UserValidator struct {
-	emailRegex    *regexp.Regexp
 	usernameRegex *regexp.Regexp
 }
 
 // NewUserValidator creates a new user validator.
 func NewUserValidator() *UserValidator {
 	return &UserValidator{
-		emailRegex:    regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`),
 		usernameRegex: regexp.MustCompile(`^[a-zA-Z0-9_-]{3,50}$`),
 	}
 }
@@ -155,7 +153,7 @@ func (v *UserValidator) validateEmail(email string) error {
 		return errors.NewValidationError("email", "must not exceed 254 characters")
 	}
 
-	if !v.emailRegex.MatchString(email) {
+	if !entities.EmailRegex.MatchString(email) {
 		return errors.NewInvalidFormatError("email", "must be a valid email address")
 	}
 
@@ -242,56 +240,9 @@ func (v *UserValidator) validateName(field, name string) error {
 
 // isReservedUsername checks if username is reserved.
 func (v *UserValidator) isReservedUsername(username string) bool {
-	reserved := map[string]bool{
-		"admin":         true,
-		"administrator": true,
-		"root":          true,
-		"system":        true,
-		"api":           true,
-		"www":           true,
-		"mail":          true,
-		"support":       true,
-		"nobody":        true,
-		"guest":         true,
-		"anonymous":     true,
-		"user":          true,
-		"users":         true,
-		"help":          true,
-		"info":          true,
-		"sales":         true,
-		"marketing":     true,
-		"billing":       true,
-		"security":      true,
-		"legal":         true,
-		"privacy":       true,
-		"terms":         true,
-		"contact":       true,
-		"about":         true,
-		"blog":          true,
-		"news":          true,
-		"press":         true,
-		"careers":       true,
-		"jobs":          true,
-		"shop":          true,
-		"store":         true,
-		"cart":          true,
-		"checkout":      true,
-		"order":         true,
-		"orders":        true,
-		"account":       true,
-		"profile":       true,
-		"settings":      true,
-		"dashboard":     true,
-		"console":       true,
-		"manage":        true,
-		"my":            true,
-		"me":            true,
-		"self":          true,
-	}
-
 	lowercase := strings.ToLower(username)
 
-	return reserved[lowercase]
+	return entities.ReservedUsernames[lowercase]
 }
 
 // isCommonPassword checks against common passwords.

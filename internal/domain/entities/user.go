@@ -69,12 +69,12 @@ func NewUuIDFromUUID(u uuid.UUID) UuID {
 	return UuID(u.String())
 }
 
-// emailRegex is a simple email validation pattern.
-var emailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
+// EmailRegex is a simple email validation pattern.
+var EmailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
 
 // isValidEmail validates an email address.
 func isValidEmail(email string) bool {
-	return emailRegex.MatchString(email)
+	return EmailRegex.MatchString(email)
 }
 
 // Email represents a validated email address.
@@ -93,8 +93,20 @@ func (e Email) String() string { return string(e) }
 // Username represents a validated username.
 type Username string
 
-var reservedUsernames = map[string]bool{
-	"admin": true, "root": true, "system": true, "moderator": true,
+// ReservedUsernames contains usernames that cannot be registered.
+var ReservedUsernames = map[string]bool{
+	"admin": true, "administrator": true, "root": true, "system": true,
+	"moderator": true, "api": true, "www": true, "mail": true,
+	"support": true, "nobody": true, "guest": true, "anonymous": true,
+	"user": true, "users": true, "help": true, "info": true,
+	"sales": true, "marketing": true, "billing": true, "security": true,
+	"legal": true, "privacy": true, "terms": true, "contact": true,
+	"about": true, "blog": true, "news": true, "press": true,
+	"careers": true, "jobs": true, "shop": true, "store": true,
+	"cart": true, "checkout": true, "order": true, "orders": true,
+	"account": true, "profile": true, "settings": true, "dashboard": true,
+	"console": true, "manage": true, "my": true, "me": true,
+	"self": true,
 }
 
 var usernameValidChars = regexp.MustCompile(`^[a-zA-Z0-9_-]+$`)
@@ -109,7 +121,7 @@ func NewUsername(username string) (Username, error) {
 		return "", ErrInvalidUsername
 	}
 
-	if reservedUsernames[strings.ToLower(username)] {
+	if ReservedUsernames[strings.ToLower(username)] {
 		return "", ErrInvalidUsername
 	}
 
