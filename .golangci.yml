@@ -133,7 +133,6 @@ linters:
           allow:
             - $gostd
             - github.com/LarsArtmann/template-sqlc/internal/domain
-            - github.com/LarsArtmann/template-sqlc/pkg
             - github.com/google/uuid
           deny:
             - pkg: "github.com/LarsArtmann/template-sqlc/internal/adapters"

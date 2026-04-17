@@ -8,7 +8,7 @@ import (
 	"github.com/LarsArtmann/template-sqlc/internal/domain/events"
 	"github.com/LarsArtmann/template-sqlc/internal/domain/repositories"
 	"github.com/LarsArtmann/template-sqlc/internal/domain/services"
-	"github.com/LarsArtmann/template-sqlc/pkg/validation"
+	"github.com/LarsArtmann/template-sqlc/internal/validation"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 )
