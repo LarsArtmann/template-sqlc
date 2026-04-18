@@ -17,17 +17,17 @@ func NewUserMapper() *UserMapper {
 }
 
 // DomainUserFromSQLite converts SQLite model to domain entity.
-func (m *UserMapper) DomainUserFromSQLite(sqliteUser any) (*entities.User, error) {
+func (m *UserMapper) DomainUserFromSQLite(_ any) (*entities.User, error) {
 	return m.DomainUser(sqliteUser)
 }
 
 // DomainUserFromPostgres converts PostgreSQL model to domain entity.
-func (m *UserMapper) DomainUserFromPostgres(postgresUser any) (*entities.User, error) {
+func (m *UserMapper) DomainUserFromPostgres(_ any) (*entities.User, error) {
 	return m.DomainUser(postgresUser)
 }
 
 // DomainUserFromMySQL converts MySQL model to domain entity.
-func (m *UserMapper) DomainUserFromMySQL(mysqlUser any) (*entities.User, error) {
+func (m *UserMapper) DomainUserFromMySQL(_ any) (*entities.User, error) {
 	return m.DomainUser(mysqlUser)
 }
 
@@ -42,7 +42,7 @@ func unimplementedUserFromDomain(db string) (any, error) {
 }
 
 // DomainUser is the common implementation for DomainUserFromXxx methods.
-func (m *UserMapper) DomainUser(user any) (*entities.User, error) {
+func (m *UserMapper) DomainUser(_ any) (*entities.User, error) {
 	panic("implement me: convert user to domain entity")
 }
 
@@ -109,17 +109,17 @@ func (m *UserMapper) MySQLSessionFromDomain(session *entities.UserSession) (any,
 
 // SessionMapper interface for session conversion operations.
 type SessionMapper interface {
-	DomainSession(any) (*entities.UserSession, error)
-	SessionFromDomain(*entities.UserSession) (any, error)
+	DomainSession(data any) (*entities.UserSession, error)
+	SessionFromDomain(session *entities.UserSession) (any, error)
 }
 
 // DomainSession is the common implementation for DomainSessionFromXxx methods.
-func (m *UserMapper) DomainSession(session any) (*entities.UserSession, error) {
+func (m *UserMapper) DomainSession(_ any) (*entities.UserSession, error) {
 	panic("implement me: convert session to domain entity")
 }
 
 // SessionFromDomain is the common implementation for XxxSessionFromDomain methods.
-func (m *UserMapper) SessionFromDomain(session *entities.UserSession) (any, error) {
+func (m *UserMapper) SessionFromDomain(_ *entities.UserSession) (any, error) {
 	panic("implement me: convert domain entity to session")
 }
 

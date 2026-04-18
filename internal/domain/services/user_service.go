@@ -96,7 +96,8 @@ func (s *UserService) CreateUser(
 	}
 
 	// Persist user
-	if err := s.userRepo.Create(ctx, user); err != nil {
+	err = s.userRepo.Create(ctx, user)
+	if err != nil {
 		return nil, fmt.Errorf("failed to save user: %w", err)
 	}
 
@@ -108,11 +109,13 @@ func (s *UserService) CreateUser(
 
 // checkUserNotExists verifies user doesn't already exist.
 func (s *UserService) checkUserNotExists(ctx context.Context, email, username string) error {
-	if _, err := s.userRepo.GetByEmail(ctx, entities.Email(email)); err == nil {
+	_, err := s.userRepo.GetByEmail(ctx, entities.Email(email))
+	if err == nil {
 		return entities.ErrUserAlreadyExists
 	}
 
-	if _, err := s.userRepo.GetByUsername(ctx, entities.Username(username)); err == nil {
+	_, err = s.userRepo.GetByUsername(ctx, entities.Username(username))
+	if err == nil {
 		return entities.ErrUserAlreadyExists
 	}
 
