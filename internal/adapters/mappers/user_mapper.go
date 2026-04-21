@@ -17,17 +17,17 @@ func NewUserMapper() *UserMapper {
 }
 
 // DomainUserFromSQLite converts SQLite model to domain entity.
-func (m *UserMapper) DomainUserFromSQLite(_ any) (*entities.User, error) {
+func (m *UserMapper) DomainUserFromSQLite(sqliteUser any) (*entities.User, error) {
 	return m.DomainUser(sqliteUser)
 }
 
 // DomainUserFromPostgres converts PostgreSQL model to domain entity.
-func (m *UserMapper) DomainUserFromPostgres(_ any) (*entities.User, error) {
+func (m *UserMapper) DomainUserFromPostgres(postgresUser any) (*entities.User, error) {
 	return m.DomainUser(postgresUser)
 }
 
 // DomainUserFromMySQL converts MySQL model to domain entity.
-func (m *UserMapper) DomainUserFromMySQL(_ any) (*entities.User, error) {
+func (m *UserMapper) DomainUserFromMySQL(mysqlUser any) (*entities.User, error) {
 	return m.DomainUser(mysqlUser)
 }
 

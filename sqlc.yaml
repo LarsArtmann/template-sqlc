@@ -106,6 +106,7 @@ sql:
         package: "sqlite"
         out: "internal/db/sqlite"
         sql_package: "database/sql"
+        build_tags: "sqlite"
         # build_tags: Go build tags for conditional compilation
         # SQLite + FTS5 full-text search support
         # build_tags: "sqlite3,fts5"
