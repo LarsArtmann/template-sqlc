@@ -10,6 +10,12 @@ import (
 	"github.com/LarsArtmann/template-sqlc/pkg/errors"
 )
 
+const (
+	minPasswordLength      = 8
+	maxPasswordLength      = 128
+	minCharacterCategories = 3
+)
+
 // UserValidator implements user validation logic.
 type UserValidator struct {
 	usernameRegex *regexp.Regexp
@@ -72,7 +78,7 @@ func (v *UserValidator) ValidatePasswordRequirements(password string) error {
 		return err
 	}
 
-	if v.countCharacterCategories(password) < 3 {
+	if v.countCharacterCategories(password) < minCharacterCategories {
 		return errors.NewValidationError(
 			"password",
 			"must contain at least 3 of: uppercase letters, lowercase letters, numbers, special characters",
@@ -110,7 +116,7 @@ func validateLength(field, value string, minLen, maxLen int) error {
 
 // validatePasswordLength checks password length requirements.
 func (v *UserValidator) validatePasswordLength(password string) error {
-	return validateLength("password", password, 8, 128)
+	return validateLength("password", password, minPasswordLength, maxPasswordLength)
 }
 
 // countCharacterCategories counts how many character categories are present.

@@ -7,7 +7,7 @@ import (
 
 // Domain errors for user entity.
 var (
-	// Validation errors.
+	// ErrInvalidEmail is returned when email validation fails.
 	ErrInvalidEmail        = NewValidationError("email", "must be a valid email address")
 	ErrInvalidUsername     = NewValidationError("username", "must be 3-50 characters")
 	ErrInvalidPasswordHash = NewValidationError("password_hash", "must be a valid hash")
@@ -16,7 +16,7 @@ var (
 	ErrInvalidUserStatus   = NewValidationError("status", "must be a valid user status")
 	ErrInvalidUserRole     = NewValidationError("role", "must be a valid user role")
 
-	// Business logic errors.
+	// ErrUserNotFound is returned when a user is not found.
 	ErrUserNotFound           = NewNotFoundError("user", "user not found")
 	ErrUserAlreadyExists      = NewConflictError("user", "user already exists")
 	ErrInvalidCredentials     = NewAuthenticationError("invalid credentials")
@@ -24,7 +24,7 @@ var (
 	ErrAccountInactive        = NewAuthorizationError("account inactive")
 	ErrInsufficientPrivileges = NewAuthorizationError("insufficient privileges")
 
-	// Session errors.
+	// ErrSessionNotFound is returned when a session is not found.
 	ErrSessionNotFound     = NewNotFoundError("session", "session not found")
 	ErrSessionExpired      = NewAuthenticationError("session expired")
 	ErrInvalidSessionToken = NewAuthenticationError("invalid session token")
@@ -194,7 +194,10 @@ func IsInternalError(err error) bool {
 	return is(err, &ie)
 }
 
+// errNotImplemented is a static error used as the base for stub not implemented errors.
+var errNotImplemented = errors.New("not implemented")
+
 // StubNotImplemented returns an error for stub implementations.
 func StubNotImplemented(_, db string) error {
-	return errors.New("not implemented: " + db)
+	return fmt.Errorf("%w: %s", errNotImplemented, db)
 }

@@ -4,6 +4,7 @@ package adapters
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/LarsArtmann/template-sqlc/internal/adapters/validation"
 	"github.com/LarsArtmann/template-sqlc/internal/domain/entities"
@@ -31,7 +32,11 @@ func ListWithPagination[T NotImplementedMethods](
 		return nil, err
 	}
 
-	return nil, repo.NotImplemented(methodName)
+	return nil, fmt.Errorf(
+		"method %s not implemented: %w",
+		methodName,
+		repo.NotImplemented(methodName),
+	)
 }
 
 // SearchWithValidation handles common validation for Search methods.
@@ -49,7 +54,11 @@ func SearchWithValidation[T NotImplementedMethods](
 		return nil, err
 	}
 
-	return nil, repo.NotImplemented(methodName)
+	return nil, fmt.Errorf(
+		"method %s not implemented: %w",
+		methodName,
+		repo.NotImplemented(methodName),
+	)
 }
 
 // SearchByTagsWithValidation handles common validation for SearchByTags methods.
@@ -73,7 +82,11 @@ func SearchByTagsWithValidation[T NotImplementedMethods](
 
 	_ = offset
 
-	return nil, repo.NotImplemented(methodName)
+	return nil, fmt.Errorf(
+		"method %s not implemented: %w",
+		methodName,
+		repo.NotImplemented(methodName),
+	)
 }
 
 // ChangeStatusWithValidation handles common validation for ChangeStatus methods.
@@ -85,7 +98,11 @@ func ChangeStatusWithValidation[T NotImplementedMethods](
 	methodName string,
 ) error {
 	return validation.ValidateAndExecute(status, "status", "invalid user status", func() error {
-		return repo.NotImplemented(methodName)
+		return fmt.Errorf(
+			"method %s not implemented: %w",
+			methodName,
+			repo.NotImplemented(methodName),
+		)
 	})
 }
 
@@ -98,6 +115,10 @@ func ChangeRoleWithValidation[T NotImplementedMethods](
 	methodName string,
 ) error {
 	return validation.ValidateAndExecute(role, "role", "invalid user role", func() error {
-		return repo.NotImplemented(methodName)
+		return fmt.Errorf(
+			"method %s not implemented: %w",
+			methodName,
+			repo.NotImplemented(methodName),
+		)
 	})
 }

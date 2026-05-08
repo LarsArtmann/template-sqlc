@@ -207,11 +207,13 @@ func (s *UserService) UpdateUser(
 
 	changes := s.applyProfileUpdates(user, req)
 
-	if err := s.validator.ValidateUserUpdate(user); err != nil {
+	err = s.validator.ValidateUserUpdate(user)
+	if err != nil {
 		return nil, fmt.Errorf("validation failed: %w", err)
 	}
 
-	if err := s.userRepo.Update(ctx, user); err != nil {
+	err = s.userRepo.Update(ctx, user)
+	if err != nil {
 		return nil, fmt.Errorf("failed to update user: %w", err)
 	}
 
@@ -326,14 +328,16 @@ func (s *UserService) AuthenticateUser(
 	)
 
 	// Save session
-	if err := s.sessionRepo.Create(ctx, session); err != nil {
+	err = s.sessionRepo.Create(ctx, session)
+	if err != nil {
 		return nil, fmt.Errorf("failed to create session: %w", err)
 	}
 
 	// Update user last login
 	user.RecordLogin()
 
-	if err := s.userRepo.Update(ctx, user); err != nil {
+	err = s.userRepo.Update(ctx, user)
+	if err != nil {
 		slog.Warn("failed to update last login", "error", err)
 	}
 
@@ -397,7 +401,8 @@ func (s *UserService) Logout(ctx context.Context, token string) error {
 	sessionToken := entities.SessionToken(tokenUUID)
 
 	// Deactivate session
-	if err := s.sessionRepo.DeactivateByToken(ctx, sessionToken); err != nil {
+	err = s.sessionRepo.DeactivateByToken(ctx, sessionToken)
+	if err != nil {
 		return fmt.Errorf("failed to logout: %w", err)
 	}
 
@@ -424,12 +429,14 @@ func (s *UserService) ChangeUserRole(
 	oldRole := user.Role()
 
 	// Change role
-	if err := user.ChangeRole(newRole); err != nil {
+	err = user.ChangeRole(newRole)
+	if err != nil {
 		return nil, fmt.Errorf("invalid role %s for user %s: %w", newRole, userID, err)
 	}
 
 	// Save changes
-	if err := s.userRepo.Update(ctx, user); err != nil {
+	err = s.userRepo.Update(ctx, user)
+	if err != nil {
 		return nil, fmt.Errorf("failed to change role to %s for user %s: %w", newRole, userID, err)
 	}
 
@@ -440,7 +447,9 @@ func (s *UserService) ChangeUserRole(
 		newRole.String(),
 		entities.UserID(0), // Placeholder - in real impl, pass the admin user ID
 	)
-	if err := s.eventPub.Publish(event); err != nil {
+
+	err = s.eventPub.Publish(event)
+	if err != nil {
 		slog.Warn("failed to publish event", "error", err)
 	}
 
@@ -459,7 +468,8 @@ func (s *UserService) VerifyUser(
 
 	user.Verify()
 
-	if err := s.userRepo.Update(ctx, user); err != nil {
+	err = s.userRepo.Update(ctx, user)
+	if err != nil {
 		return nil, fmt.Errorf("failed to verify user %s: %w", userID, err)
 	}
 
@@ -479,11 +489,13 @@ func (s *UserService) DeactivateUser(
 		return nil, fmt.Errorf("user %s not found: %w", userID, err)
 	}
 
-	if err := user.ChangeStatus(entities.UserStatusInactive); err != nil {
+	err = user.ChangeStatus(entities.UserStatusInactive)
+	if err != nil {
 		return nil, fmt.Errorf("failed to deactivate user %s: %w", userID, err)
 	}
 
-	if err := s.userRepo.Update(ctx, user); err != nil {
+	err = s.userRepo.Update(ctx, user)
+	if err != nil {
 		return nil, fmt.Errorf("failed to save deactivated user %s: %w", userID, err)
 	}
 

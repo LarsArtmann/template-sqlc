@@ -1,6 +1,7 @@
 package converters
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/LarsArtmann/template-sqlc/internal/domain/entities"
@@ -146,7 +147,12 @@ func (c *SQLiteTimeConverter) DBToDomain(db any) (time.Time, error) {
 	}
 
 	if str, ok := db.(string); ok {
-		return time.Parse(time.RFC3339, str)
+		parsedTime, err := time.Parse(time.RFC3339, str)
+		if err != nil {
+			return time.Time{}, fmt.Errorf("invalid time format: %w", err)
+		}
+
+		return parsedTime, nil
 	}
 
 	return time.Time{}, NewConversionError("expected time or string", db)
@@ -164,15 +170,15 @@ func (c *SQLiteBoolConverter) DBToDomain(db any) (bool, error) {
 		return false, nil
 	}
 
-	switch v := db.(type) {
+	switch dbValue := db.(type) {
 	case bool:
-		return v, nil
+		return dbValue, nil
 	case int64:
-		return v != 0, nil
+		return dbValue != 0, nil
 	case int:
-		return v != 0, nil
+		return dbValue != 0, nil
 	case string:
-		return v == "true" || v == "1", nil
+		return dbValue == "true" || dbValue == "1", nil
 	default:
 		return false, NewConversionError("expected bool, int, or string", db)
 	}
@@ -266,6 +272,8 @@ type enum interface {
 	IsValid() bool
 }
 
+// convertEnumString converts enum values between domain and database representations.
+//nolint:ireturn // Generic converters intentionally return type parameters
 func convertEnumString[T enum](db string, defaultVal T, typeName string) (T, error) {
 	val := T(db)
 	if !val.IsValid() {
@@ -277,6 +285,8 @@ func convertEnumString[T enum](db string, defaultVal T, typeName string) (T, err
 
 type stringConstructor[T any] func(string) (T, error)
 
+// convertSimpleValue converts simple values using a constructor function.
+//nolint:ireturn // Generic converters intentionally return type parameters
 func convertSimpleValue[T any](db string, constructor stringConstructor[T]) (T, error) {
 	return constructor(db)
 }
@@ -313,16 +323,26 @@ func (c *DefaultSessionTokenConverter) DBToDomain(db any) (entities.SessionToken
 }
 
 // parseUUIDFromAny parses a UUID from various database types.
-func parseUUIDFromAny(db any) (uuid.UUID, error) {
-	switch v := db.(type) {
+func parseUUIDFromAny(dbValue any) (uuid.UUID, error) {
+	switch parsed := dbValue.(type) {
 	case uuid.UUID:
-		return v, nil
+		return parsed, nil
 	case string:
-		return uuid.Parse(v)
+		parsedUUID, err := uuid.Parse(parsed)
+		if err != nil {
+			return uuid.Nil, fmt.Errorf("invalid UUID string: %w", err)
+		}
+
+		return parsedUUID, nil
 	case []byte:
-		return uuid.FromBytes(v)
+		parsedUUID, err := uuid.FromBytes(parsed)
+		if err != nil {
+			return uuid.Nil, fmt.Errorf("invalid UUID bytes: %w", err)
+		}
+
+		return parsedUUID, nil
 	default:
-		return uuid.Nil, NewConversionError("expected UUID, string, or bytes", db)
+		return uuid.Nil, NewConversionError("expected UUID, string, or bytes", dbValue)
 	}
 }
 

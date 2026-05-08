@@ -2,11 +2,18 @@ package monitoring
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"          // DEPRECATED: prefer go.opentelemetry.io/otel
 	"github.com/prometheus/client_golang/prometheus/promhttp" // DEPRECATED: prefer go.opentelemetry.io/otel
+)
+
+const (
+	// readHeaderTimeout is the time limit for reading request headers.
+	readHeaderTimeout = 10 * time.Second
 )
 
 // Metrics collects and exposes sqlc-related metrics.
@@ -59,12 +66,13 @@ type HistogramConfig struct {
 
 func newHistogram(cfg HistogramConfig) prometheus.Histogram {
 	return prometheus.NewHistogram(
-		prometheus.HistogramOpts{
-			Name:      cfg.Name,
-			Help:      cfg.Help,
-			Buckets:   cfg.Buckets,
-			Namespace: "sqlc",
-			Subsystem: cfg.Subsystem,
+		prometheus.HistogramOpts{ //nolint:exhaustruct // NativeHistogram fields are optional
+			Name:        cfg.Name,
+			Help:        cfg.Help,
+			Buckets:     cfg.Buckets,
+			Namespace:   "sqlc",
+			Subsystem:   cfg.Subsystem,
+			ConstLabels: nil,
 		},
 	)
 }
@@ -72,10 +80,11 @@ func newHistogram(cfg HistogramConfig) prometheus.Histogram {
 func newCounter(name, help, subsystem string) prometheus.Counter {
 	return prometheus.NewCounter(
 		prometheus.CounterOpts{
-			Name:      name,
-			Help:      help,
-			Namespace: "sqlc",
-			Subsystem: subsystem,
+			Name:        name,
+			Help:        help,
+			Namespace:   "sqlc",
+			Subsystem:   subsystem,
+			ConstLabels: nil,
 		},
 	)
 }
@@ -83,17 +92,20 @@ func newCounter(name, help, subsystem string) prometheus.Counter {
 func newGauge(name, help, subsystem string) prometheus.Gauge {
 	return prometheus.NewGauge(
 		prometheus.GaugeOpts{
-			Name:      name,
-			Help:      help,
-			Namespace: "sqlc",
-			Subsystem: subsystem,
+			Name:        name,
+			Help:        help,
+			Namespace:   "sqlc",
+			Subsystem:   subsystem,
+			ConstLabels: nil,
 		},
 	)
 }
 
+// newMetrics creates and configures all metrics for the application.
+//
+//nolint:funlen // Metrics initialization requires comprehensive setup
 func newMetrics(registry *prometheus.Registry) *Metrics {
 	metrics := &Metrics{
-		// Code generation metrics
 		CodeGenDuration: newHistogram(HistogramConfig{
 			Name:      "sqlc_codegen_duration_seconds",
 			Help:      "Duration of sqlc code generation in seconds",
@@ -111,7 +123,6 @@ func newMetrics(registry *prometheus.Registry) *Metrics {
 			"codegen",
 		),
 
-		// Database query metrics
 		QueryDuration: newHistogram(HistogramConfig{
 			Name:      "sqlc_query_duration_seconds",
 			Help:      "Duration of database queries in seconds",
@@ -134,7 +145,6 @@ func newMetrics(registry *prometheus.Registry) *Metrics {
 			"database",
 		),
 
-		// User operation metrics
 		UserOperations: newCounter(
 			"sqlc_user_operations_total",
 			"Total number of user operations performed",
@@ -151,7 +161,6 @@ func newMetrics(registry *prometheus.Registry) *Metrics {
 			"user",
 		),
 
-		// Session metrics
 		SessionCreations: newCounter(
 			"sqlc_session_creations_total",
 			"Total number of session creations performed",
@@ -163,7 +172,6 @@ func newMetrics(registry *prometheus.Registry) *Metrics {
 			"session",
 		),
 
-		// Configuration metrics
 		ConfigFileSize: newGauge(
 			"sqlc_config_file_size_bytes",
 			"Size of sqlc configuration file in bytes",
@@ -175,7 +183,6 @@ func newMetrics(registry *prometheus.Registry) *Metrics {
 			"config",
 		),
 
-		// Build metrics
 		BuildDuration: newHistogram(HistogramConfig{
 			Name:      "sqlc_build_duration_seconds",
 			Help:      "Duration of build operations in seconds",
@@ -196,7 +203,6 @@ func newMetrics(registry *prometheus.Registry) *Metrics {
 		registry: registry,
 	}
 
-	// Register metrics
 	registry.MustRegister(
 		metrics.CodeGenDuration,
 		metrics.CodeGenErrors,
@@ -297,32 +303,48 @@ func (m *Metrics) ObserveBuild(duration time.Duration, success bool) {
 // StartServer starts the metrics HTTP server.
 func (m *Metrics) StartServer(addr string) error {
 	mux := http.NewServeMux()
-	mux.Handle("/metrics", promhttp.HandlerFor(m.registry, promhttp.HandlerOpts{}))
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	mux.Handle(
+		"/metrics",
+		promhttp.HandlerFor(
+			m.registry,
+			promhttp.HandlerOpts{ //nolint:exhaustruct // Only DisableCompression needed
+				DisableCompression: false,
+			},
+		),
+	)
+	mux.HandleFunc("/", func(w http.ResponseWriter, _ *http.Request) {
 		_, _ = w.Write([]byte(`<html><head><title>sqlc Metrics</title></head>
 <body><h1>sqlc Metrics</h1>
 <p><a href="/metrics">Metrics</a></p>
 <p><a href="/health">Health Check</a></p>
 </body></html>`))
 	})
-	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/health", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte("OK"))
 	})
 
-	m.server = &http.Server{
+	m.server = &http.Server{ //nolint:exhaustruct // Only required fields needed
 		Addr:              addr,
 		Handler:           mux,
-		ReadHeaderTimeout: 10 * time.Second,
+		ReadHeaderTimeout: readHeaderTimeout,
 	}
 
-	return m.server.ListenAndServe()
+	err := m.server.ListenAndServe()
+	if err != nil && !errors.Is(err, http.ErrServerClosed) {
+		return fmt.Errorf("server listen error: %w", err)
+	}
+
+	return nil
 }
 
 // Shutdown gracefully shuts down the metrics server.
 func (m *Metrics) Shutdown(ctx context.Context) error {
 	if m.server != nil {
-		return m.server.Shutdown(ctx)
+		err := m.server.Shutdown(ctx)
+		if err != nil {
+			return fmt.Errorf("server shutdown error: %w", err)
+		}
 	}
 
 	return nil

@@ -10,6 +10,9 @@ import (
 	"github.com/google/uuid"
 )
 
+// minBcryptLength is the minimum length for a bcrypt hash.
+const minBcryptLength = 32
+
 // User represents the core domain entity for a user
 // This is INDEPENDENT of database representation.
 type User struct {
@@ -58,7 +61,7 @@ func NewUuID(s string) (UuID, error) {
 
 	parsed, err := uuid.Parse(s)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("invalid UUID string: %w", err)
 	}
 
 	return UuID(parsed.String()), nil
@@ -94,6 +97,8 @@ func (e Email) String() string { return string(e) }
 type Username string
 
 // ReservedUsernames contains usernames that cannot be registered.
+//
+//nolint:gochecknoglobals // Intentional lookup table for validation
 var ReservedUsernames = map[string]bool{
 	"admin": true, "administrator": true, "root": true, "system": true,
 	"moderator": true, "api": true, "www": true, "mail": true,
@@ -134,7 +139,7 @@ func (u Username) String() string { return string(u) }
 type PasswordHash string
 
 func NewPasswordHash(hash string) (PasswordHash, error) {
-	if len(hash) < 32 { // Minimum bcrypt length
+	if len(hash) < minBcryptLength {
 		return "", ErrInvalidPasswordHash
 	}
 
@@ -328,7 +333,7 @@ func (u *User) UpdateProfile(
 
 // changeField updates a field with validation and timestamp using generics.
 func changeField[T any](
-	u *User,
+	user *User,
 	value T,
 	valid func(T) bool,
 	errForInvalid func() error,
@@ -338,8 +343,8 @@ func changeField[T any](
 		return errForInvalid()
 	}
 
-	apply(u, value)
-	u.updatedAt = time.Now()
+	apply(user, value)
+	user.updatedAt = time.Now()
 
 	return nil
 }

@@ -76,12 +76,16 @@ func testEntityValidation[T valueObject](
 	constructor func(string) (T, error),
 	expectedSuccess bool,
 ) {
+	t.Helper()
+
 	entity, err := constructor(value)
 	if expectedSuccess {
-		assert.NoError(t, err)
+		require.NoError(t, err)
+		require.NotNil(t, entity)
 		assert.Equal(t, value, entity.String())
 	} else {
-		assert.Error(t, err)
+		require.Error(t, err)
+		require.Nil(t, entity)
 	}
 }
 
@@ -146,12 +150,12 @@ func TestUserCreation(t *testing.T) {
 			)
 
 			if tt.expectError {
-				assert.Error(t, err)
-				assert.IsType(t, tt.errorType, err)
-				assert.Nil(t, user)
+				require.Error(t, err)
+				require.ErrorIs(t, err, tt.errorType)
+				require.Nil(t, user)
 			} else {
-				assert.NoError(t, err)
-				assert.NotNil(t, user)
+				require.NoError(t, err)
+				require.NotNil(t, user)
 				assert.Equal(t, email, user.Email())
 				assert.Equal(t, username, user.Username())
 				assert.Equal(t, firstName, user.FirstName())
@@ -191,16 +195,16 @@ func TestUserMethods(t *testing.T) {
 
 	// Test status changes
 	err = user.ChangeStatus(entities.UserStatusInactive)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.False(t, user.IsActive())
 
 	err = user.ChangeStatus(entities.UserStatusSuspended)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.False(t, user.IsActive())
 
 	// Test role changes
 	err = user.ChangeRole(entities.UserRoleAdmin)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, entities.UserRoleAdmin, user.Role())
 
 	// Test verification
@@ -224,7 +228,7 @@ func TestUserMethods(t *testing.T) {
 	// Test profile update
 	newFirstName, _ := entities.NewFirstName("Jane")
 	err = user.UpdateProfile(&newFirstName, nil, nil, nil)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, newFirstName, user.FirstName())
 }
 

@@ -1,6 +1,7 @@
 package mappers
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/LarsArtmann/template-sqlc/internal/domain/entities"
@@ -131,7 +132,12 @@ func ParseUUID(uuidStr entities.UuID) (uuid.UUID, error) {
 		return uuid.Nil, nil
 	}
 
-	return uuid.Parse(string(uuidStr))
+	parsed, err := uuid.Parse(string(uuidStr))
+	if err != nil {
+		return uuid.Nil, fmt.Errorf("invalid UUID: %w", err)
+	}
+
+	return parsed, nil
 }
 
 // FormatUUID safely formats UUID to string.
@@ -154,7 +160,12 @@ func ParseTime(timeStr string) (time.Time, error) {
 	// PostgreSQL: timestamptz format
 	// MySQL: datetime format
 
-	return time.Parse(time.RFC3339, timeStr)
+	parsed, err := time.Parse(time.RFC3339, timeStr)
+	if err != nil {
+		return time.Time{}, fmt.Errorf("invalid time format: %w", err)
+	}
+
+	return parsed, nil
 }
 
 // FormatTime safely formats time to string/database format.

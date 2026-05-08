@@ -2,20 +2,28 @@ package db
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 )
 
+// errClosingStatements is a static error for statement close failures.
+var errClosingStatements = errors.New("error closing statements")
+
 func CloseStatements(stmts ...*sql.Stmt) error {
-	var err error
+	var errs []error
 
 	for _, stmt := range stmts {
 		if stmt != nil {
 			cerr := stmt.Close()
 			if cerr != nil {
-				err = fmt.Errorf("error closing statement: %w", cerr)
+				errs = append(errs, cerr)
 			}
 		}
 	}
 
-	return err
+	if len(errs) > 0 {
+		return fmt.Errorf("%w: %d errors occurred", errClosingStatements, len(errs))
+	}
+
+	return nil
 }

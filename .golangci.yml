@@ -165,6 +165,7 @@ linters:
         - (or|er)$
         - repositories\.\w+Repository
         - prometheus\.(Histogram|Counter|Gauge)
+        - ~.*
     tagliatelle:
       case:
         rules:
@@ -179,6 +180,7 @@ linters:
         - github.com/LarsArtmann/template-sqlc/internal/adapters.ChangeStatusWithValidation
         - github.com/LarsArtmann/template-sqlc/internal/adapters.ChangeRoleWithValidation
         - github.com/LarsArtmann/template-sqlc/internal/domain/entities.StubNotImplemented
+        - fmt.Errorf
       ignore-package-globs:
         - github.com/LarsArtmann/template-sqlc/internal/adapters/*
         - github.com/LarsArtmann/template-sqlc/internal/domain/entities
@@ -196,10 +198,11 @@ linters:
         - .*NotImplementedUserRepository$
         - .*NotImplementedSessionRepository$
         - .*BaseQueries$
-        - prometheus\.HistogramOpts
-        - prometheus\.CounterOpts
-        - prometheus\.GaugeOpts
-        - promhttp\.HandlerOpts
+        - .*HTTP.*Server
+        - prometheus/.*HistogramOpts
+        - prometheus/.*CounterOpts
+        - prometheus/.*GaugeOpts
+        - promhttp/.*HandlerOpts
   exclusions:
     rules:
       - path: '_test\.go'

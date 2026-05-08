@@ -20,7 +20,7 @@ const (
 
 	// Authentication errors.
 	ErrCodeUnauthorized       ErrorCode = "UNAUTHORIZED"
-	ErrCodeInvalidCredentials ErrorCode = "INVALID_CREDENTIALS"
+	ErrCodeInvalidCredentials ErrorCode = "INVALID_CREDENTIALS" //nolint:gosec // This is an error code, not a credential
 	ErrCodeTokenExpired       ErrorCode = "TOKEN_EXPIRED"
 	ErrCodeTokenInvalid       ErrorCode = "TOKEN_INVALID"
 
@@ -349,6 +349,8 @@ func IsInternalServerError(err error) bool {
 }
 
 // HTTP Status Code mapping.
+//
+//nolint:gochecknoglobals // Intentional lookup table for error code to HTTP status mapping
 var errorCodeToHTTPStatus = map[ErrorCode]int{
 	ErrCodeValidationFailed:       http.StatusBadRequest,
 	ErrCodeInvalidInput:           http.StatusBadRequest,

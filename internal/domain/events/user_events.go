@@ -226,7 +226,7 @@ func (p *InMemoryEventPublisher) Clear() {
 	p.events = make([]*UserEvent, 0)
 }
 
-// EventType returns the string representation of EventType.
+// String implements fmt.Stringer for EventType.
 func (e EventType) String() string {
 	return string(e)
 }

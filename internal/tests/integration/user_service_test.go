@@ -2,6 +2,7 @@ package integration
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/LarsArtmann/template-sqlc/internal/domain/entities"
@@ -9,7 +10,6 @@ import (
 	"github.com/LarsArtmann/template-sqlc/internal/domain/repositories"
 	"github.com/LarsArtmann/template-sqlc/internal/domain/services"
 	"github.com/LarsArtmann/template-sqlc/internal/validation"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -31,7 +31,7 @@ func newTestCreateUserRequest(username, firstName, lastName string) *services.Cr
 type UserServiceIntegrationTestSuite struct {
 	suite.Suite
 
-	ctx            context.Context
+	ctx            context.Context //nolint:containedctx // Test context stored in struct
 	userService    *services.UserService
 	userRepo       repositories.UserRepository
 	sessionRepo    repositories.SessionRepository
@@ -135,10 +135,9 @@ func (s *UserServiceIntegrationTestSuite) TestCreateUserDuplicateEmail() {
 	req2 := newTestCreateUserRequest("testuser2", "Jane", "Smith")
 
 	user, err := s.userService.CreateUser(s.ctx, req2)
-	s.Error(err)
-	s.True(entities.IsNotFoundError(err) ||
-		assert.IsType(s.T(), entities.ErrUserAlreadyExists, err))
-	s.Nil(user)
+	s.Require().Error(err)
+	s.True(entities.IsNotFoundError(err) || errors.Is(err, entities.ErrUserAlreadyExists))
+	s.Require().Nil(user)
 }
 
 func (s *UserServiceIntegrationTestSuite) TestGetUser() {
@@ -224,8 +223,8 @@ func (s *UserServiceIntegrationTestSuite) TestAuthenticateUserInvalidCredentials
 		"127.0.0.1",
 		"test-user-agent")
 
-	s.Error(err)
-	s.Nil(session)
+	s.Require().Error(err)
+	s.Require().Nil(session)
 	s.True(entities.IsAuthenticationError(err))
 
 	// Check that failed login event was published

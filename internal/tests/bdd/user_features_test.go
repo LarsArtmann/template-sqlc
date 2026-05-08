@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 	"time"
 
@@ -19,6 +18,8 @@ import (
 	"github.com/cucumber/godog"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 // TestPasswordHash is a bcrypt hash for "test_password" used in tests.
@@ -205,7 +206,7 @@ func (s *UserFeaturesTestSuite) createUserWithPrefix(prefix string) (*entities.U
 		Email:        prefix + "@example.com",
 		Username:     prefix,
 		PasswordHash: TestPasswordHash,
-		FirstName:    strings.Title(prefix),
+		FirstName:    cases.Title(language.Und).String(prefix),
 		LastName:     "User",
 		Status:       "active",
 		Role:         "user",
@@ -936,7 +937,7 @@ func TestUserManagementFeatures(t *testing.T) {
 		require.NoError(t, err, "User creation should succeed")
 
 		err = suite.userShouldBeCreatedSuccessfully()
-		assert.NoError(t, err, "User should be created successfully")
+		require.NoError(t, err, "User should be created successfully")
 
 		err = suite.userCreatedEventShouldBePublished()
 		assert.NoError(t, err, "User created event should be published")
@@ -959,7 +960,7 @@ func TestUserManagementFeatures(t *testing.T) {
 		require.NoError(t, err, "User profile should be updated")
 
 		err = suite.userProfileShouldBeUpdated()
-		assert.NoError(t, err, "User profile should be updated")
+		require.NoError(t, err, "User profile should be updated")
 
 		err = suite.userUpdatedEventShouldBePublished()
 		assert.NoError(t, err, "User updated event should be published")

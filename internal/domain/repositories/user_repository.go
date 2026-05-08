@@ -8,6 +8,8 @@ import (
 
 // UserRepository defines the interface for user data access
 // This abstracts away database-specific implementation details.
+//
+//nolint:interfacebloat // Repository pattern requires comprehensive methods
 type UserRepository interface {
 	// CRUD operations
 	Create(ctx context.Context, user *entities.User) error

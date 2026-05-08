@@ -8,6 +8,8 @@ import (
 const (
 	maxPaginationLimit = 1000
 	maxSearchLimit     = 100
+	maxTagsLimit       = 10
+	maxQueryLength     = 500
 )
 
 // ValidatePagination validates pagination parameters.
@@ -33,7 +35,7 @@ func ValidateTags(tags []string) error {
 		return errors.NewValidationError("tags", "cannot be empty")
 	}
 
-	if len(tags) > 10 {
+	if len(tags) > maxTagsLimit {
 		return errors.NewValidationError("tags", "cannot exceed 10 tags")
 	}
 
@@ -46,7 +48,7 @@ func ValidateSearchQuery(query string, limit int) error {
 		return errors.NewValidationError("query", "cannot be empty")
 	}
 
-	if len(query) > 500 {
+	if len(query) > maxQueryLength {
 		return errors.NewValidationError("query", "cannot exceed 500 characters")
 	}
 
