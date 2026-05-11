@@ -273,6 +273,7 @@ type enum interface {
 }
 
 // convertEnumString converts enum values between domain and database representations.
+//
 //nolint:ireturn // Generic converters intentionally return type parameters
 func convertEnumString[T enum](db string, defaultVal T, typeName string) (T, error) {
 	val := T(db)
@@ -286,6 +287,7 @@ func convertEnumString[T enum](db string, defaultVal T, typeName string) (T, err
 type stringConstructor[T any] func(string) (T, error)
 
 // convertSimpleValue converts simple values using a constructor function.
+//
 //nolint:ireturn // Generic converters intentionally return type parameters
 func convertSimpleValue[T any](db string, constructor stringConstructor[T]) (T, error) {
 	return constructor(db)
