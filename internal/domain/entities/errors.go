@@ -1,3 +1,6 @@
+// Package entities provides domain entities and error types for the application.
+// It contains core business logic objects like User and UserSession, along with
+// domain-specific error types for validation, authentication, authorization, and more.
 package entities
 
 import (
@@ -36,6 +39,7 @@ type ValidationError struct {
 	Message string `json:"message"`
 }
 
+// NewValidationError creates a new ValidationError for the given field and message.
 func NewValidationError(field, message string) *ValidationError {
 	return &ValidationError{
 		Field:   field,
@@ -63,6 +67,7 @@ type NotFoundError struct {
 	ResourceError
 }
 
+// NewNotFoundError creates a new NotFoundError for the specified resource with a message.
 func NewNotFoundError(resource, message string) *NotFoundError {
 	return &NotFoundError{
 		ResourceError{Resource: resource, Message: message, Prefix: "not found"},
@@ -78,6 +83,7 @@ type ConflictError struct {
 	ResourceError
 }
 
+// NewConflictError creates a new ConflictError for the specified resource with a message.
 func NewConflictError(resource, message string) *ConflictError {
 	return &ConflictError{
 		ResourceError{Resource: resource, Message: message, Prefix: "conflict"},
@@ -93,6 +99,7 @@ type AuthenticationError struct {
 	Message string `json:"message"`
 }
 
+// NewAuthenticationError creates a new AuthenticationError with the given message.
 func NewAuthenticationError(message string) *AuthenticationError {
 	return &AuthenticationError{
 		Message: message,
@@ -108,6 +115,7 @@ type AuthorizationError struct {
 	Message string `json:"message"`
 }
 
+// NewAuthorizationError creates a new AuthorizationError with the given message.
 func NewAuthorizationError(message string) *AuthorizationError {
 	return &AuthorizationError{
 		Message: message,
@@ -124,6 +132,7 @@ type InternalError struct {
 	Cause   error  `json:"-"`
 }
 
+// NewInternalError creates a new InternalError with message and optional cause.
 func NewInternalError(message string, cause error) *InternalError {
 	return &InternalError{
 		Message: message,

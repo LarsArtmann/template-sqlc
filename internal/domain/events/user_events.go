@@ -1,3 +1,4 @@
+// Package events provides domain event types and publishing capabilities.
 package events
 
 import (
@@ -20,31 +21,42 @@ type UserEvent struct {
 type EventType string
 
 const (
-	// User lifecycle events.
-	EventUserCreated     EventType = "user.created"
-	EventUserUpdated     EventType = "user.updated"
-	EventUserDeleted     EventType = "user.deleted"
-	EventUserActivated   EventType = "user.activated"
+	// EventUserCreated is emitted when a user is created.
+	EventUserCreated EventType = "user.created"
+	// EventUserUpdated is emitted when a user is updated.
+	EventUserUpdated EventType = "user.updated"
+	// EventUserDeleted is emitted when a user is deleted.
+	EventUserDeleted EventType = "user.deleted"
+	// EventUserActivated is emitted when a user is activated.
+	EventUserActivated EventType = "user.activated"
+	// EventUserDeactivated is emitted when a user is deactivated.
 	EventUserDeactivated EventType = "user.deactivated"
-	EventUserSuspended   EventType = "user.suspended"
+	// EventUserSuspended is emitted when a user is suspended.
+	EventUserSuspended EventType = "user.suspended"
 
-	// Authentication events.
-	EventUserLogin     EventType = "user.login"
-	EventUserLogout    EventType = "user.logout"
+	// EventUserLogin is emitted when a user logs in.
+	EventUserLogin EventType = "user.login"
+	// EventUserLogout is emitted when a user logs out.
+	EventUserLogout EventType = "user.logout"
+	// EventUserLoginFail is emitted when a user login fails.
 	EventUserLoginFail EventType = "user.login.failed"
 
-	// Verification events.
-	EventUserVerified              EventType = "user.verified"
+	// EventUserVerified is emitted when a user is verified.
+	EventUserVerified EventType = "user.verified"
+	// EventUserVerificationRequested is emitted when verification is requested.
 	EventUserVerificationRequested EventType = "user.verification.requested"
 
-	// Password events.
-	EventPasswordChanged        EventType = "password.changed"
-	EventPasswordReset          EventType = "password.reset"
+	// EventPasswordChanged is emitted when a password is changed.
+	EventPasswordChanged EventType = "password.changed"
+	// EventPasswordReset is emitted when a password is reset.
+	EventPasswordReset EventType = "password.reset"
+	// EventPasswordResetRequested is emitted when a password reset is requested.
 	EventPasswordResetRequested EventType = "password.reset.requested"
 
-	// Profile events.
+	// EventProfileUpdated is emitted when a profile is updated.
 	EventProfileUpdated EventType = "profile.updated"
-	EventRoleChanged    EventType = "role.changed"
+	// EventRoleChanged is emitted when a role is changed.
+	EventRoleChanged EventType = "role.changed"
 )
 
 // UserCreatedEvent data for user creation.
@@ -200,28 +212,33 @@ type InMemoryEventPublisher struct {
 	events []*UserEvent
 }
 
+// NewInMemoryEventPublisher creates a new InMemoryEventPublisher.
 func NewInMemoryEventPublisher() *InMemoryEventPublisher {
 	return &InMemoryEventPublisher{
 		events: make([]*UserEvent, 0),
 	}
 }
 
+// Publish publishes a single event.
 func (p *InMemoryEventPublisher) Publish(event *UserEvent) error {
 	p.events = append(p.events, event)
 
 	return nil
 }
 
+// PublishBatch publishes multiple events.
 func (p *InMemoryEventPublisher) PublishBatch(events []*UserEvent) error {
 	p.events = append(p.events, events...)
 
 	return nil
 }
 
+// Events returns all published events.
 func (p *InMemoryEventPublisher) Events() []*UserEvent {
 	return p.events
 }
 
+// Clear removes all published events.
 func (p *InMemoryEventPublisher) Clear() {
 	p.events = make([]*UserEvent, 0)
 }
@@ -231,7 +248,7 @@ func (e EventType) String() string {
 	return string(e)
 }
 
-// IsValidEventType checks if the event type is valid.
+// IsValid returns true if the event type is valid.
 func (e EventType) IsValid() bool {
 	validTypes := map[EventType]bool{
 		EventUserCreated:               true,

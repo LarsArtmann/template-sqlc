@@ -1,3 +1,4 @@
+// Package db provides database helper utilities.
 package db
 
 import (
@@ -9,6 +10,7 @@ import (
 // errClosingStatements is a static error for statement close failures.
 var errClosingStatements = errors.New("error closing statements")
 
+// CloseStatements closes multiple SQL statements and aggregates any errors.
 func CloseStatements(stmts ...*sql.Stmt) error {
 	var errs []error
 

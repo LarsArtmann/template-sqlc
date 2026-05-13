@@ -1,3 +1,6 @@
+// Package repositories defines repository interfaces for data access.
+// It provides abstractions over database-specific implementations, enabling
+// the domain layer to remain independent of infrastructure concerns.
 package repositories
 
 import (

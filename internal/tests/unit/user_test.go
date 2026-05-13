@@ -71,7 +71,7 @@ type valueObject interface {
 // testEntityValidation is a helper function to test value object creation.
 func testEntityValidation[T valueObject](
 	t *testing.T,
-	name string,
+	_ string,
 	value string,
 	constructor func(string) (T, error),
 	expectedSuccess bool,

@@ -1,3 +1,4 @@
+// Package monitoring provides metrics collection and exposure via Prometheus.
 package monitoring
 
 import (
@@ -259,7 +260,8 @@ func (m *Metrics) RecordUserCreation() {
 }
 
 // RecordUserAuthentication records a user authentication operation.
-func (m *Metrics) RecordUserAuthentication(success bool) {
+// The success parameter indicates whether authentication was successful.
+func (m *Metrics) RecordUserAuthentication(_ bool) {
 	m.UserOperations.Inc()
 	m.UserAuthentications.Inc()
 }

@@ -1,3 +1,4 @@
+// Package errors provides standardized application error types with HTTP status codes.
 package errors
 
 import (
@@ -11,39 +12,39 @@ import (
 type ErrorCode string
 
 const (
-	// Validation errors.
+	// Validation error codes.
 	ErrCodeValidationFailed ErrorCode = "VALIDATION_FAILED"
 	ErrCodeInvalidInput     ErrorCode = "INVALID_INPUT"
 	ErrCodeMissingField     ErrorCode = "MISSING_FIELD"
 	ErrCodeInvalidFormat    ErrorCode = "INVALID_FORMAT"
 	ErrCodeConstraintFailed ErrorCode = "CONSTRAINT_FAILED"
 
-	// Authentication errors.
+	// Authentication error codes.
 	ErrCodeUnauthorized       ErrorCode = "UNAUTHORIZED"
 	ErrCodeInvalidCredentials ErrorCode = "INVALID_CREDENTIALS" //nolint:gosec // This is an error code, not a credential
 	ErrCodeTokenExpired       ErrorCode = "TOKEN_EXPIRED"
 	ErrCodeTokenInvalid       ErrorCode = "TOKEN_INVALID"
 
-	// Authorization errors.
+	// Authorization error codes.
 	ErrCodeForbidden              ErrorCode = "FORBIDDEN"
 	ErrCodeInsufficientPrivileges ErrorCode = "INSUFFICIENT_PRIVILEGES"
 	ErrCodeAccountSuspended       ErrorCode = "ACCOUNT_SUSPENDED"
 	ErrCodeAccountInactive        ErrorCode = "ACCOUNT_INACTIVE"
 
-	// Resource errors.
+	// Resource error codes.
 	ErrCodeNotFound         ErrorCode = "NOT_FOUND"
 	ErrCodeResourceNotFound ErrorCode = "RESOURCE_NOT_FOUND"
 	ErrCodeAlreadyExists    ErrorCode = "ALREADY_EXISTS"
 	ErrCodeResourceConflict ErrorCode = "RESOURCE_CONFLICT"
 
-	// System errors.
+	// System error codes.
 	ErrCodeInternal    ErrorCode = "INTERNAL_ERROR"
 	ErrCodeDatabase    ErrorCode = "DATABASE_ERROR"
 	ErrCodeNetwork     ErrorCode = "NETWORK_ERROR"
 	ErrCodeTimeout     ErrorCode = "TIMEOUT"
 	ErrCodeUnavailable ErrorCode = "UNAVAILABLE"
 
-	// Business logic errors.
+	// Business logic error codes.
 	ErrCodeBusinessLogic    ErrorCode = "BUSINESS_LOGIC_ERROR"
 	ErrCodeInvalidState     ErrorCode = "INVALID_STATE"
 	ErrCodePermissionDenied ErrorCode = "PERMISSION_DENIED"
@@ -116,7 +117,7 @@ func newBadRequestError(code ErrorCode, message string, kvPairs ...string) *AppE
 	return NewAppErrorWithDetails(code, message, http.StatusBadRequest, details)
 }
 
-// Validation error constructors.
+// NewValidationError creates a validation error for a specific field.
 func NewValidationError(field, message string) *AppError {
 	return newBadRequestError(
 		ErrCodeValidationFailed,
@@ -128,6 +129,7 @@ func NewValidationError(field, message string) *AppError {
 	)
 }
 
+// NewInvalidInputError creates an invalid input error.
 func NewInvalidInputError(message string) *AppError {
 	return NewAppError(ErrCodeInvalidInput, message, http.StatusBadRequest)
 }
@@ -142,10 +144,12 @@ func newFieldError(code ErrorCode, message, field string) *AppError {
 	)
 }
 
+// NewMissingFieldError creates a missing field error.
 func NewMissingFieldError(field string) *AppError {
 	return newFieldError(ErrCodeMissingField, "Required field is missing", field)
 }
 
+// NewInvalidFormatError creates an invalid format error.
 func NewInvalidFormatError(field, format string) *AppError {
 	return newBadRequestError(
 		ErrCodeInvalidFormat,
@@ -157,28 +161,32 @@ func NewInvalidFormatError(field, format string) *AppError {
 	)
 }
 
-// Authentication error constructors.
+// NewUnauthorizedError creates an unauthorized error.
 func NewUnauthorizedError(message string) *AppError {
 	return NewAppError(ErrCodeUnauthorized, message, http.StatusUnauthorized)
 }
 
+// NewInvalidCredentialsError creates an invalid credentials error.
 func NewInvalidCredentialsError() *AppError {
 	return NewAppError(ErrCodeInvalidCredentials, "Invalid credentials", http.StatusUnauthorized)
 }
 
+// NewTokenExpiredError creates a token expired error.
 func NewTokenExpiredError() *AppError {
 	return NewAppError(ErrCodeTokenExpired, "Token has expired", http.StatusUnauthorized)
 }
 
+// NewTokenInvalidError creates a token invalid error.
 func NewTokenInvalidError() *AppError {
 	return NewAppError(ErrCodeTokenInvalid, "Invalid token", http.StatusUnauthorized)
 }
 
-// Authorization error constructors.
+// NewForbiddenError creates a forbidden error.
 func NewForbiddenError(message string) *AppError {
 	return NewAppError(ErrCodeForbidden, message, http.StatusForbidden)
 }
 
+// NewInsufficientPrivilegesError creates an insufficient privileges error.
 func NewInsufficientPrivilegesError() *AppError {
 	return NewAppError(
 		ErrCodeInsufficientPrivileges,
@@ -187,10 +195,12 @@ func NewInsufficientPrivilegesError() *AppError {
 	)
 }
 
+// NewAccountSuspendedError creates an account suspended error.
 func NewAccountSuspendedError() *AppError {
 	return NewAppError(ErrCodeAccountSuspended, "Account suspended", http.StatusForbidden)
 }
 
+// NewAccountInactiveError creates an account inactive error.
 func NewAccountInactiveError() *AppError {
 	return NewAppError(ErrCodeAccountInactive, "Account inactive", http.StatusForbidden)
 }
@@ -205,22 +215,27 @@ func newResourceError(code ErrorCode, message, resource string) *AppError {
 	)
 }
 
+// NewNotFoundError creates a not found error for a resource.
 func NewNotFoundError(resource string) *AppError {
 	return newResourceError(ErrCodeResourceNotFound, "Resource not found", resource)
 }
 
+// NewUserNotFoundError creates a user not found error.
 func NewUserNotFoundError() *AppError {
 	return NewNotFoundError("user")
 }
 
+// NewSessionNotFoundError creates a session not found error.
 func NewSessionNotFoundError() *AppError {
 	return NewNotFoundError("session")
 }
 
+// NewAlreadyExistsError creates an already exists error.
 func NewAlreadyExistsError(resource string) *AppError {
 	return newResourceError(ErrCodeAlreadyExists, "Resource already exists", resource)
 }
 
+// NewResourceConflictError creates a resource conflict error.
 func NewResourceConflictError(resource, message string) *AppError {
 	return NewAppErrorWithDetails(
 		ErrCodeResourceConflict,
@@ -230,23 +245,27 @@ func NewResourceConflictError(resource, message string) *AppError {
 	)
 }
 
-// System error constructors.
+// NewInternalError creates an internal error.
 func NewInternalError(message string, cause error) *AppError {
 	return NewAppErrorWithCause(ErrCodeInternal, message, http.StatusInternalServerError, cause)
 }
 
+// NewDatabaseError creates a database error.
 func NewDatabaseError(message string, cause error) *AppError {
 	return NewAppErrorWithCause(ErrCodeDatabase, message, http.StatusInternalServerError, cause)
 }
 
+// NewNetworkError creates a network error.
 func NewNetworkError(message string, cause error) *AppError {
 	return NewAppErrorWithCause(ErrCodeNetwork, message, http.StatusServiceUnavailable, cause)
 }
 
+// NewTimeoutError creates a timeout error.
 func NewTimeoutError(operation string) *AppError {
 	return NewAppError(ErrCodeTimeout, "Operation timed out: "+operation, http.StatusRequestTimeout)
 }
 
+// NewUnavailableError creates a service unavailable error.
 func NewUnavailableError(service string) *AppError {
 	return NewAppError(
 		ErrCodeUnavailable,
@@ -255,11 +274,12 @@ func NewUnavailableError(service string) *AppError {
 	)
 }
 
-// Business logic error constructors.
+// NewBusinessLogicError creates a business logic error.
 func NewBusinessLogicError(message string) *AppError {
 	return NewAppError(ErrCodeBusinessLogic, message, http.StatusBadRequest)
 }
 
+// NewInvalidStateError creates an invalid state error.
 func NewInvalidStateError(state, operation string) *AppError {
 	return newBadRequestError(
 		ErrCodeInvalidState,
@@ -271,6 +291,7 @@ func NewInvalidStateError(state, operation string) *AppError {
 	)
 }
 
+// NewPermissionDeniedError creates a permission denied error.
 func NewPermissionDeniedError(operation string) *AppError {
 	return NewAppErrorWithDetails(
 		ErrCodePermissionDenied,
@@ -280,7 +301,7 @@ func NewPermissionDeniedError(operation string) *AppError {
 	)
 }
 
-// Error checking functions.
+// IsAppError checks if err is an AppError.
 func IsAppError(err error) bool {
 	appError := &AppError{}
 	ok := errors.As(err, &appError)
@@ -288,6 +309,7 @@ func IsAppError(err error) bool {
 	return ok
 }
 
+// IsValidationError checks if err is a validation error.
 func IsValidationError(err error) bool {
 	return hasErrorCode(err,
 		ErrCodeValidationFailed,
@@ -298,6 +320,7 @@ func IsValidationError(err error) bool {
 	)
 }
 
+// IsNotFoundError checks if err is a not found error.
 func IsNotFoundError(err error) bool {
 	appErr := &AppError{}
 	if errors.As(err, &appErr) {
@@ -307,6 +330,7 @@ func IsNotFoundError(err error) bool {
 	return false
 }
 
+// IsUnauthorizedError checks if err is an unauthorized error.
 func IsUnauthorizedError(err error) bool {
 	appErr := &AppError{}
 	if errors.As(err, &appErr) {
@@ -331,6 +355,7 @@ func hasErrorCode(err error, codes ...ErrorCode) bool {
 	return false
 }
 
+// IsForbiddenError checks if err is a forbidden error.
 func IsForbiddenError(err error) bool {
 	return hasErrorCode(err,
 		ErrCodeForbidden,
@@ -340,6 +365,7 @@ func IsForbiddenError(err error) bool {
 	)
 }
 
+// IsInternalServerError checks if err is an internal server error.
 func IsInternalServerError(err error) bool {
 	return hasErrorCode(err,
 		ErrCodeInternal,
@@ -376,6 +402,7 @@ var errorCodeToHTTPStatus = map[ErrorCode]int{
 	ErrCodeUnavailable:            http.StatusServiceUnavailable,
 }
 
+// StatusCode returns the HTTP status code for the error.
 func (e *AppError) StatusCode() int {
 	if e.HTTPStatus != 0 {
 		return e.HTTPStatus

@@ -36,12 +36,14 @@ type User struct {
 // UserID is a strongly-typed user identifier.
 type UserID int64
 
+// Int64 returns the int64 representation of the user ID.
 func (id UserID) Int64() int64   { return int64(id) }
 func (id UserID) String() string { return fmt.Sprintf("user:%d", id) }
 
 // IDID is a strongly-typed event identifier.
 type IDID int64
 
+// Int64 returns the int64 representation of the ID.
 func (id IDID) Int64() int64   { return int64(id) }
 func (id IDID) String() string { return fmt.Sprintf("event:%d", id) }
 
@@ -83,6 +85,7 @@ func isValidEmail(email string) bool {
 // Email represents a validated email address.
 type Email string
 
+// NewEmail creates a new Email from a string, validating its format.
 func NewEmail(email string) (Email, error) {
 	if !isValidEmail(email) {
 		return "", ErrInvalidEmail
@@ -116,6 +119,7 @@ var ReservedUsernames = map[string]bool{
 
 var usernameValidChars = regexp.MustCompile(`^[a-zA-Z0-9_-]+$`)
 
+// NewUsername creates a new Username from a string, validating length and characters.
 func NewUsername(username string) (Username, error) {
 	username = strings.TrimSpace(username)
 	if len(username) < 3 || len(username) > 50 {
@@ -138,6 +142,7 @@ func (u Username) String() string { return string(u) }
 // PasswordHash represents a secure password hash.
 type PasswordHash string
 
+// NewPasswordHash creates a new PasswordHash from a hash string.
 func NewPasswordHash(hash string) (PasswordHash, error) {
 	if len(hash) < minBcryptLength {
 		return "", ErrInvalidPasswordHash
@@ -151,6 +156,7 @@ func (p PasswordHash) String() string { return string(p) }
 // FirstName represents a validated first name.
 type FirstName string
 
+// NewFirstName creates a new FirstName from a string, validating it's not empty.
 func NewFirstName(name string) (FirstName, error) {
 	validated, err := validateNonEmpty(name, ErrInvalidFirstName)
 	if err != nil {
@@ -165,6 +171,7 @@ func (f FirstName) String() string { return string(f) }
 // LastName represents a validated last name.
 type LastName string
 
+// NewLastName creates a new LastName from a string, validating it's not empty.
 func NewLastName(name string) (LastName, error) {
 	validated, err := validateNonEmpty(name, ErrInvalidLastName)
 	if err != nil {
@@ -189,6 +196,7 @@ func validateNonEmpty(name string, emptyErr error) (string, error) {
 // UserStatus represents user account status.
 type UserStatus string
 
+// Valid user status values.
 const (
 	UserStatusActive    UserStatus = "active"
 	UserStatusInactive  UserStatus = "inactive"
@@ -197,6 +205,8 @@ const (
 )
 
 func (s UserStatus) String() string { return string(s) }
+
+// IsValid returns true if the user status is a valid value.
 func (s UserStatus) IsValid() bool {
 	switch s {
 	case UserStatusActive, UserStatusInactive, UserStatusSuspended, UserStatusPending:
@@ -209,6 +219,7 @@ func (s UserStatus) IsValid() bool {
 // UserRole represents user role in system.
 type UserRole string
 
+// Valid user role values.
 const (
 	UserRoleUser      UserRole = "user"
 	UserRoleAdmin     UserRole = "admin"
@@ -216,6 +227,8 @@ const (
 )
 
 func (r UserRole) String() string { return string(r) }
+
+// IsValid returns true if the user role is a valid value.
 func (r UserRole) IsValid() bool {
 	switch r {
 	case UserRoleUser, UserRoleAdmin, UserRoleModerator:
@@ -228,14 +241,17 @@ func (r UserRole) IsValid() bool {
 // UserMetadata represents flexible user metadata.
 type UserMetadata map[string]any
 
+// NewUserMetadata creates a new empty UserMetadata map.
 func NewUserMetadata() UserMetadata {
 	return make(UserMetadata)
 }
 
+// Set sets a metadata value for the given key.
 func (m UserMetadata) Set(key string, value any) {
 	m[key] = value
 }
 
+// Get returns the metadata value for the given key and whether it exists.
 func (m UserMetadata) Get(key string) (any, bool) {
 	val, ok := m[key]
 
@@ -283,19 +299,46 @@ func NewUser(
 
 // Methods for the User entity
 
-func (u *User) ID() UserID              { return u.id }
-func (u *User) UUID() uuid.UUID         { return u.uuid }
-func (u *User) Email() Email            { return u.email }
-func (u *User) Username() Username      { return u.username }
-func (u *User) FirstName() FirstName    { return u.firstName }
-func (u *User) LastName() LastName      { return u.lastName }
-func (u *User) Status() UserStatus      { return u.status }
-func (u *User) Role() UserRole          { return u.role }
-func (u *User) IsVerified() bool        { return u.isVerified }
-func (u *User) Metadata() UserMetadata  { return u.metadata }
-func (u *User) Tags() []string          { return u.tags }
-func (u *User) CreatedAt() time.Time    { return u.createdAt }
-func (u *User) UpdatedAt() time.Time    { return u.updatedAt }
+// ID returns the user's internal ID.
+func (u *User) ID() UserID { return u.id }
+
+// UUID returns the user's public UUID.
+func (u *User) UUID() uuid.UUID { return u.uuid }
+
+// Email returns the user's email address.
+func (u *User) Email() Email { return u.email }
+
+// Username returns the user's username.
+func (u *User) Username() Username { return u.username }
+
+// FirstName returns the user's first name.
+func (u *User) FirstName() FirstName { return u.firstName }
+
+// LastName returns the user's last name.
+func (u *User) LastName() LastName { return u.lastName }
+
+// Status returns the user's account status.
+func (u *User) Status() UserStatus { return u.status }
+
+// Role returns the user's role.
+func (u *User) Role() UserRole { return u.role }
+
+// IsVerified returns whether the user's email has been verified.
+func (u *User) IsVerified() bool { return u.isVerified }
+
+// Metadata returns the user's metadata.
+func (u *User) Metadata() UserMetadata { return u.metadata }
+
+// Tags returns the user's tags.
+func (u *User) Tags() []string { return u.tags }
+
+// CreatedAt returns when the user was created.
+func (u *User) CreatedAt() time.Time { return u.createdAt }
+
+// UpdatedAt returns when the user was last updated.
+func (u *User) UpdatedAt() time.Time { return u.updatedAt }
+
+// LastLoginAt returns when the user last logged in.
 func (u *User) LastLoginAt() *time.Time { return u.lastLoginAt }
 
 // IsActive returns true if user status is active.

@@ -1,3 +1,5 @@
+// Package mappers provides conversion functions between domain entities and database models.
+// It isolates domain entities from database-specific types for different database backends.
 package mappers
 
 import (
@@ -33,7 +35,7 @@ func (m *UserMapper) DomainUserFromMySQL(mysqlUser any) (*entities.User, error) 
 }
 
 // SQLiteUserFromDomain converts domain entity to SQLite model.
-func (m *UserMapper) SQLiteUserFromDomain(user *entities.User) (any, error) {
+func (m *UserMapper) SQLiteUserFromDomain(_ *entities.User) (any, error) {
 	return unimplementedUserFromDomain("SQLite")
 }
 
@@ -48,12 +50,12 @@ func (m *UserMapper) DomainUser(_ any) (*entities.User, error) {
 }
 
 // PostgresUserFromDomain converts domain entity to PostgreSQL model.
-func (m *UserMapper) PostgresUserFromDomain(user *entities.User) (any, error) {
+func (m *UserMapper) PostgresUserFromDomain(_ *entities.User) (any, error) {
 	return unimplementedUserFromDomain("PostgreSQL")
 }
 
 // MySQLUserFromDomain converts domain entity to MySQL model.
-func (m *UserMapper) MySQLUserFromDomain(user *entities.User) (any, error) {
+func (m *UserMapper) MySQLUserFromDomain(_ *entities.User) (any, error) {
 	return unimplementedUserFromDomain("MySQL")
 }
 
@@ -92,7 +94,7 @@ func SQLiteSessionFromDomain(session *entities.UserSession) (any, error) {
 }
 
 // withMapper executes a mapper function with a fresh UserMapper instance.
-func withMapper[T any](entity T, fn func(*UserMapper) (any, error)) (any, error) {
+func withMapper[T any](_ T, fn func(*UserMapper) (any, error)) (any, error) {
 	m := &UserMapper{}
 
 	return fn(m)

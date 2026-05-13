@@ -24,6 +24,7 @@ func NewNotImplementedUserRepository(dbName string) *NotImplementedUserRepositor
 	return &NotImplementedUserRepository{dbName: dbName}
 }
 
+// NotImplemented returns an error indicating the method is not implemented.
 func (r *NotImplementedUserRepository) NotImplemented(method string) error {
 	return entities.StubNotImplemented(method, r.dbName)
 }
@@ -187,6 +188,7 @@ func NewNotImplementedSessionRepository(dbName string) *NotImplementedSessionRep
 	return &NotImplementedSessionRepository{dbName: dbName}
 }
 
+// NotImplemented returns an error indicating the method is not implemented.
 func (r *NotImplementedSessionRepository) NotImplemented(method string) error {
 	return entities.StubNotImplemented(method, r.dbName)
 }

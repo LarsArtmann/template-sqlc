@@ -24,16 +24,19 @@ type UserSession struct {
 // SessionID is a strongly-typed session identifier.
 type SessionID int64
 
+// Int64 returns the int64 representation of the session ID.
 func (id SessionID) Int64() int64   { return int64(id) }
 func (id SessionID) String() string { return fmt.Sprintf("session:%d", id) }
 
 // SessionToken represents a secure session token.
 type SessionToken uuid.UUID
 
+// NewSessionToken generates a new secure session token.
 func NewSessionToken() SessionToken {
 	return SessionToken(uuid.New())
 }
 
+// UUID returns the underlying uuid.UUID representation of the token.
 func (t SessionToken) UUID() uuid.UUID { return uuid.UUID(t) }
 func (t SessionToken) String() string  { return uuid.UUID(t).String() }
 
@@ -46,6 +49,7 @@ type SessionDeviceInfo struct {
 	Metadata map[string]any `json:"metadata"`
 }
 
+// NewSessionDeviceInfo creates a new SessionDeviceInfo with initialized metadata.
 func NewSessionDeviceInfo() SessionDeviceInfo {
 	return SessionDeviceInfo{
 		Metadata: make(map[string]any),
@@ -75,15 +79,33 @@ func NewUserSession(
 }
 
 // Session methods.
-func (s *UserSession) ID() SessionID                 { return s.id }
-func (s *UserSession) UserID() UserID                { return s.userID }
-func (s *UserSession) Token() SessionToken           { return s.token }
+
+// ID returns the session ID.
+func (s *UserSession) ID() SessionID { return s.id }
+
+// UserID returns the user ID associated with this session.
+func (s *UserSession) UserID() UserID { return s.userID }
+
+// Token returns the session token.
+func (s *UserSession) Token() SessionToken { return s.token }
+
+// DeviceInfo returns the device information for this session.
 func (s *UserSession) DeviceInfo() SessionDeviceInfo { return s.deviceInfo }
-func (s *UserSession) IPAddress() net.IP             { return s.ipAddress }
-func (s *UserSession) UserAgent() string             { return s.userAgent }
-func (s *UserSession) CreatedAt() time.Time          { return s.createdAt }
-func (s *UserSession) ExpiresAt() time.Time          { return s.expiresAt }
-func (s *UserSession) IsActive() bool                { return s.isActive }
+
+// IPAddress returns the IP address used for this session.
+func (s *UserSession) IPAddress() net.IP { return s.ipAddress }
+
+// UserAgent returns the user agent string for this session.
+func (s *UserSession) UserAgent() string { return s.userAgent }
+
+// CreatedAt returns the session creation timestamp.
+func (s *UserSession) CreatedAt() time.Time { return s.createdAt }
+
+// ExpiresAt returns the session expiration timestamp.
+func (s *UserSession) ExpiresAt() time.Time { return s.expiresAt }
+
+// IsActive returns true if the session is currently active.
+func (s *UserSession) IsActive() bool { return s.isActive }
 
 // IsExpired returns true if the session has expired.
 func (s *UserSession) IsExpired() bool {
