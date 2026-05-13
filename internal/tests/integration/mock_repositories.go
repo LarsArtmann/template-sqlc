@@ -1,3 +1,4 @@
+// Package integration provides integration test utilities including mock repositories.
 package integration
 
 import (
@@ -7,6 +8,7 @@ import (
 	"github.com/LarsArtmann/template-sqlc/internal/domain/repositories"
 )
 
+// NewMockUserRepository creates a new MockUserRepository for testing.
 func NewMockUserRepository() *MockUserRepository {
 	return &MockUserRepository{
 		users:                 make(map[entities.UserID]*entities.User),
@@ -15,6 +17,7 @@ func NewMockUserRepository() *MockUserRepository {
 	}
 }
 
+// NewMockSessionRepository creates a new MockSessionRepository for testing.
 func NewMockSessionRepository() *MockSessionRepository {
 	return &MockSessionRepository{
 		sessions:  make(map[entities.SessionID]*entities.UserSession),
@@ -134,7 +137,8 @@ type MockUserRepository struct {
 	idCounter             entities.UserID
 }
 
-func (m *MockUserRepository) Create(ctx context.Context, user *entities.User) error {
+// Create stores a new user in the mock repository.
+func (m *MockUserRepository) Create(_ context.Context, user *entities.User) error {
 	userID := m.idCounter
 	m.idCounter++
 
@@ -144,8 +148,9 @@ func (m *MockUserRepository) Create(ctx context.Context, user *entities.User) er
 	return nil
 }
 
+// GetByID retrieves a user by their ID from the mock repository.
 func (m *MockUserRepository) GetByID(
-	ctx context.Context,
+	_ context.Context,
 	id entities.UserID,
 ) (*entities.User, error) {
 	user, ok := m.users[id]
@@ -156,12 +161,14 @@ func (m *MockUserRepository) GetByID(
 	return user, nil
 }
 
+// SetPasswordVerification sets the expected password for an email in the mock repository.
 func (m *MockUserRepository) SetPasswordVerification(email, password string) {
 	m.passwordVerifications[email] = password
 }
 
+// GetByUUID retrieves a user by their UUID from the mock repository.
 func (m *MockUserRepository) GetByUUID(
-	ctx context.Context,
+	_ context.Context,
 	uuid entities.UuID,
 ) (*entities.User, error) {
 	for _, user := range m.users {
@@ -173,8 +180,9 @@ func (m *MockUserRepository) GetByUUID(
 	return nil, entities.ErrUserNotFound
 }
 
+// GetByEmail retrieves a user by their email from the mock repository.
 func (m *MockUserRepository) GetByEmail(
-	ctx context.Context,
+	_ context.Context,
 	email entities.Email,
 ) (*entities.User, error) {
 	return findUserBy(m.users, func(u *entities.User) bool {
@@ -182,8 +190,9 @@ func (m *MockUserRepository) GetByEmail(
 	})
 }
 
+// GetByUsername retrieves a user by their username from the mock repository.
 func (m *MockUserRepository) GetByUsername(
-	ctx context.Context,
+	_ context.Context,
 	username entities.Username,
 ) (*entities.User, error) {
 	return findUserBy(m.users, func(u *entities.User) bool {
@@ -191,16 +200,18 @@ func (m *MockUserRepository) GetByUsername(
 	})
 }
 
-func (m *MockUserRepository) Delete(ctx context.Context, id entities.UserID) error {
+// Delete removes a user from the mock repository.
+func (m *MockUserRepository) Delete(_ context.Context, id entities.UserID) error {
 	delete(m.users, id)
 
 	return nil
 }
 
+// List retrieves all users with a specific status from the mock repository.
 func (m *MockUserRepository) List(
-	ctx context.Context,
+	_ context.Context,
 	status entities.UserStatus,
-	limit, offset int,
+	_, _ int,
 ) ([]*entities.User, error) {
 	result := make([]*entities.User, 0)
 
@@ -213,8 +224,9 @@ func (m *MockUserRepository) List(
 	return result, nil
 }
 
+// CountByStatus counts users by their status in the mock repository.
 func (m *MockUserRepository) CountByStatus(
-	ctx context.Context,
+	_ context.Context,
 ) (map[entities.UserStatus]int64, error) {
 	counts := make(map[entities.UserStatus]int64)
 	for _, user := range m.users {
@@ -224,7 +236,8 @@ func (m *MockUserRepository) CountByStatus(
 	return counts, nil
 }
 
-func (m *MockUserRepository) GetStats(ctx context.Context) (*entities.UserStats, error) {
+// GetStats retrieves user statistics from the mock repository.
+func (m *MockUserRepository) GetStats(_ context.Context) (*entities.UserStats, error) {
 	stats := &entities.UserStats{}
 	for _, user := range m.users {
 		stats.TotalUsers++
@@ -236,6 +249,7 @@ func (m *MockUserRepository) GetStats(ctx context.Context) (*entities.UserStats,
 	return stats, nil
 }
 
+// VerifyCredentials verifies user credentials against the mock repository.
 func (m *MockUserRepository) VerifyCredentials(
 	ctx context.Context,
 	email entities.Email,
@@ -286,7 +300,8 @@ type MockSessionRepository struct {
 	idCounter entities.SessionID
 }
 
-func (m *MockSessionRepository) Create(ctx context.Context, session *entities.UserSession) error {
+// Create stores a new session in the mock repository.
+func (m *MockSessionRepository) Create(_ context.Context, session *entities.UserSession) error {
 	sessionID := m.idCounter
 	m.idCounter++
 
@@ -295,8 +310,9 @@ func (m *MockSessionRepository) Create(ctx context.Context, session *entities.Us
 	return nil
 }
 
+// GetByToken retrieves a session by its token from the mock repository.
 func (m *MockSessionRepository) GetByToken(
-	ctx context.Context,
+	_ context.Context,
 	token entities.SessionToken,
 ) (*entities.UserSession, error) {
 	return findSessionBy(m.sessions, func(s *entities.UserSession) bool {
@@ -304,8 +320,9 @@ func (m *MockSessionRepository) GetByToken(
 	})
 }
 
+// GetByUserID retrieves all sessions for a user from the mock repository.
 func (m *MockSessionRepository) GetByUserID(
-	ctx context.Context,
+	_ context.Context,
 	userID entities.UserID,
 	activeOnly bool,
 ) ([]*entities.UserSession, error) {
@@ -322,14 +339,16 @@ func (m *MockSessionRepository) GetByUserID(
 	return result, nil
 }
 
-func (m *MockSessionRepository) Delete(ctx context.Context, id entities.SessionID) error {
+// Delete removes a session from the mock repository.
+func (m *MockSessionRepository) Delete(_ context.Context, id entities.SessionID) error {
 	delete(m.sessions, id)
 
 	return nil
 }
 
+// GetActiveSessions counts active sessions for a user in the mock repository.
 func (m *MockSessionRepository) GetActiveSessions(
-	ctx context.Context,
+	_ context.Context,
 	userID entities.UserID,
 ) (int64, error) {
 	count := int64(0)
@@ -343,8 +362,9 @@ func (m *MockSessionRepository) GetActiveSessions(
 	return count, nil
 }
 
+// GetSessionStats retrieves session statistics from the mock repository.
 func (m *MockSessionRepository) GetSessionStats(
-	ctx context.Context,
+	_ context.Context,
 ) (*entities.SessionStats, error) {
 	stats := &entities.SessionStats{}
 	for _, session := range m.sessions {

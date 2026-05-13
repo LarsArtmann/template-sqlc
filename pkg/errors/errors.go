@@ -12,41 +12,60 @@ import (
 type ErrorCode string
 
 const (
-	// Validation error codes.
+	// ErrCodeValidationFailed indicates a validation error occurred.
 	ErrCodeValidationFailed ErrorCode = "VALIDATION_FAILED"
-	ErrCodeInvalidInput     ErrorCode = "INVALID_INPUT"
-	ErrCodeMissingField     ErrorCode = "MISSING_FIELD"
-	ErrCodeInvalidFormat    ErrorCode = "INVALID_FORMAT"
+	// ErrCodeInvalidInput indicates invalid input was provided.
+	ErrCodeInvalidInput ErrorCode = "INVALID_INPUT"
+	// ErrCodeMissingField indicates a required field is missing.
+	ErrCodeMissingField ErrorCode = "MISSING_FIELD"
+	// ErrCodeInvalidFormat indicates the format of a value is invalid.
+	ErrCodeInvalidFormat ErrorCode = "INVALID_FORMAT"
+	// ErrCodeConstraintFailed indicates a database constraint was violated.
 	ErrCodeConstraintFailed ErrorCode = "CONSTRAINT_FAILED"
 
-	// Authentication error codes.
-	ErrCodeUnauthorized       ErrorCode = "UNAUTHORIZED"
+	// ErrCodeUnauthorized indicates authentication is required.
+	ErrCodeUnauthorized ErrorCode = "UNAUTHORIZED"
+	// ErrCodeInvalidCredentials indicates the provided credentials are invalid.
 	ErrCodeInvalidCredentials ErrorCode = "INVALID_CREDENTIALS" //nolint:gosec // This is an error code, not a credential
-	ErrCodeTokenExpired       ErrorCode = "TOKEN_EXPIRED"
-	ErrCodeTokenInvalid       ErrorCode = "TOKEN_INVALID"
+	// ErrCodeTokenExpired indicates an authentication token has expired.
+	ErrCodeTokenExpired ErrorCode = "TOKEN_EXPIRED"
+	// ErrCodeTokenInvalid indicates an authentication token is invalid.
+	ErrCodeTokenInvalid ErrorCode = "TOKEN_INVALID"
 
-	// Authorization error codes.
-	ErrCodeForbidden              ErrorCode = "FORBIDDEN"
+	// ErrCodeForbidden indicates the user lacks permission for this action.
+	ErrCodeForbidden ErrorCode = "FORBIDDEN"
+	// ErrCodeInsufficientPrivileges indicates insufficient privileges for this operation.
 	ErrCodeInsufficientPrivileges ErrorCode = "INSUFFICIENT_PRIVILEGES"
-	ErrCodeAccountSuspended       ErrorCode = "ACCOUNT_SUSPENDED"
-	ErrCodeAccountInactive        ErrorCode = "ACCOUNT_INACTIVE"
+	// ErrCodeAccountSuspended indicates the account is suspended.
+	ErrCodeAccountSuspended ErrorCode = "ACCOUNT_SUSPENDED"
+	// ErrCodeAccountInactive indicates the account is inactive.
+	ErrCodeAccountInactive ErrorCode = "ACCOUNT_INACTIVE"
 
-	// Resource error codes.
-	ErrCodeNotFound         ErrorCode = "NOT_FOUND"
+	// ErrCodeNotFound indicates the requested resource was not found.
+	ErrCodeNotFound ErrorCode = "NOT_FOUND"
+	// ErrCodeResourceNotFound indicates a specific resource type was not found.
 	ErrCodeResourceNotFound ErrorCode = "RESOURCE_NOT_FOUND"
-	ErrCodeAlreadyExists    ErrorCode = "ALREADY_EXISTS"
+	// ErrCodeAlreadyExists indicates the resource already exists.
+	ErrCodeAlreadyExists ErrorCode = "ALREADY_EXISTS"
+	// ErrCodeResourceConflict indicates a conflict with the current state of the resource.
 	ErrCodeResourceConflict ErrorCode = "RESOURCE_CONFLICT"
 
-	// System error codes.
-	ErrCodeInternal    ErrorCode = "INTERNAL_ERROR"
-	ErrCodeDatabase    ErrorCode = "DATABASE_ERROR"
-	ErrCodeNetwork     ErrorCode = "NETWORK_ERROR"
-	ErrCodeTimeout     ErrorCode = "TIMEOUT"
+	// ErrCodeInternal indicates an internal server error occurred.
+	ErrCodeInternal ErrorCode = "INTERNAL_ERROR"
+	// ErrCodeDatabase indicates a database error occurred.
+	ErrCodeDatabase ErrorCode = "DATABASE_ERROR"
+	// ErrCodeNetwork indicates a network error occurred.
+	ErrCodeNetwork ErrorCode = "NETWORK_ERROR"
+	// ErrCodeTimeout indicates an operation timed out.
+	ErrCodeTimeout ErrorCode = "TIMEOUT"
+	// ErrCodeUnavailable indicates the service is unavailable.
 	ErrCodeUnavailable ErrorCode = "UNAVAILABLE"
 
-	// Business logic error codes.
-	ErrCodeBusinessLogic    ErrorCode = "BUSINESS_LOGIC_ERROR"
-	ErrCodeInvalidState     ErrorCode = "INVALID_STATE"
+	// ErrCodeBusinessLogic indicates a business logic rule was violated.
+	ErrCodeBusinessLogic ErrorCode = "BUSINESS_LOGIC_ERROR"
+	// ErrCodeInvalidState indicates the resource is in an invalid state for this operation.
+	ErrCodeInvalidState ErrorCode = "INVALID_STATE"
+	// ErrCodePermissionDenied indicates permission was denied for this operation.
 	ErrCodePermissionDenied ErrorCode = "PERMISSION_DENIED"
 )
 

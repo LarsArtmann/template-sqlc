@@ -21,8 +21,8 @@ type NotImplementedListResult = []*entities.User
 // ListWithPagination handles common pagination validation for List methods.
 // Returns validation error or calls notImplementedStub if validation passes.
 func ListWithPagination[T NotImplementedMethods](
-	repo T,
 	_ context.Context,
+	repo T,
 	_ entities.UserStatus,
 	limit, offset int,
 	methodName string,
@@ -42,8 +42,8 @@ func ListWithPagination[T NotImplementedMethods](
 // SearchWithValidation handles common validation for Search methods.
 // Returns validation error or calls notImplementedStub if validation passes.
 func SearchWithValidation[T NotImplementedMethods](
-	repo T,
 	_ context.Context,
+	repo T,
 	query string,
 	_ entities.UserStatus,
 	limit int,
@@ -64,11 +64,11 @@ func SearchWithValidation[T NotImplementedMethods](
 // SearchByTagsWithValidation handles common validation for SearchByTags methods.
 // Returns validation error or calls notImplementedStub if validation passes.
 func SearchByTagsWithValidation[T NotImplementedMethods](
-	repo T,
 	_ context.Context,
+	repo T,
 	tags []string,
 	_ entities.UserStatus,
-	limit, offset int,
+	_, offset int,
 	methodName string,
 ) (NotImplementedListResult, error) {
 	err := validation.ValidateTags(tags)
@@ -91,8 +91,8 @@ func SearchByTagsWithValidation[T NotImplementedMethods](
 
 // ChangeStatusWithValidation handles common validation for ChangeStatus methods.
 func ChangeStatusWithValidation[T NotImplementedMethods](
-	repo T,
 	_ context.Context,
+	repo T,
 	_ entities.UserID,
 	status entities.UserStatus,
 	methodName string,
@@ -108,8 +108,8 @@ func ChangeStatusWithValidation[T NotImplementedMethods](
 
 // ChangeRoleWithValidation handles common validation for ChangeRole methods.
 func ChangeRoleWithValidation[T NotImplementedMethods](
-	repo T,
 	_ context.Context,
+	repo T,
 	_ entities.UserID,
 	role entities.UserRole,
 	methodName string,

@@ -1,3 +1,5 @@
+// Package validation provides input validation utilities for user data.
+// It handles validation of emails, usernames, passwords, and other user-related fields.
 package validation
 
 import (

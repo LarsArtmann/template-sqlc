@@ -151,16 +151,16 @@ func (c *SQLiteTimeConverter) DomainToDB(domain time.Time) any {
 }
 
 // DBToDomain converts a SQLite time value to a domain time.Time.
-func (c *SQLiteTimeConverter) DBToDomain(db any) (time.Time, error) {
-	if db == nil {
+func (c *SQLiteTimeConverter) DBToDomain(value any) (time.Time, error) {
+	if value == nil {
 		return time.Time{}, nil
 	}
 
-	if t, ok := db.(time.Time); ok {
+	if t, ok := value.(time.Time); ok {
 		return t, nil
 	}
 
-	if str, ok := db.(string); ok {
+	if str, ok := value.(string); ok {
 		parsedTime, err := time.Parse(time.RFC3339, str)
 		if err != nil {
 			return time.Time{}, fmt.Errorf("invalid time format: %w", err)
@@ -169,7 +169,7 @@ func (c *SQLiteTimeConverter) DBToDomain(db any) (time.Time, error) {
 		return parsedTime, nil
 	}
 
-	return time.Time{}, NewConversionError("expected time or string", db)
+	return time.Time{}, NewConversionError("expected time or string", value)
 }
 
 // SQLiteBoolConverter handles boolean conversion for SQLite.
@@ -182,12 +182,12 @@ func NewSQLiteBoolConverter() *SQLiteBoolConverter { return &SQLiteBoolConverter
 func (c *SQLiteBoolConverter) DomainToDB(domain bool) any { return domain }
 
 // DBToDomain converts a SQLite bool value to a domain bool.
-func (c *SQLiteBoolConverter) DBToDomain(db any) (bool, error) {
-	if db == nil {
+func (c *SQLiteBoolConverter) DBToDomain(value any) (bool, error) {
+	if value == nil {
 		return false, nil
 	}
 
-	switch dbValue := db.(type) {
+	switch dbValue := value.(type) {
 	case bool:
 		return dbValue, nil
 	case int64:
@@ -197,7 +197,7 @@ func (c *SQLiteBoolConverter) DBToDomain(db any) (bool, error) {
 	case string:
 		return dbValue == "true" || dbValue == "1", nil
 	default:
-		return false, NewConversionError("expected bool, int, or string", db)
+		return false, NewConversionError("expected bool, int, or string", value)
 	}
 }
 

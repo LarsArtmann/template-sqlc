@@ -1,3 +1,4 @@
+// Package services provides domain service types and DTOs for user management.
 package services
 
 import "github.com/LarsArtmann/template-sqlc/internal/domain/entities"
