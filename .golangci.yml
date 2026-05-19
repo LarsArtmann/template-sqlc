@@ -1,7 +1,13 @@
 version: "2"
 run:
   timeout: 5m
-  go: 1.26.1
+  go: 1.26.2
+  build-tags:
+    - goexperiment.arenas
+    - goexperiment.goroutineleakprofile
+    - goexperiment.jsonv2
+    - goexperiment.runtimesecret
+    - goexperiment.simd
   allow-parallel-runners: true
   allow-serial-runners: true
   issues-exit-code: 1
@@ -57,7 +63,7 @@ linters:
     - godox
     - goheader
     - gomoddirectives
-    - gomodguard
+    - gomodguard_v2
     - goprintffuncname
     - gosec
     - gosmopolitan
@@ -127,63 +133,35 @@ linters:
     depguard:
       rules:
         domain:
-          list-mode: lax
-          files:
-            - "internal/domain/**"
           allow:
             - $gostd
             - github.com/LarsArtmann/template-sqlc/internal/domain
             - github.com/google/uuid
           deny:
-            - pkg: "github.com/LarsArtmann/template-sqlc/internal/adapters"
-              desc: "domain layer must not import adapters (hexagonal architecture)"
-            - pkg: "github.com/LarsArtmann/template-sqlc/internal/db"
-              desc: "domain layer must not import database layer (hexagonal architecture)"
-        main:
+            - desc: domain layer must not import adapters (hexagonal architecture)
+              pkg: github.com/LarsArtmann/template-sqlc/internal/adapters
+            - desc: domain layer must not import database layer (hexagonal architecture)
+              pkg: github.com/LarsArtmann/template-sqlc/internal/db
+          files:
+            - internal/domain/**
           list-mode: lax
+        main:
           allow:
             - $gostd
             - github.com/LarsArtmann/template-sqlc
             - github.com/google/uuid
             - github.com/jackc/pgx/v5
             - github.com/prometheus/client_golang
-        test:
           list-mode: lax
-          files:
-            - "$test"
+        test:
           allow:
             - $gostd
             - github.com/LarsArtmann/template-sqlc
             - github.com/cucumber/godog
             - github.com/stretchr/testify
-    ireturn:
-      allow:
-        - anon
-        - empty
-        - error
-        - stdlib
-        - (or|er)$
-        - repositories\.\w+Repository
-        - prometheus\.(Histogram|Counter|Gauge)
-        - ~.*
-    tagliatelle:
-      case:
-        rules:
-          json: camel
-    wrapcheck:
-      ignore-sigs:
-        - github.com/LarsArtmann/template-sqlc/internal/adapters/validation.Validate*
-        - github.com/LarsArtmann/template-sqlc/internal/adapters.validation.Validate*
-        - github.com/LarsArtmann/template-sqlc/internal/adapters.ListWithPagination
-        - github.com/LarsArtmann/template-sqlc/internal/adapters.SearchWithValidation
-        - github.com/LarsArtmann/template-sqlc/internal/adapters.SearchByTagsWithValidation
-        - github.com/LarsArtmann/template-sqlc/internal/adapters.ChangeStatusWithValidation
-        - github.com/LarsArtmann/template-sqlc/internal/adapters.ChangeRoleWithValidation
-        - github.com/LarsArtmann/template-sqlc/internal/domain/entities.StubNotImplemented
-        - fmt.Errorf
-      ignore-package-globs:
-        - github.com/LarsArtmann/template-sqlc/internal/adapters/*
-        - github.com/LarsArtmann/template-sqlc/internal/domain/entities
+          files:
+            - $test
+          list-mode: lax
     exhaustruct:
       exclude:
         - .*AppError
@@ -203,9 +181,44 @@ linters:
         - prometheus/.*CounterOpts
         - prometheus/.*GaugeOpts
         - promhttp/.*HandlerOpts
+    gocritic:
+      disabled-checks:
+        - dupImport
+        - ifElseChain
+        - octalLiteral
+        - whyNoLint
+    ireturn:
+      allow:
+        - anon
+        - empty
+        - error
+        - stdlib
+        - (or|er)$
+        - repositories\.\w+Repository
+        - prometheus\.(Histogram|Counter|Gauge)
+        - ~.*
+    tagliatelle:
+      case:
+        rules:
+          json: camel
+    wrapcheck:
+      ignore-package-globs:
+        - github.com/LarsArtmann/template-sqlc/internal/adapters/*
+        - github.com/LarsArtmann/template-sqlc/internal/domain/entities
+      ignore-sigs:
+        - github.com/LarsArtmann/template-sqlc/internal/adapters/validation.Validate*
+        - github.com/LarsArtmann/template-sqlc/internal/adapters.validation.Validate*
+        - github.com/LarsArtmann/template-sqlc/internal/adapters.ListWithPagination
+        - github.com/LarsArtmann/template-sqlc/internal/adapters.SearchWithValidation
+        - github.com/LarsArtmann/template-sqlc/internal/adapters.SearchByTagsWithValidation
+        - github.com/LarsArtmann/template-sqlc/internal/adapters.ChangeStatusWithValidation
+        - github.com/LarsArtmann/template-sqlc/internal/adapters.ChangeRoleWithValidation
+        - github.com/LarsArtmann/template-sqlc/internal/domain/entities.StubNotImplemented
+        - fmt.Errorf
   exclusions:
+    generated: lax
     rules:
-      - path: '_test\.go'
+      - path: _test\.go
         linters:
           - err113
           - exhaustruct
@@ -217,14 +230,18 @@ linters:
           - testpackage
           - tparallel
           - varnamelen
-      - path: '_test\.go'
-        text: "error returned from"
+      - path: _test\.go
+        text: error returned from
         linters:
           - wrapcheck
     paths:
+      - _mock\.go$
       - internal/db/mysql
-      - internal/db/sqlite
+      - internal/db/mysql/
       - internal/db/postgres
+      - internal/db/postgres/
+      - internal/db/sqlite
+      - internal/db/sqlite/
 formatters:
   enable:
     - gci
@@ -232,7 +249,13 @@ formatters:
     - gofumpt
     - golines
   exclusions:
+    generated: lax
     paths:
+      - _mock\.go$
       - internal/db/mysql
-      - internal/db/sqlite
+      - internal/db/mysql/
       - internal/db/postgres
+      - internal/db/postgres/
+      - internal/db/sqlite
+      - internal/db/sqlite/
+issues: {}
