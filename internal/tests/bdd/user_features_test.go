@@ -27,6 +27,14 @@ import (
 
 const TestPasswordHash = "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZRGdjGj/n3.rsQ5pPjZ5yVlWK5WAe"
 
+// Test constants for reusable test values.
+const (
+	testLastName     = "User"
+	testStatusActive = "active"
+	testRoleUser     = "user"
+	testTag          = "test"
+)
+
 // UserFeaturesTestSuite contains BDD tests for user functionality.
 type UserFeaturesTestSuite struct {
 	userService    *services.UserService
@@ -165,10 +173,10 @@ func (s *UserFeaturesTestSuite) createUserWithEmailUsername(email, username stri
 		Username:     username,
 		PasswordHash: TestPasswordHash,
 		FirstName:    "Test",
-		LastName:     "User",
-		Status:       "active",
-		Role:         "user",
-		Tags:         []string{"test"},
+		LastName:     testLastName,
+		Status:       testStatusActive,
+		Role:         testRoleUser,
+		Tags:         []string{testTag},
 		Metadata:     map[string]any{"source": "bdd"},
 	}
 
@@ -185,9 +193,9 @@ func (s *UserFeaturesTestSuite) createUserWithStatus(status string) error {
 		Username:     fmt.Sprintf("statususer%d", time.Now().UnixNano()),
 		PasswordHash: TestPasswordHash,
 		FirstName:    "Status",
-		LastName:     "User",
+		LastName:     testLastName,
 		Status:       status,
-		Role:         "user",
+		Role:         testRoleUser,
 	}
 
 	user, err := s.userService.CreateUser(context.Background(), req)
@@ -207,9 +215,9 @@ func (s *UserFeaturesTestSuite) createUserWithPrefix(prefix string) (*entities.U
 		Username:     prefix,
 		PasswordHash: TestPasswordHash,
 		FirstName:    cases.Title(language.Und).String(prefix),
-		LastName:     "User",
-		Status:       "active",
-		Role:         "user",
+		LastName:     testLastName,
+		Status:       testStatusActive,
+		Role:         testRoleUser,
 	}
 
 	return s.userService.CreateUser(context.Background(), req)
@@ -261,9 +269,9 @@ func (s *UserFeaturesTestSuite) createMultipleStatusAccounts() error {
 			Username:     fmt.Sprintf("user%d", i),
 			PasswordHash: TestPasswordHash,
 			FirstName:    "Multi",
-			LastName:     "User",
+			LastName:     testLastName,
 			Status:       status,
-			Role:         "user",
+			Role:         testRoleUser,
 		}
 
 		_, err := s.userService.CreateUser(context.Background(), req)
@@ -283,10 +291,10 @@ func (s *UserFeaturesTestSuite) createUserWithValidData() error {
 		Username:     "validuser",
 		PasswordHash: TestPasswordHash,
 		FirstName:    "Valid",
-		LastName:     "User",
-		Status:       "active",
-		Role:         "user",
-		Tags:         []string{"valid", "test"},
+		LastName:     testLastName,
+		Status:       testStatusActive,
+		Role:         testRoleUser,
+		Tags:         []string{"valid", testTag},
 		Metadata:     map[string]any{"test": true},
 	}
 
@@ -303,9 +311,9 @@ func (s *UserFeaturesTestSuite) createUserWithEmail(email string) error {
 		Username:     fmt.Sprintf("emailuser%d", time.Now().UnixNano()),
 		PasswordHash: TestPasswordHash,
 		FirstName:    "Email",
-		LastName:     "User",
-		Status:       "active",
-		Role:         "user",
+		LastName:     testLastName,
+		Status:       testStatusActive,
+		Role:         testRoleUser,
 	}
 
 	user, err := s.userService.CreateUser(context.Background(), req)
@@ -321,9 +329,9 @@ func (s *UserFeaturesTestSuite) createUserWithUsername(username string) error {
 		Username:     username,
 		PasswordHash: TestPasswordHash,
 		FirstName:    "Username",
-		LastName:     "User",
-		Status:       "active",
-		Role:         "user",
+		LastName:     testLastName,
+		Status:       testStatusActive,
+		Role:         testRoleUser,
 	}
 
 	user, err := s.userService.CreateUser(context.Background(), req)
@@ -442,8 +450,8 @@ func (s *UserFeaturesTestSuite) setUserRole(role string) error {
 		Username:     fmt.Sprintf("roleuser%d", time.Now().UnixNano()),
 		PasswordHash: TestPasswordHash,
 		FirstName:    "Role",
-		LastName:     "User",
-		Status:       "active",
+		LastName:     testLastName,
+		Status:       testStatusActive,
 		Role:         role,
 	}
 
@@ -460,9 +468,9 @@ func (s *UserFeaturesTestSuite) setUserStatus(status string) error {
 		Username:     fmt.Sprintf("statususer%d", time.Now().UnixNano()),
 		PasswordHash: TestPasswordHash,
 		FirstName:    "Status",
-		LastName:     "User",
+		LastName:     testLastName,
 		Status:       status,
-		Role:         "user",
+		Role:         testRoleUser,
 	}
 
 	user, err := s.userService.CreateUser(context.Background(), req)

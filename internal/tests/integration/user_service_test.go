@@ -15,6 +15,11 @@ import (
 
 const testPasswordHash = "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZRGdjGj/n3.rsQ5pPjZ5yVlWK5WAe"
 
+const (
+	testStatusActive = "active"
+	testRoleUser     = "user"
+)
+
 func newTestCreateUserRequest(username, firstName, lastName string) *services.CreateUserRequest {
 	return &services.CreateUserRequest{
 		Email:        "test@example.com",
@@ -22,8 +27,8 @@ func newTestCreateUserRequest(username, firstName, lastName string) *services.Cr
 		PasswordHash: testPasswordHash,
 		FirstName:    firstName,
 		LastName:     lastName,
-		Status:       "active",
-		Role:         "user",
+		Status:       testStatusActive,
+		Role:         testRoleUser,
 	}
 }
 
@@ -96,8 +101,8 @@ func (s *UserServiceIntegrationTestSuite) TestCreateUser() {
 		PasswordHash: "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZRGdjGj/n3.rsQ5pPjZ5yVlWK5WAe", // Valid bcrypt hash (60 chars)
 		FirstName:    "John",
 		LastName:     "Doe",
-		Status:       "active",
-		Role:         "user",
+		Status:       testStatusActive,
+		Role:         testRoleUser,
 		Tags:         []string{"developer", "golang"},
 		Metadata:     map[string]any{"team": "engineering"},
 	}
@@ -264,10 +269,10 @@ func (s *UserServiceIntegrationTestSuite) TestGetUserStats() {
 		status string
 		role   string
 	}{
-		{"active", "user"},
-		{"active", "admin"},
-		{"inactive", "user"},
-		{"suspended", "user"},
+		{testStatusActive, testRoleUser},
+		{testStatusActive, "admin"},
+		{"inactive", testRoleUser},
+		{"suspended", testRoleUser},
 	}
 
 	for _, userData := range users {

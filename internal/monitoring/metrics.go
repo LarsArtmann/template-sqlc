@@ -15,6 +15,8 @@ import (
 const (
 	// readHeaderTimeout is the time limit for reading request headers.
 	readHeaderTimeout = 10 * time.Second
+	// metricNamespace is the namespace used for all prometheus metrics.
+	metricNamespace = "sqlc"
 )
 
 // Metrics collects and exposes sqlc-related metrics.
@@ -71,7 +73,7 @@ func newHistogram(cfg HistogramConfig) prometheus.Histogram {
 			Name:        cfg.Name,
 			Help:        cfg.Help,
 			Buckets:     cfg.Buckets,
-			Namespace:   "sqlc",
+			Namespace:   metricNamespace,
 			Subsystem:   cfg.Subsystem,
 			ConstLabels: nil,
 		},
@@ -83,7 +85,7 @@ func newCounter(name, help, subsystem string) prometheus.Counter {
 		prometheus.CounterOpts{
 			Name:        name,
 			Help:        help,
-			Namespace:   "sqlc",
+			Namespace:   metricNamespace,
 			Subsystem:   subsystem,
 			ConstLabels: nil,
 		},
@@ -95,7 +97,7 @@ func newGauge(name, help, subsystem string) prometheus.Gauge {
 		prometheus.GaugeOpts{
 			Name:        name,
 			Help:        help,
-			Namespace:   "sqlc",
+			Namespace:   metricNamespace,
 			Subsystem:   subsystem,
 			ConstLabels: nil,
 		},

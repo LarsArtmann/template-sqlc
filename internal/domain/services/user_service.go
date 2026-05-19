@@ -12,6 +12,13 @@ import (
 	"github.com/google/uuid"
 )
 
+const (
+	// changeKeyOld represents the old value key in change tracking maps.
+	changeKeyOld = "old"
+	// changeKeyNew represents the new value key in change tracking maps.
+	changeKeyNew = "new"
+)
+
 // UserService provides business logic for user operations
 // This layer sits between domain entities and repositories.
 type UserService struct {
@@ -239,8 +246,8 @@ func (s *UserService) applyProfileUpdates(
 		}
 
 		changes["first_name"] = map[string]any{
-			"old": user.FirstName().String(),
-			"new": firstName.String(),
+			changeKeyOld: user.FirstName().String(),
+			changeKeyNew: firstName.String(),
 		}
 		_ = user.UpdateProfile(&firstName, nil, nil, nil)
 	}
@@ -252,8 +259,8 @@ func (s *UserService) applyProfileUpdates(
 		}
 
 		changes["last_name"] = map[string]any{
-			"old": user.LastName().String(),
-			"new": lastName.String(),
+			changeKeyOld: user.LastName().String(),
+			changeKeyNew: lastName.String(),
 		}
 		_ = user.UpdateProfile(nil, &lastName, nil, nil)
 	}
@@ -265,16 +272,16 @@ func (s *UserService) applyProfileUpdates(
 		}
 
 		changes["metadata"] = map[string]any{
-			"old": user.Metadata(),
-			"new": metadata,
+			changeKeyOld: user.Metadata(),
+			changeKeyNew: metadata,
 		}
 		_ = user.UpdateProfile(nil, nil, &metadata, nil)
 	}
 
 	if req.Tags != nil {
 		changes["tags"] = map[string]any{
-			"old": user.Tags(),
-			"new": *req.Tags,
+			changeKeyOld: user.Tags(),
+			changeKeyNew: *req.Tags,
 		}
 		_ = user.UpdateProfile(nil, nil, nil, req.Tags)
 	}
@@ -501,8 +508,8 @@ func (s *UserService) DeactivateUser(
 
 	changes := map[string]any{
 		"status": map[string]any{
-			"old": "active",
-			"new": "inactive",
+			changeKeyOld: string(entities.UserStatusActive),
+			changeKeyNew: string(entities.UserStatusInactive),
 		},
 	}
 	event := events.UserUpdated(user.ID(), changes, userID)
