@@ -29,12 +29,13 @@ func ListWithPagination[T NotImplementedMethods](
 ) (NotImplementedListResult, error) {
 	err := validation.ValidatePagination(limit, offset)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("limit=%v: %w", limit, err)
 	}
 
 	return nil, fmt.Errorf(
-		"method %s not implemented: %w",
+		"method %s not implemented for limit=%v: %w",
 		methodName,
+		limit,
 		repo.NotImplemented(methodName),
 	)
 }
@@ -51,12 +52,14 @@ func SearchWithValidation[T NotImplementedMethods](
 ) (NotImplementedListResult, error) {
 	err := validation.ValidateSearchQuery(query, limit)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("query=%v limit=%v: %w", query, limit, err)
 	}
 
 	return nil, fmt.Errorf(
-		"method %s not implemented: %w",
+		"method %s not implemented for query=%v limit=%v: %w",
 		methodName,
+		query,
+		limit,
 		repo.NotImplemented(methodName),
 	)
 }
@@ -121,4 +124,126 @@ func ChangeRoleWithValidation[T NotImplementedMethods](
 			repo.NotImplemented(methodName),
 		)
 	})
+}
+
+// ListUsers handles the common List implementation for user repositories.
+func ListUsers[T NotImplementedMethods](
+	repo T,
+	ctx context.Context,
+	status entities.UserStatus,
+	limit, offset int,
+) ([]*entities.User, error) {
+	return ListWithPagination(ctx, repo, status, limit, offset, "List")
+}
+
+// SearchUsers handles the common Search implementation for user repositories.
+func SearchUsers[T NotImplementedMethods](
+	repo T,
+	ctx context.Context,
+	query string,
+	status entities.UserStatus,
+	limit int,
+) ([]*entities.User, error) {
+	return SearchWithValidation(ctx, repo, query, status, limit, "Search")
+}
+
+// SearchUsersByTags handles the common SearchByTags implementation for user repositories.
+func SearchUsersByTags[T NotImplementedMethods](
+	repo T,
+	ctx context.Context,
+	tags []string,
+	status entities.UserStatus,
+	limit, offset int,
+) ([]*entities.User, error) {
+	return SearchByTagsWithValidation(ctx, repo, tags, status, limit, offset, "SearchByTags")
+}
+
+// ChangeUserStatus handles the common ChangeStatus implementation for user repositories.
+func ChangeUserStatus[T NotImplementedMethods](
+	repo T,
+	ctx context.Context,
+	id entities.UserID,
+	status entities.UserStatus,
+) error {
+	return ChangeStatusWithValidation(ctx, repo, id, status, "ChangeStatus")
+}
+
+// BaseUserRepository provides common implementations for user repository methods.
+// Embed this struct in database-specific repositories to avoid duplicating method implementations.
+type BaseUserRepository struct {
+	*NotImplementedUserRepository
+}
+
+// NewBaseUserRepository creates a new BaseUserRepository with the given database name.
+func NewBaseUserRepository(dbName string) *BaseUserRepository {
+	return &BaseUserRepository{
+		NotImplementedUserRepository: NewNotImplementedUserRepository(dbName),
+	}
+}
+
+// List retrieves users with pagination.
+func (r *BaseUserRepository) List(
+	ctx context.Context,
+	status entities.UserStatus,
+	limit, offset int,
+) ([]*entities.User, error) {
+	return ListUsers(r, ctx, status, limit, offset)
+}
+
+// Search searches users by query.
+func (r *BaseUserRepository) Search(
+	ctx context.Context,
+	query string,
+	status entities.UserStatus,
+	limit int,
+) ([]*entities.User, error) {
+	return SearchUsers(r, ctx, query, status, limit)
+}
+
+// SearchByTags searches users by tags.
+func (r *BaseUserRepository) SearchByTags(
+	ctx context.Context,
+	tags []string,
+	status entities.UserStatus,
+	limit, offset int,
+) ([]*entities.User, error) {
+	return SearchUsersByTags(r, ctx, tags, status, limit, offset)
+}
+
+// ChangeStatus changes user status.
+func (r *BaseUserRepository) ChangeStatus(
+	ctx context.Context,
+	id entities.UserID,
+	status entities.UserStatus,
+) error {
+	return ChangeUserStatus(r, ctx, id, status)
+}
+
+// Activate activates a user.
+func (r *BaseUserRepository) Activate(ctx context.Context, id entities.UserID) error {
+	return r.ChangeStatus(ctx, id, entities.UserStatusActive)
+}
+
+// Deactivate deactivates a user.
+func (r *BaseUserRepository) Deactivate(ctx context.Context, id entities.UserID) error {
+	return r.ChangeStatus(ctx, id, entities.UserStatusInactive)
+}
+
+// Suspend suspends a user.
+func (r *BaseUserRepository) Suspend(ctx context.Context, id entities.UserID) error {
+	return r.ChangeStatus(ctx, id, entities.UserStatusSuspended)
+}
+
+// ChangeRole changes user role.
+func (r *BaseUserRepository) ChangeRole(
+	ctx context.Context,
+	id entities.UserID,
+	role entities.UserRole,
+) error {
+	return ChangeRoleWithValidation(ctx, r, id, role, "ChangeRole")
+}
+
+// Delete soft deletes a user.
+func (r *BaseUserRepository) Delete(ctx context.Context, id entities.UserID) error {
+	return r.ChangeStatus(ctx, id, entities.UserStatusInactive)
 }

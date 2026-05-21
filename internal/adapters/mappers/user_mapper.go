@@ -136,7 +136,7 @@ func ParseUUID(uuidStr entities.UuID) (uuid.UUID, error) {
 
 	parsed, err := uuid.Parse(string(uuidStr))
 	if err != nil {
-		return uuid.Nil, fmt.Errorf("invalid UUID: %w", err)
+		return uuid.Nil, fmt.Errorf("invalid UUID uuidStr=%v: %w", uuidStr, err)
 	}
 
 	return parsed, nil
@@ -164,7 +164,7 @@ func ParseTime(timeStr string) (time.Time, error) {
 
 	parsed, err := time.Parse(time.RFC3339, timeStr)
 	if err != nil {
-		return time.Time{}, fmt.Errorf("invalid time format: %w", err)
+		return time.Time{}, fmt.Errorf("invalid time format timeStr=%v: %w", timeStr, err)
 	}
 
 	return parsed, nil

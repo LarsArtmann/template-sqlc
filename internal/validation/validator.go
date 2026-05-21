@@ -35,25 +35,25 @@ func (v *UserValidator) ValidateUserCreate(email, username, firstName, lastName 
 	// Validate email
 	err := v.validateEmail(email)
 	if err != nil {
-		return err
+		return fmt.Errorf("email=%v: %w", email, err)
 	}
 
 	// Validate username
 	err = v.validateUsername(username)
 	if err != nil {
-		return err
+		return fmt.Errorf("username=%v: %w", username, err)
 	}
 
 	// Validate first name
 	err = v.validateName("first_name", firstName)
 	if err != nil {
-		return err
+		return fmt.Errorf("firstName=%v: %w", firstName, err)
 	}
 
 	// Validate last name
 	err = v.validateName("last_name", lastName)
 	if err != nil {
-		return err
+		return fmt.Errorf("lastName=%v: %w", lastName, err)
 	}
 
 	return nil

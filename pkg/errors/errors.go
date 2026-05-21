@@ -330,7 +330,8 @@ func IsAppError(err error) bool {
 
 // IsValidationError checks if err is a validation error.
 func IsValidationError(err error) bool {
-	return hasErrorCode(err,
+	return hasErrorCode(
+		err,
 		ErrCodeValidationFailed,
 		ErrCodeInvalidInput,
 		ErrCodeMissingField,
@@ -376,7 +377,8 @@ func hasErrorCode(err error, codes ...ErrorCode) bool {
 
 // IsForbiddenError checks if err is a forbidden error.
 func IsForbiddenError(err error) bool {
-	return hasErrorCode(err,
+	return hasErrorCode(
+		err,
 		ErrCodeForbidden,
 		ErrCodeInsufficientPrivileges,
 		ErrCodeAccountSuspended,
@@ -386,7 +388,8 @@ func IsForbiddenError(err error) bool {
 
 // IsInternalServerError checks if err is an internal server error.
 func IsInternalServerError(err error) bool {
-	return hasErrorCode(err,
+	return hasErrorCode(
+		err,
 		ErrCodeInternal,
 		ErrCodeDatabase,
 		ErrCodeNetwork,

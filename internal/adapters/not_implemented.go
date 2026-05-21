@@ -176,6 +176,58 @@ func (r *NotImplementedUserRepository) ChangeRole(
 // Ensure NotImplementedUserRepository implements UserRepository.
 var _ repositories.UserRepository = (*NotImplementedUserRepository)(nil)
 
+// NewSharedUserRepository creates a new SharedUserRepository.
+func NewSharedUserRepository(dbName string) *SharedUserRepository {
+	return &SharedUserRepository{
+		NotImplementedUserRepository: NewNotImplementedUserRepository(dbName),
+	}
+}
+
+// SharedUserRepository provides shared implementations for List, Search, SearchByTags,
+// and ChangeStatus methods. Embed this struct in database-specific user repositories
+// to avoid duplicating method implementations.
+type SharedUserRepository struct {
+	*NotImplementedUserRepository
+}
+
+// List provides validated List implementation.
+func (s *SharedUserRepository) List(
+	ctx context.Context,
+	status entities.UserStatus,
+	limit, offset int,
+) ([]*entities.User, error) {
+	return ListUsers(s, ctx, status, limit, offset)
+}
+
+// Search provides validated Search implementation.
+func (s *SharedUserRepository) Search(
+	ctx context.Context,
+	query string,
+	status entities.UserStatus,
+	limit int,
+) ([]*entities.User, error) {
+	return SearchUsers(s, ctx, query, status, limit)
+}
+
+// SearchByTags provides validated SearchByTags implementation.
+func (s *SharedUserRepository) SearchByTags(
+	ctx context.Context,
+	tags []string,
+	status entities.UserStatus,
+	limit, offset int,
+) ([]*entities.User, error) {
+	return SearchUsersByTags(s, ctx, tags, status, limit, offset)
+}
+
+// ChangeStatus provides validated ChangeStatus implementation.
+func (s *SharedUserRepository) ChangeStatus(
+	ctx context.Context,
+	id entities.UserID,
+	status entities.UserStatus,
+) error {
+	return ChangeUserStatus(s, ctx, id, status)
+}
+
 // NotImplementedSessionRepository provides stub implementations for SessionRepository methods.
 type NotImplementedSessionRepository struct {
 	NotImplementedRepository

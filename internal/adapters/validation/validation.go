@@ -2,6 +2,8 @@
 package validation
 
 import (
+	"fmt"
+
 	"github.com/LarsArtmann/template-sqlc/pkg/errors"
 )
 
@@ -80,7 +82,7 @@ func ValidateAndExecute[T interface{ IsValid() bool }](
 ) error {
 	err := Validate(entity, fieldName, invalidMessage)
 	if err != nil {
-		return err
+		return fmt.Errorf("validation failed for %s: %w", fieldName, err)
 	}
 
 	return updateFn()

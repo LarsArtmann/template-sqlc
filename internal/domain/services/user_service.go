@@ -118,12 +118,18 @@ func (s *UserService) CreateUser(
 func (s *UserService) checkUserNotExists(ctx context.Context, email, username string) error {
 	_, err := s.userRepo.GetByEmail(ctx, entities.Email(email))
 	if err == nil {
-		return entities.ErrUserAlreadyExists
+		return fmt.Errorf(
+			"user already exists with email=%v username=%v: %w",
+			email, username, entities.ErrUserAlreadyExists,
+		)
 	}
 
 	_, err = s.userRepo.GetByUsername(ctx, entities.Username(username))
 	if err == nil {
-		return entities.ErrUserAlreadyExists
+		return fmt.Errorf(
+			"user already exists with username=%v: %w",
+			username, entities.ErrUserAlreadyExists,
+		)
 	}
 
 	return nil
@@ -297,7 +303,7 @@ func (s *UserService) AuthenticateUser(
 	// Validate email
 	emailEntity, err := entities.NewEmail(email)
 	if err != nil {
-		return nil, entities.ErrInvalidCredentials
+		return nil, fmt.Errorf("email=%v: %w", email, entities.ErrInvalidCredentials)
 	}
 
 	// Get user
@@ -307,7 +313,7 @@ func (s *UserService) AuthenticateUser(
 		event := events.UserLoginFailed(entities.UserID(0), ipAddress, userAgent, "unknown")
 		_ = s.eventPub.Publish(event)
 
-		return nil, entities.ErrInvalidCredentials
+		return nil, fmt.Errorf("email=%v: %w", email, entities.ErrInvalidCredentials)
 	}
 
 	// Check if user is active
@@ -316,10 +322,10 @@ func (s *UserService) AuthenticateUser(
 		_ = s.eventPub.Publish(event)
 
 		if user.Status() == entities.UserStatusSuspended {
-			return nil, entities.ErrAccountSuspended
+			return nil, fmt.Errorf("email=%v: %w", email, entities.ErrAccountSuspended)
 		}
 
-		return nil, entities.ErrAccountInactive
+		return nil, fmt.Errorf("email=%v: %w", email, entities.ErrAccountInactive)
 	}
 
 	// Create session
@@ -337,7 +343,7 @@ func (s *UserService) AuthenticateUser(
 	// Save session
 	err = s.sessionRepo.Create(ctx, session)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create session: %w", err)
+		return nil, fmt.Errorf("session create for email=%v: %w", email, err)
 	}
 
 	// Update user last login
@@ -363,7 +369,7 @@ func (s *UserService) VerifySession(
 	// Parse token
 	tokenUUID, err := uuid.Parse(token)
 	if err != nil {
-		return nil, nil, entities.ErrInvalidSessionToken
+		return nil, nil, fmt.Errorf("token=%v: %w", token, entities.ErrInvalidSessionToken)
 	}
 
 	sessionToken := entities.SessionToken(tokenUUID)
@@ -371,27 +377,27 @@ func (s *UserService) VerifySession(
 	// Get session
 	session, err := s.sessionRepo.GetByToken(ctx, sessionToken)
 	if err != nil {
-		return nil, nil, entities.ErrSessionNotFound
+		return nil, nil, fmt.Errorf("token=%v: %w", token, entities.ErrSessionNotFound)
 	}
 
 	// Check if session is valid
 	if !session.IsValid() {
 		if session.IsExpired() {
-			return nil, nil, entities.ErrSessionExpired
+			return nil, nil, fmt.Errorf("token=%v: %w", token, entities.ErrSessionExpired)
 		}
 
-		return nil, nil, entities.ErrSessionNotFound
+		return nil, nil, fmt.Errorf("token=%v: %w", token, entities.ErrSessionNotFound)
 	}
 
 	// Get user
 	user, err := s.userRepo.GetByID(ctx, session.UserID())
 	if err != nil {
-		return nil, nil, fmt.Errorf("user not found: %w", err)
+		return nil, nil, fmt.Errorf("user not found for token=%v: %w", token, err)
 	}
 
 	// Check if user is active
 	if !user.IsActive() {
-		return nil, nil, entities.ErrAccountInactive
+		return nil, nil, fmt.Errorf("token=%v: %w", token, entities.ErrAccountInactive)
 	}
 
 	return session, user, nil
@@ -402,7 +408,7 @@ func (s *UserService) Logout(ctx context.Context, token string) error {
 	// Parse token
 	tokenUUID, err := uuid.Parse(token)
 	if err != nil {
-		return entities.ErrInvalidSessionToken
+		return fmt.Errorf("token=%v: %w", token, entities.ErrInvalidSessionToken)
 	}
 
 	sessionToken := entities.SessionToken(tokenUUID)
@@ -410,7 +416,7 @@ func (s *UserService) Logout(ctx context.Context, token string) error {
 	// Deactivate session
 	err = s.sessionRepo.DeactivateByToken(ctx, sessionToken)
 	if err != nil {
-		return fmt.Errorf("failed to logout: %w", err)
+		return fmt.Errorf("failed to logout token=%v: %w", token, err)
 	}
 
 	// Publish logout event
