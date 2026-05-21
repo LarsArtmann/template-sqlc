@@ -128,8 +128,8 @@ func ChangeRoleWithValidation[T NotImplementedMethods](
 
 // ListUsers handles the common List implementation for user repositories.
 func ListUsers[T NotImplementedMethods](
-	repo T,
 	ctx context.Context,
+	repo T,
 	status entities.UserStatus,
 	limit, offset int,
 ) ([]*entities.User, error) {
@@ -138,8 +138,8 @@ func ListUsers[T NotImplementedMethods](
 
 // SearchUsers handles the common Search implementation for user repositories.
 func SearchUsers[T NotImplementedMethods](
-	repo T,
 	ctx context.Context,
+	repo T,
 	query string,
 	status entities.UserStatus,
 	limit int,
@@ -149,8 +149,8 @@ func SearchUsers[T NotImplementedMethods](
 
 // SearchUsersByTags handles the common SearchByTags implementation for user repositories.
 func SearchUsersByTags[T NotImplementedMethods](
-	repo T,
 	ctx context.Context,
+	repo T,
 	tags []string,
 	status entities.UserStatus,
 	limit, offset int,
@@ -160,8 +160,8 @@ func SearchUsersByTags[T NotImplementedMethods](
 
 // ChangeUserStatus handles the common ChangeStatus implementation for user repositories.
 func ChangeUserStatus[T NotImplementedMethods](
-	repo T,
 	ctx context.Context,
+	repo T,
 	id entities.UserID,
 	status entities.UserStatus,
 ) error {
@@ -187,7 +187,7 @@ func (r *BaseUserRepository) List(
 	status entities.UserStatus,
 	limit, offset int,
 ) ([]*entities.User, error) {
-	return ListUsers(r, ctx, status, limit, offset)
+	return ListUsers(ctx, r, status, limit, offset)
 }
 
 // Search searches users by query.
@@ -197,7 +197,7 @@ func (r *BaseUserRepository) Search(
 	status entities.UserStatus,
 	limit int,
 ) ([]*entities.User, error) {
-	return SearchUsers(r, ctx, query, status, limit)
+	return SearchUsers(ctx, r, query, status, limit)
 }
 
 // SearchByTags searches users by tags.
@@ -207,7 +207,7 @@ func (r *BaseUserRepository) SearchByTags(
 	status entities.UserStatus,
 	limit, offset int,
 ) ([]*entities.User, error) {
-	return SearchUsersByTags(r, ctx, tags, status, limit, offset)
+	return SearchUsersByTags(ctx, r, tags, status, limit, offset)
 }
 
 // ChangeStatus changes user status.
@@ -216,7 +216,7 @@ func (r *BaseUserRepository) ChangeStatus(
 	id entities.UserID,
 	status entities.UserStatus,
 ) error {
-	return ChangeUserStatus(r, ctx, id, status)
+	return ChangeUserStatus(ctx, r, id, status)
 }
 
 // Activate activates a user.

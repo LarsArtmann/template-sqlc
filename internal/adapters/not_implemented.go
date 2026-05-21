@@ -196,7 +196,7 @@ func (s *SharedUserRepository) List(
 	status entities.UserStatus,
 	limit, offset int,
 ) ([]*entities.User, error) {
-	return ListUsers(s, ctx, status, limit, offset)
+	return ListUsers(ctx, s, status, limit, offset)
 }
 
 // Search provides validated Search implementation.
@@ -206,7 +206,7 @@ func (s *SharedUserRepository) Search(
 	status entities.UserStatus,
 	limit int,
 ) ([]*entities.User, error) {
-	return SearchUsers(s, ctx, query, status, limit)
+	return SearchUsers(ctx, s, query, status, limit)
 }
 
 // SearchByTags provides validated SearchByTags implementation.
@@ -216,7 +216,7 @@ func (s *SharedUserRepository) SearchByTags(
 	status entities.UserStatus,
 	limit, offset int,
 ) ([]*entities.User, error) {
-	return SearchUsersByTags(s, ctx, tags, status, limit, offset)
+	return SearchUsersByTags(ctx, s, tags, status, limit, offset)
 }
 
 // ChangeStatus provides validated ChangeStatus implementation.
@@ -225,7 +225,7 @@ func (s *SharedUserRepository) ChangeStatus(
 	id entities.UserID,
 	status entities.UserStatus,
 ) error {
-	return ChangeUserStatus(s, ctx, id, status)
+	return ChangeUserStatus(ctx, s, id, status)
 }
 
 // NotImplementedSessionRepository provides stub implementations for SessionRepository methods.
