@@ -17,6 +17,7 @@ Production-ready Go template using sqlc for type-safe SQL code generation with m
 ## a) WORK — FULLY DONE ✅
 
 ### Core Infrastructure
+
 - **Multi-database build system** — All three databases build successfully:
   - `go build -tags sqlite ./...` ✅
   - `go build -tags mysql ./...` ✅
@@ -27,12 +28,14 @@ Production-ready Go template using sqlc for type-safe SQL code generation with m
 - **Shared package for DBTX** — `internal/db/shared/` provides common types
 
 ### Domain Layer
+
 - **Strongly-typed domain entities** — `User`, `UserID`, `Email`, `Username`, `PasswordHash`, `FirstName`, `LastName`, `UserStatus`, `UserRole`, `UserMetadata`, `Session`, `SessionID`
 - **Domain services** — `UserService` with full CRUD, authentication, role management
 - **Domain events** — `UserEvent` with various event types
 - **Repository interfaces** — `UserRepository`, `SessionRepository` in domain layer
 
 ### Adapters Layer
+
 - **MySQL adapter** — Full implementation with `SharedUserRepository` embedding
 - **PostgreSQL adapter** — Full implementation with `SharedUserRepository` embedding
 - **SQLite adapter** — Full implementation with `SharedUserRepository` embedding
@@ -41,11 +44,13 @@ Production-ready Go template using sqlc for type-safe SQL code generation with m
 - **Shared helpers** — `shared_helpers.go` with generic repository helpers
 
 ### Test Suites
+
 - **BDD Tests** — 21 scenarios, 123 steps, all passing ✅
 - **Integration Tests** — 9 test cases all passing ✅
 - **Unit Tests** — 4 test suites pass, 3 test suites fail (see below)
 
 ### Recent Fixes (Commit 478560b)
+
 - ✅ Removed erroneous `"json"` imports from MySQL `models.go` and `user.sql.go`
 - ✅ Fixed 9 `wrapcheck` lint issues with proper error wrapping
 - ✅ Fixed 3 `revive` lint issues with context parameter ordering
@@ -56,6 +61,7 @@ Production-ready Go template using sqlc for type-safe SQL code generation with m
 ## b) WORK — PARTIALLY DONE ⚠️
 
 ### Unit Tests (16 failing test cases, 3 test suites broken)
+
 - `TestEmailValidation` — 6 failing cases (invalid emails returning `""` instead of `nil`)
 - `TestUsernameValidation` — 8 failing cases (invalid usernames returning `""` instead of `nil`)
 - `TestPasswordHashValidation` — 2 failing cases (invalid hashes returning `""` instead of `nil`)
@@ -84,12 +90,14 @@ Production-ready Go template using sqlc for type-safe SQL code generation with m
 ## c) WORK — NOT STARTED 🔲
 
 ### Missing Test Coverage
+
 - **Adapter unit tests** — No test files for `adapters/mysql/`, `adapters/sqlite/`, `adapters/postgres/`, `adapters/converters/`, `adapters/mappers/`, `adapters/validation/`
 - **Domain unit tests** — No test files for `domain/entities/`, `domain/services/`, `domain/repositories/`, `domain/events/`
 - **Monitoring** — No test files for `internal/monitoring/`
 - **Shared package** — No test files for `internal/db/shared/`
 
 ### Missing Features
+
 - **E2E tests** — `internal/tests/e2e/` directory does not exist
 - **flake.nix** — Project uses `justfile` (AGENTS.md says use `flake.nix`)
 - **Database migrations** — No migration tool integration
@@ -97,6 +105,7 @@ Production-ready Go template using sqlc for type-safe SQL code generation with m
 - **CLI tool** — No `main.go` or command-line interface
 
 ### Documentation
+
 - **TODO_LIST.md** — Does not exist
 - **FEATURES.md** — Does not exist
 - **AGENTS.md** — 32 days old (exceeds 14-day max)
@@ -106,6 +115,7 @@ Production-ready Go template using sqlc for type-safe SQL code generation with m
 ## d) WORK — TOTALLY FUCKED UP 🔥
 
 ### Nothing is completely broken. Core functionality works:
+
 - ✅ All 3 database builds pass
 - ✅ golangci-lint: 0 issues
 - ✅ BDD tests: 21/21 passing
@@ -113,6 +123,7 @@ Production-ready Go template using sqlc for type-safe SQL code generation with m
 - ❌ Unit tests: 11 passing, 16 failing (test design issue)
 
 ### Concerns:
+
 - ⚠️ New code duplication introduced by error-wrapping fix
 - ⚠️ Pre-commit hook blocks commits due to structural policy issues (not code quality)
 
@@ -121,6 +132,7 @@ Production-ready Go template using sqlc for type-safe SQL code generation with m
 ## e) WHAT WE SHOULD IMPROVE 📈
 
 ### Critical (Fix Immediately)
+
 1. **Unit test helper bug** — `testEntityValidation()` uses `require.Nil()` but string aliases return `""` not `nil`. This is the #1 priority fix.
 
 2. **New duplication in user_repository.go** — Add Delete/Activate/Deactivate/Suspend methods to `false-positives.json` since each adapter needs its own implementation.
@@ -128,18 +140,21 @@ Production-ready Go template using sqlc for type-safe SQL code generation with m
 3. **AGENTS.md age** — Update to reflect current project state (32 days old).
 
 ### High Priority
+
 4. **flake.nix** — Create and migrate from `justfile`
 5. **E2E test directory** — Create `internal/tests/e2e/`
 6. **TODO_LIST.md** — Track outstanding work items
 7. **FEATURES.md** — Document all implemented features
 
 ### Medium Priority
+
 8. **Adapter unit tests** — Add tests for MySQL, SQLite, PostgreSQL adapters
 9. **Domain entity tests** — Add unit tests for `User`, `Session` entities
 10. **Coverage threshold** — Add minimum test coverage requirement
 11. **Race detector** — Add `-race` flag to test commands
 
 ### Low Priority
+
 12. **Database migrations** — Add migration tooling
 13. **Configuration wiring** — Connect `config/` builder for runtime use
 14. **CLI tool** — Implement main.go
@@ -182,17 +197,20 @@ Production-ready Go template using sqlc for type-safe SQL code generation with m
 ### How to properly test string-based value objects that return `""` on validation failure?
 
 **The Problem:**
+
 - Domain entities use string alias types: `type Email string`, `type Username string`, `type PasswordHash string`
 - Validation functions return `(Email, error)` where empty string `""` is returned on failure (not `nil`)
 - Test helper `testEntityValidation()` expects `nil` for validation failures: `require.Nil(t, entity)`
 - This causes 16 test failures for invalid inputs that correctly return `""`
 
 **Options Considered:**
+
 1. Change test helper to check `""` instead of `nil` — But this changes the helper's behavior for all types
 2. Change value objects to use pointer types — But this defeats the purpose of string alias safety
 3. Use a wrapper type that can be `nil` — But this adds complexity
 
 **Why I Can't Solve It Alone:**
+
 - The string alias pattern is intentional for type safety
 - The test helper pattern is used throughout the test suite
 - Changing either affects the entire codebase
@@ -203,6 +221,7 @@ Production-ready Go template using sqlc for type-safe SQL code generation with m
 ## APPENDIX: Quick Reference
 
 ### Build & Test Commands
+
 ```bash
 go build -tags sqlite ./...   # SQLite build
 go build -tags mysql ./...    # MySQL build
@@ -213,6 +232,7 @@ art-dupl -t 40 . --semantic  # Check duplication
 ```
 
 ### Current Status (2026-05-21 18:28)
+
 ```
 Builds:         ✅ All 3 databases pass
 golangci-lint:  ✅ 0 issues
@@ -223,6 +243,7 @@ Duplication:    ⚠️ 3 clone groups (2 existing, 1 new from error-wrapping)
 ```
 
 ### git Status
+
 ```
 Branch: master (1 commit ahead of origin/master)
 Last commit: 478560b (fix(lint): resolve all golangci-lint issues)
@@ -230,6 +251,7 @@ Working tree: clean
 ```
 
 ### Clone Groups (art-dupl)
+
 ```
 1. mysql/db.go ↔ sqlite/db.go (27 lines) — Cannot fix without sqlc template changes
 2. mysql/user_repository.go ↔ postgres/user_repository.go ↔ sqlite/user_repository.go (38 lines each) — Intentional, each adapter needs own impl
@@ -237,4 +259,4 @@ Working tree: clean
 
 ---
 
-*Report generated by Crush AI — 2026-05-21 18:28*
+_Report generated by Crush AI — 2026-05-21 18:28_

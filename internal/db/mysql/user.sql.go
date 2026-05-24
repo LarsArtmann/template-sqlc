@@ -11,6 +11,8 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+
+	"json"
 )
 
 const CountActiveUsers = `-- name: CountActiveUsers :one

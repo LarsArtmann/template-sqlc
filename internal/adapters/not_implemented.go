@@ -176,7 +176,6 @@ func (r *NotImplementedUserRepository) ChangeRole(
 // Ensure NotImplementedUserRepository implements UserRepository.
 var _ repositories.UserRepository = (*NotImplementedUserRepository)(nil)
 
-
 // NotImplementedSessionRepository provides stub implementations for SessionRepository methods.
 type NotImplementedSessionRepository struct {
 	NotImplementedRepository
