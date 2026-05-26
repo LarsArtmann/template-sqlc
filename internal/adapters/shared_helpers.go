@@ -15,6 +15,15 @@ type NotImplementedMethods interface {
 	NotImplemented(method string) error
 }
 
+// notImplementedError creates a standardized not implemented error with proper wrapping.
+func notImplementedError[T NotImplementedMethods](repo T, methodName string) error {
+	return fmt.Errorf(
+		"method %s not implemented: %w",
+		methodName,
+		repo.NotImplemented(methodName),
+	)
+}
+
 // NotImplementedListResult is the return type for List methods.
 type NotImplementedListResult = []*entities.User
 
@@ -101,11 +110,7 @@ func ChangeStatusWithValidation[T NotImplementedMethods](
 	methodName string,
 ) error {
 	return validation.ValidateAndExecute(status, "status", "invalid user status", func() error {
-		return fmt.Errorf(
-			"method %s not implemented: %w",
-			methodName,
-			repo.NotImplemented(methodName),
-		)
+		return notImplementedError(repo, methodName)
 	})
 }
 
@@ -118,11 +123,7 @@ func ChangeRoleWithValidation[T NotImplementedMethods](
 	methodName string,
 ) error {
 	return validation.ValidateAndExecute(role, "role", "invalid user role", func() error {
-		return fmt.Errorf(
-			"method %s not implemented: %w",
-			methodName,
-			repo.NotImplemented(methodName),
-		)
+		return notImplementedError(repo, methodName)
 	})
 }
 

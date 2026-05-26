@@ -11,16 +11,13 @@ import (
 // This adapts SQLite-specific types to domain interfaces.
 type UserRepository struct {
 	*adapters.BaseUserRepository
-
-	db         shared.DBTX
-	converters *converters.ConverterSet
+	*adapters.DBUserRepository
 }
 
 // NewUserRepository creates a new SQLite user repository.
 func NewUserRepository(db shared.DBTX) repositories.UserRepository {
 	return &UserRepository{
 		BaseUserRepository: adapters.NewBaseUserRepository("SQLite"),
-		db:                 db,
-		converters:         converters.NewConverterSet(converters.DbTypeSQLite),
+		DBUserRepository:   adapters.NewDBUserRepository(db, converters.DbTypeSQLite),
 	}
 }

@@ -12,16 +12,13 @@ import (
 // This adapts MySQL-specific types to domain interfaces.
 type UserRepository struct {
 	*adapters.BaseUserRepository
-
-	db         shared.DBTX
-	converters *converters.ConverterSet
+	*adapters.DBUserRepository
 }
 
 // NewUserRepository creates a new MySQL user repository.
 func NewUserRepository(db shared.DBTX) repositories.UserRepository {
 	return &UserRepository{
 		BaseUserRepository: adapters.NewBaseUserRepository("MySQL"),
-		db:                 db,
-		converters:         converters.NewConverterSet(converters.DbTypeMySQL),
+		DBUserRepository:   adapters.NewDBUserRepository(db, converters.DbTypeMySQL),
 	}
 }

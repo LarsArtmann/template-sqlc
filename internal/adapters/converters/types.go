@@ -88,11 +88,7 @@ func (c *SQLiteUUIDConverter) DomainToDB(domain uuid.UUID) any {
 
 // DBToDomain converts a SQLite UUID (string) to a domain UUID.
 func (c *SQLiteUUIDConverter) DBToDomain(db any) (uuid.UUID, error) {
-	if db == nil {
-		return uuid.Nil, nil
-	}
-
-	return parseUUIDFromAny(db)
+	return uuidFromDBValue(db)
 }
 
 // PostgresUUIDConverter handles UUID conversion for PostgreSQL (stores as UUID type).
@@ -108,11 +104,7 @@ func (c *PostgresUUIDConverter) DomainToDB(domain uuid.UUID) any {
 
 // DBToDomain converts a PostgreSQL UUID to a domain UUID.
 func (c *PostgresUUIDConverter) DBToDomain(db any) (uuid.UUID, error) {
-	if db == nil {
-		return uuid.Nil, nil
-	}
-
-	return parseUUIDFromAny(db)
+	return uuidFromDBValue(db)
 }
 
 // MySQLUUIDConverter handles UUID conversion for MySQL (stores as binary).
@@ -128,11 +120,7 @@ func (c *MySQLUUIDConverter) DomainToDB(domain uuid.UUID) any {
 
 // DBToDomain converts MySQL binary UUID to a domain UUID.
 func (c *MySQLUUIDConverter) DBToDomain(db any) (uuid.UUID, error) {
-	if db == nil {
-		return uuid.Nil, nil
-	}
-
-	return parseUUIDFromAny(db)
+	return uuidFromDBValue(db)
 }
 
 // SQLiteTimeConverter handles time conversion for SQLite.
@@ -368,6 +356,15 @@ func (c *DefaultSessionTokenConverter) DBToDomain(db any) (entities.SessionToken
 	}
 
 	return entities.SessionToken(tokenUUID), nil
+}
+
+// uuidFromDBValue converts a database UUID value to domain UUID, handling nil.
+func uuidFromDBValue(db any) (uuid.UUID, error) {
+	if db == nil {
+		return uuid.Nil, nil
+	}
+
+	return parseUUIDFromAny(db)
 }
 
 // parseUUIDFromAny parses a UUID from various database types.
