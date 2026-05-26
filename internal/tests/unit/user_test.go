@@ -85,7 +85,7 @@ func testEntityValidation[T valueObject](
 		assert.Equal(t, value, entity.String())
 	} else {
 		require.Error(t, err)
-		require.Nil(t, entity)
+		assert.Empty(t, entity.String())
 	}
 }
 
