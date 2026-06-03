@@ -9,13 +9,13 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// ConfigBuilder builds sqlc configurations from components
+// ConfigBuilder builds sqlc configurations from components.
 type ConfigBuilder struct {
 	baseDir   string
 	outputDir string
 }
 
-// NewConfigBuilder creates a new configuration builder
+// NewConfigBuilder creates a new configuration builder.
 func NewConfigBuilder(baseDir, outputDir string) *ConfigBuilder {
 	return &ConfigBuilder{
 		baseDir:   baseDir,
@@ -23,7 +23,7 @@ func NewConfigBuilder(baseDir, outputDir string) *ConfigBuilder {
 	}
 }
 
-// BuildConfig builds a complete sqlc configuration for the specified databases
+// BuildConfig builds a complete sqlc configuration for the specified databases.
 func (cb *ConfigBuilder) BuildConfig(databases []string) error {
 	// Load base configuration
 	baseConfig, err := cb.loadBaseConfig()
@@ -32,17 +32,19 @@ func (cb *ConfigBuilder) BuildConfig(databases []string) error {
 	}
 
 	// Build configurations for each database
-	var configs []map[string]interface{}
+	var configs []map[string]any
+
 	for _, db := range databases {
 		dbConfig, err := cb.buildDatabaseConfig(db, baseConfig)
 		if err != nil {
 			return fmt.Errorf("failed to build %s config: %w", db, err)
 		}
+
 		configs = append(configs, dbConfig)
 	}
 
 	// Combine configurations
-	finalConfig := map[string]interface{}{
+	finalConfig := map[string]any{
 		"version": "2",
 		"rules":   baseConfig["rules"],
 		"plugins": baseConfig["plugins"],
@@ -53,15 +55,16 @@ func (cb *ConfigBuilder) BuildConfig(databases []string) error {
 	return cb.writeConfig(finalConfig)
 }
 
-// loadBaseConfig loads the base configuration
-func (cb *ConfigBuilder) loadBaseConfig() (map[string]interface{}, error) {
+// loadBaseConfig loads the base configuration.
+func (cb *ConfigBuilder) loadBaseConfig() (map[string]any, error) {
 	basePath := filepath.Join(cb.baseDir, "base", "common.yaml")
+
 	data, err := os.ReadFile(basePath)
 	if err != nil {
 		return nil, err
 	}
 
-	var config map[string]interface{}
+	var config map[string]any
 	if err := yaml.Unmarshal(data, &config); err != nil {
 		return nil, err
 	}
@@ -69,31 +72,32 @@ func (cb *ConfigBuilder) loadBaseConfig() (map[string]interface{}, error) {
 	return config, nil
 }
 
-// buildDatabaseConfig builds configuration for a specific database
+// buildDatabaseConfig builds configuration for a specific database.
 func (cb *ConfigBuilder) buildDatabaseConfig(
 	db string,
-	baseConfig map[string]interface{},
-) (map[string]interface{}, error) {
+	baseConfig map[string]any,
+) (map[string]any, error) {
 	// Load database-specific configuration
-	dbPath := filepath.Join(cb.baseDir, "databases", fmt.Sprintf("%s.yaml", db))
+	dbPath := filepath.Join(cb.baseDir, "databases", db+".yaml")
+
 	data, err := os.ReadFile(dbPath)
 	if err != nil {
 		return nil, err
 	}
 
-	var dbConfig map[string]interface{}
+	var dbConfig map[string]any
 	if err := yaml.Unmarshal(data, &dbConfig); err != nil {
 		return nil, err
 	}
 
 	// Extract the SQL configuration
-	sqlConfigs, ok := dbConfig["sql"].([]interface{})
+	sqlConfigs, ok := dbConfig["sql"].([]any)
 	if !ok || len(sqlConfigs) == 0 {
 		return nil, fmt.Errorf("no sql configuration found for %s", db)
 	}
 
 	// Return the first SQL configuration
-	sqlConfig, ok := sqlConfigs[0].(map[string]interface{})
+	sqlConfig, ok := sqlConfigs[0].(map[string]any)
 	if !ok {
 		return nil, fmt.Errorf("invalid sql configuration format for %s", db)
 	}
@@ -101,8 +105,8 @@ func (cb *ConfigBuilder) buildDatabaseConfig(
 	return sqlConfig, nil
 }
 
-// writeConfig writes the final configuration to file
-func (cb *ConfigBuilder) writeConfig(config map[string]interface{}) error {
+// writeConfig writes the final configuration to file.
+func (cb *ConfigBuilder) writeConfig(config map[string]any) error {
 	// Ensure output directory exists
 	if err := os.MkdirAll(cb.outputDir, 0o755); err != nil {
 		return err
@@ -110,6 +114,7 @@ func (cb *ConfigBuilder) writeConfig(config map[string]interface{}) error {
 
 	// Write configuration
 	outputPath := filepath.Join(cb.outputDir, "sqlc.yaml")
+
 	data, err := yaml.Marshal(config)
 	if err != nil {
 		return err
@@ -133,7 +138,8 @@ func main() {
 
 	// Build configuration
 	builder := NewConfigBuilder("internal", ".")
-	if err := builder.BuildConfig(databases); err != nil {
+	err := builder.BuildConfig(databases)
+	if err != nil {
 		fmt.Printf("Error building configuration: %v\n", err)
 		os.Exit(1)
 	}
