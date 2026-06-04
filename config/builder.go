@@ -138,6 +138,7 @@ func main() {
 
 	// Build configuration
 	builder := NewConfigBuilder("internal", ".")
+
 	err := builder.BuildConfig(databases)
 	if err != nil {
 		fmt.Printf("Error building configuration: %v\n", err)
