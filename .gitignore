@@ -69,3 +69,5 @@ node_modules/
 /template-sqlc
 Copy/paste detection report
 /report/jscpd-report.json
+# Nix build output
+/result
