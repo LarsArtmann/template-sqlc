@@ -1,7 +1,7 @@
 version: "2"
 run:
   timeout: 5m
-  go: 1.26.3
+  go: 1.26.4
   build-tags:
     - goexperiment.arenas
     - goexperiment.goroutineleakprofile
@@ -183,6 +183,9 @@ linters:
         - prometheus/.*CounterOpts
         - prometheus/.*GaugeOpts
         - promhttp/.*HandlerOpts
+    ginkgolinter:
+      forbid-focus-container: true
+      forbid-spec-pollution: true
     gocritic:
       disabled-checks:
         - ifElseChain
@@ -198,6 +201,8 @@ linters:
         - repositories\.\w+Repository
         - prometheus\.(Histogram|Counter|Gauge)
         - ~.*
+    makezero:
+      always: true
     revive:
       rules:
         - disabled: true
@@ -208,6 +213,10 @@ linters:
       case:
         rules:
           json: camel
+    testifylint:
+      disable:
+        - go-require
+      enable-all: true
     varnamelen:
       ignore-map-index-ok: true
       ignore-names:
@@ -270,6 +279,7 @@ linters:
       - internal/db/postgres/
       - internal/db/sqlite
       - internal/db/sqlite/
+      - internal/tests/integration/
       - vendor/
 formatters:
   enable:
@@ -291,4 +301,7 @@ formatters:
       - internal/db/postgres/
       - internal/db/sqlite
       - internal/db/sqlite/
-issues: {}
+      - internal/tests/integration/
+issues:
+  max-issues-per-linter: 50
+  max-same-issues: 10
