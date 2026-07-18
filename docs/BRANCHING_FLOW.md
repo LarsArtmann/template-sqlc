@@ -28,14 +28,15 @@ This document outlines the branching strategy, git workflow, and development pro
 ```
 
 **Types:**
-| Type | Purpose | Example |
-|------|---------|---------|
-| `feat/` | New features | `feat/add-user-validation` |
-| `fix/` | Bug fixes | `fix/session-expiry-bug` |
-| `refactor/` | Code refactoring | `refactor/user-service` |
-| `docs/` | Documentation | `docs/update-readme` |
-| `chore/` | Maintenance tasks | `chore/update-deps` |
-| `test/` | Test improvements | `test/add-bdd-scenarios` |
+
+| Type        | Purpose           | Example                    |
+| ----------- | ----------------- | -------------------------- |
+| `feat/`     | New features      | `feat/add-user-validation` |
+| `fix/`      | Bug fixes         | `fix/session-expiry-bug`   |
+| `refactor/` | Code refactoring  | `refactor/user-service`    |
+| `docs/`     | Documentation     | `docs/update-readme`       |
+| `chore/`    | Maintenance tasks | `chore/update-deps`        |
+| `test/`     | Test improvements | `test/add-bdd-scenarios`   |
 
 ---
 

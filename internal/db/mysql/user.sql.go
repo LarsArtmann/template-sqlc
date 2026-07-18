@@ -11,7 +11,6 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
-
 	"json"
 )
 
@@ -58,7 +57,8 @@ type CreateUserParams struct {
 //	    ?, ?, ?, ?, ?, ?, ?, ?
 //	)
 func (q *Queries) CreateUser(ctx context.Context, arg *CreateUserParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, CreateUser,
+	return q.db.ExecContext(
+		ctx, CreateUser,
 		arg.UUID,
 		arg.Email,
 		arg.Username,
@@ -363,7 +363,8 @@ type UpdateUserParams struct {
 //	    is_verified = COALESCE(?, is_verified)
 //	WHERE id = ?
 func (q *Queries) UpdateUser(ctx context.Context, arg *UpdateUserParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, UpdateUser,
+	return q.db.ExecContext(
+		ctx, UpdateUser,
 		arg.Email,
 		arg.Username,
 		arg.FirstName,

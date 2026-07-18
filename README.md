@@ -10,7 +10,7 @@ DO NOT EDIT MANUALLY - Changes will be overwritten
 
 [![CI Status](https://img.shields.io/github/actions/workflow/status/LarsArtmann/template-sqlc/ci.yml?style=flat-square&branch=main)](https://github.com/LarsArtmann/template-sqlc/actions)
 
-[![Coverage](https://img.shields.io/codecov/c/github/LarsArtmann/template-sqlc?style=flat-square)](https://codecov.io/gh/LarsArtmann/template-sqlc) [![Go Report Card](https://goreportcard.com/badge/github.com/LarsArtmann/template-sqlc)](https://goreportcard.com/report/github.com/LarsArtmann/template-sqlc)
+[![Coverage](https://img.shields.io/codecov/c/github/LarsArtmann/template-sqlc?style=flat-square)](https://codecov.io/gh/LarsArtmann/template-sqlc)
 
 [![GitHub Stars](https://img.shields.io/github/stars/LarsArtmann/template-sqlc?style=flat-square)](https://github.com/LarsArtmann/template-sqlc) [![GitHub Forks](https://img.shields.io/github/forks/LarsArtmann/template-sqlc?style=flat-square)](https://github.com/LarsArtmann/template-sqlc) [![GitHub Issues](https://img.shields.io/github/issues/LarsArtmann/template-sqlc?style=flat-square)](https://github.com/LarsArtmann/template-sqlc/issues)
 

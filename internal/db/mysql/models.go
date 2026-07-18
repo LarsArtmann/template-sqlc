@@ -9,7 +9,6 @@ package mysql
 import (
 	"database/sql"
 	"encoding/json"
-
 	"json"
 )
 

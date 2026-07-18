@@ -28,13 +28,14 @@ This project contains **7 potential reusable components** that could be extracte
 - Factory functions for database-specific converter selection
 
 **Alternatives:**
-| Library | Limitation |
-|---------|------------|
-| `github.com/lib/pq` | PostgreSQL-specific, no interface abstraction |
-| `github.com/go-sql-driver/mysql` | MySQL-specific, no domain types |
-| `github.com/mattn/go-sqlite3` | SQLite-specific, no abstraction |
-| `gorm.io/gorm/schema` | Tied to GORM, no domain value objects |
-| Manual conversion | Boilerplate, error-prone, inconsistent |
+
+| Library                          | Limitation                                    |
+| -------------------------------- | --------------------------------------------- |
+| `github.com/lib/pq`              | PostgreSQL-specific, no interface abstraction |
+| `github.com/go-sql-driver/mysql` | MySQL-specific, no domain types               |
+| `github.com/mattn/go-sqlite3`    | SQLite-specific, no abstraction               |
+| `gorm.io/gorm/schema`            | Tied to GORM, no domain value objects         |
+| Manual conversion                | Boilerplate, error-prone, inconsistent        |
 
 **Our Unique Value:**
 
@@ -82,12 +83,13 @@ sqlc-converter/
 - **Database-specific presets** with isolated configs
 
 **Alternatives:**
-| Source | Limitation |
-|--------|------------|
-| sqlc docs examples | Fragmented, not comprehensive |
-| `github.com/sqlc-dev/sqlc` examples | Basic only, no validation rules |
-| Community templates | Inconsistent quality, unmaintained |
-| Manual config | Time-consuming, error-prone, incomplete |
+
+| Source                              | Limitation                              |
+| ----------------------------------- | --------------------------------------- |
+| sqlc docs examples                  | Fragmented, not comprehensive           |
+| `github.com/sqlc-dev/sqlc` examples | Basic only, no validation rules         |
+| Community templates                 | Inconsistent quality, unmaintained      |
+| Manual config                       | Time-consuming, error-prone, incomplete |
 
 **Our Unique Value:**
 
@@ -147,12 +149,13 @@ sqlc-config/
 - **Domain errors:** Sentinel errors for type-safe error handling
 
 **Alternatives:**
-| Library | Limitation |
-|---------|------------|
-| `go-playground/validator` | Struct tags only, no value object encapsulation |
-| `github.com/go-ozzo/ozzo-validation` | Validation focused, no entity pattern |
-| Manual structs | No encapsulation, validation scattered |
-| DDD frameworks | Heavy, opinionated, overkill for simple cases |
+
+| Library                              | Limitation                                      |
+| ------------------------------------ | ----------------------------------------------- |
+| `go-playground/validator`            | Struct tags only, no value object encapsulation |
+| `github.com/go-ozzo/ozzo-validation` | Validation focused, no entity pattern           |
+| Manual structs                       | No encapsulation, validation scattered          |
+| DDD frameworks                       | Heavy, opinionated, overkill for simple cases   |
 
 **Our Unique Value:**
 
@@ -210,11 +213,12 @@ domainkit/
   - Error translation (SQL errors → domain errors)
 
 **Alternatives:**
-| Library | Limitation |
-|---------|------------|
-| `gorm.io/gorm` | ORM, not sqlc-compatible |
-| `github.com/jmoiron/sqlx` | No interface abstraction |
-| Manual repositories | Repetitive, error-prone |
+
+| Library                      | Limitation                  |
+| ---------------------------- | --------------------------- |
+| `gorm.io/gorm`               | ORM, not sqlc-compatible    |
+| `github.com/jmoiron/sqlx`    | No interface abstraction    |
+| Manual repositories          | Repetitive, error-prone     |
 | Clean architecture templates | Generic, not sqlc-optimized |
 
 **Our Unique Value:**
@@ -243,11 +247,12 @@ domainkit/
 - Built-in HTTP server for `/metrics` endpoint
 
 **Alternatives:**
-| Library | Limitation |
-|---------|------------|
-| `prometheus/client_golang` | Requires manual setup |
-| OpenTelemetry | More complex, different paradigm |
-| Custom metrics | Reinventing the wheel |
+
+| Library                    | Limitation                       |
+| -------------------------- | -------------------------------- |
+| `prometheus/client_golang` | Requires manual setup            |
+| OpenTelemetry              | More complex, different paradigm |
+| Custom metrics             | Reinventing the wheel            |
 
 **Our Unique Value:**
 
@@ -274,11 +279,12 @@ domainkit/
 - Database fixture management
 
 **Alternatives:**
-| Library | Limitation |
-|---------|------------|
-| `testcontainers/testcontainers-go` | Heavy, Docker required |
-| `DATA-DOG/go-sqlmock` | Mock only, no real DB testing |
-| `onsi/ginkgo` | BDD framework only, no sqlc utilities |
+
+| Library                            | Limitation                            |
+| ---------------------------------- | ------------------------------------- |
+| `testcontainers/testcontainers-go` | Heavy, Docker required                |
+| `DATA-DOG/go-sqlmock`              | Mock only, no real DB testing         |
+| `onsi/ginkgo`                      | BDD framework only, no sqlc utilities |
 
 **Our Unique Value:**
 
@@ -305,11 +311,12 @@ domainkit/
 - Database-specific features (FTS, JSON, Enums)
 
 **Alternatives:**
-| Source | Quality |
-|--------|---------|
-| sqlc docs | Official, maintained |
-| `github.com/sqlc-dev/sqlc/tree/main/examples` | Official examples |
-| Real-world projects | More comprehensive |
+
+| Source                                        | Quality              |
+| --------------------------------------------- | -------------------- |
+| sqlc docs                                     | Official, maintained |
+| `github.com/sqlc-dev/sqlc/tree/main/examples` | Official examples    |
+| Real-world projects                           | More comprehensive   |
 
 **Our Unique Value:**
 
