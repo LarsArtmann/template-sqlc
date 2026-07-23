@@ -22,7 +22,7 @@ func HandleDBError(
 	}
 
 	switch {
-	case stderrors.Is(err, sql.ErrNoRows):
+	case stderrors.Is(err, sql.ErrNoRows): //nolint:legacyerrors // value sentinel
 		return notFoundErr
 	case uniqueConstraintChecker(err):
 		return conflictErr

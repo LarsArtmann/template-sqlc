@@ -141,7 +141,7 @@ func (s *UserServiceIntegrationTestSuite) TestCreateUserDuplicateEmail() {
 
 	user, err := s.userService.CreateUser(s.ctx, req2)
 	s.Require().Error(err)
-	s.True(entities.IsNotFoundError(err) || errors.Is(err, entities.ErrUserAlreadyExists))
+	s.True(entities.IsNotFoundError(err) || errors.Is(err, entities.ErrUserAlreadyExists)) //nolint:legacyerrors // value sentinel
 	s.Require().Nil(user)
 }
 

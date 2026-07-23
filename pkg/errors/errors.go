@@ -322,8 +322,7 @@ func NewPermissionDeniedError(operation string) *AppError {
 
 // IsAppError checks if err is an AppError.
 func IsAppError(err error) bool {
-	appError := &AppError{}
-	ok := errors.As(err, &appError)
+	_, ok := errors.AsType[*AppError](err)
 
 	return ok
 }
@@ -342,8 +341,8 @@ func IsValidationError(err error) bool {
 
 // IsNotFoundError checks if err is a not found error.
 func IsNotFoundError(err error) bool {
-	appErr := &AppError{}
-	if errors.As(err, &appErr) {
+	appErr, ok := errors.AsType[*AppError](err)
+	if ok {
 		return appErr.Code == ErrCodeResourceNotFound || appErr.Code == ErrCodeNotFound
 	}
 
@@ -352,8 +351,8 @@ func IsNotFoundError(err error) bool {
 
 // IsUnauthorizedError checks if err is an unauthorized error.
 func IsUnauthorizedError(err error) bool {
-	appErr := &AppError{}
-	if errors.As(err, &appErr) {
+	appErr, ok := errors.AsType[*AppError](err)
+	if ok {
 		return appErr.Code == ErrCodeUnauthorized ||
 			appErr.Code == ErrCodeInvalidCredentials ||
 			appErr.Code == ErrCodeTokenExpired ||
@@ -365,8 +364,8 @@ func IsUnauthorizedError(err error) bool {
 
 // hasErrorCode checks if err contains any of the given error codes.
 func hasErrorCode(err error, codes ...ErrorCode) bool {
-	appErr := &AppError{}
-	if errors.As(err, &appErr) {
+	appErr, ok := errors.AsType[*AppError](err)
+	if ok {
 		if slices.Contains(codes, appErr.Code) {
 			return true
 		}

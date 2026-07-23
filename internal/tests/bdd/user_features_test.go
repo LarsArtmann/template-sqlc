@@ -586,8 +586,8 @@ func (s *UserFeaturesTestSuite) shouldReceiveUserAlreadyExistsError() error {
 		return errors.New("expected user already exists error, got nil")
 	}
 
-	if !errors.Is(s.lastError, entities.ErrUserNotFound) &&
-		!errors.Is(s.lastError, entities.ErrUserAlreadyExists) {
+	if !errors.Is(s.lastError, entities.ErrUserNotFound) && //nolint:legacyerrors // value sentinel
+		!errors.Is(s.lastError, entities.ErrUserAlreadyExists) { //nolint:legacyerrors // value sentinel
 		return fmt.Errorf("expected user already exists error, got: %w", s.lastError)
 	}
 
@@ -627,7 +627,7 @@ func (s *UserFeaturesTestSuite) shouldReceiveUserNotFoundError() error {
 	}
 
 	if !entities.IsNotFoundError(s.lastError) &&
-		!errors.Is(s.lastError, entities.ErrUserNotFound) {
+		!errors.Is(s.lastError, entities.ErrUserNotFound) { //nolint:legacyerrors // value sentinel
 		return fmt.Errorf("expected user not found error, got: %w", s.lastError)
 	}
 

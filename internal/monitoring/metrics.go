@@ -335,7 +335,7 @@ func (m *Metrics) StartServer(addr string) error {
 	}
 
 	err := m.server.ListenAndServe()
-	if err != nil && !errors.Is(err, http.ErrServerClosed) {
+	if err != nil && !errors.Is(err, http.ErrServerClosed) { //nolint:legacyerrors // value sentinel
 		return fmt.Errorf("server listen error addr=%v: %w", addr, err)
 	}
 
