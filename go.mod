@@ -1,6 +1,6 @@
 module github.com/LarsArtmann/template-sqlc
 
-go 1.26.4
+go 1.26.5
 
 require (
 	github.com/cucumber/godog v0.15.1

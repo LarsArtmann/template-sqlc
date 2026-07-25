@@ -334,8 +334,8 @@ JSON serialization produces the same output:
 ```json
 // Before and After: Same output
 {
-  "id": 123,
-  "email": "user@example.com"
+	"id": 123,
+	"email": "user@example.com"
 }
 ```
 
