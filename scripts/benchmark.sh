@@ -23,38 +23,38 @@ TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
-    case $1 in
-        --warmup)
-            WARMUP_RUNS="$2"
-            shift 2
-            ;;
-        --runs)
-            BENCHMARK_RUNS="$2"
-            shift 2
-            ;;
-        --databases)
-            DATABASES="$2"
-            shift 2
-            ;;
-        --output)
-            OUTPUT_DIR="$2"
-            shift 2
-            ;;
-        --help)
-            echo "Usage: $0 [options]"
-            echo "Options:"
-            echo "  --warmup N     Number of warmup runs (default: 3)"
-            echo "  --runs N        Number of benchmark runs (default: 10)"
-            echo "  --databases    Comma-separated list of databases (default: sqlite,postgres,mysql)"
-            echo "  --output DIR    Output directory for results (default: benchmark-results)"
-            echo "  --help          Show this help message"
-            exit 0
-            ;;
-        *)
-            echo "Unknown option: $1"
-            exit 1
-            ;;
-    esac
+	case $1 in
+	--warmup)
+		WARMUP_RUNS="$2"
+		shift 2
+		;;
+	--runs)
+		BENCHMARK_RUNS="$2"
+		shift 2
+		;;
+	--databases)
+		DATABASES="$2"
+		shift 2
+		;;
+	--output)
+		OUTPUT_DIR="$2"
+		shift 2
+		;;
+	--help)
+		echo "Usage: $0 [options]"
+		echo "Options:"
+		echo "  --warmup N     Number of warmup runs (default: 3)"
+		echo "  --runs N        Number of benchmark runs (default: 10)"
+		echo "  --databases    Comma-separated list of databases (default: sqlite,postgres,mysql)"
+		echo "  --output DIR    Output directory for results (default: benchmark-results)"
+		echo "  --help          Show this help message"
+		exit 0
+		;;
+	*)
+		echo "Unknown option: $1"
+		exit 1
+		;;
+	esac
 done
 
 echo -e "${BLUE}🚀 sqlc Performance Benchmarking${NC}"
@@ -70,104 +70,104 @@ mkdir -p "$OUTPUT_PATH"
 # Dependencies check
 echo -e "${CYAN}🔍 Checking dependencies...${NC}"
 
-if ! command -v hyperfine &> /dev/null; then
-    echo -e "${RED}❌ hyperfine not found. Install with: brew install hyperfine${NC}"
-    exit 1
+if ! command -v hyperfine &>/dev/null; then
+	echo -e "${RED}❌ hyperfine not found. Install with: brew install hyperfine${NC}"
+	exit 1
 fi
 
-if ! command -v sqlc &> /dev/null; then
-    echo -e "${RED}❌ sqlc not found. Please install sqlc${NC}"
-    exit 1
+if ! command -v sqlc &>/dev/null; then
+	echo -e "${RED}❌ sqlc not found. Please install sqlc${NC}"
+	exit 1
 fi
 
-if ! command -v yq &> /dev/null; then
-    echo -e "${RED}❌ yq not found. Install with: brew install yq${NC}"
-    exit 1
+if ! command -v yq &>/dev/null; then
+	echo -e "${RED}❌ yq not found. Install with: brew install yq${NC}"
+	exit 1
 fi
 
 echo -e "${GREEN}✅ All dependencies found${NC}"
 
 # Setup test data
 echo -e "${CYAN}📋 Setting up test data...${NC}"
-make examples > /dev/null 2>&1
+make examples >/dev/null 2>&1
 
 # Global results
 GLOBAL_RESULTS="$OUTPUT_PATH/global_results.json"
-echo "{" > "$GLOBAL_RESULTS"
-echo "\"timestamp\": \"$TIMESTAMP\"," >> "$GLOBAL_RESULTS"
-echo "\"warmup_runs\": $WARMUP_RUNS," >> "$GLOBAL_RESULTS"
-echo "\"benchmark_runs\": $BENCHMARK_RUNS," >> "$GLOBAL_RESULTS"
-echo "\"databases\": [$(echo $DATABASES | sed 's/,/","/g')]," >> "$GLOBAL_RESULTS"
-echo "\"results\": {" >> "$GLOBAL_RESULTS"
+echo "{" >"$GLOBAL_RESULTS"
+echo "\"timestamp\": \"$TIMESTAMP\"," >>"$GLOBAL_RESULTS"
+echo "\"warmup_runs\": $WARMUP_RUNS," >>"$GLOBAL_RESULTS"
+echo "\"benchmark_runs\": $BENCHMARK_RUNS," >>"$GLOBAL_RESULTS"
+echo "\"databases\": [$(echo $DATABASES | sed 's/,/","/g')]," >>"$GLOBAL_RESULTS"
+echo "\"results\": {" >>"$GLOBAL_RESULTS"
 
 # Benchmark each database
-IFS=',' read -ra DB_ARRAY <<< "$DATABASES"
+IFS=',' read -ra DB_ARRAY <<<"$DATABASES"
 for db in "${DB_ARRAY[@]}"; do
-    db=$(echo "$db" | xargs) # Trim whitespace
-    echo -e "\n${PURPLE}🗃️  Benchmarking $db...${NC}"
-    
-    DB_RESULTS="$OUTPUT_PATH/${db}_results.json"
-    DB_CONFIG="config/modular/sqlc-${db}.yaml"
-    
-    if [ ! -f "$DB_CONFIG" ]; then
-        echo -e "${RED}❌ Configuration not found: $DB_CONFIG${NC}"
-        continue
-    fi
-    
-    # Warmup runs
-    echo -e "${YELLOW}🔥 Warming up ($WARMUP_RUNS runs)...${NC}"
-    for ((i=1; i<=$WARMUP_RUNS; i++)); do
-        echo -n "."
-        sqlc -f "$DB_CONFIG" generate > /dev/null 2>&1
-    done
-    echo ""
-    
-    # Benchmark runs
-    echo -e "${CYAN}📊 Running benchmark ($BENCHMARK_RUNS runs)...${NC}"
-    
-    hyperfine \
-        --warmup $WARMUP_RUNS \
-        --runs $BENCHMARK_RUNS \
-        --shell none \
-        --export-json "$DB_RESULTS.json" \
-        --output none \
-        "sqlc -f $DB_CONFIG generate" \
-        --command-name "sqlc-$db-generate"
-    
-    # Extract key metrics
-    if [ -f "$DB_RESULTS.json" ]; then
-        MEAN_TIME=$(yq e '.results[0].mean' "$DB_RESULTS.json" 2>/dev/null || echo "0")
-        MIN_TIME=$(yq e '.results[0].min' "$DB_RESULTS.json" 2>/dev/null || echo "0")
-        MAX_TIME=$(yq e '.results[0].max' "$DB_RESULTS.json" 2>/dev/null || echo "0")
-        STDDEV=$(yq e '.results[0].stddev' "$DB_RESULTS.json" 2>/dev/null || echo "0")
-        
-        echo -e "${GREEN}📈 $db Results:${NC}"
-        echo -e "  ⏱️  Mean: $(printf "%.3f" $MEAN_TIME)s"
-        echo -e "  ⚡ Min: $(printf "%.3f" $MIN_TIME)s"
-        echo -e "  🐌 Max: $(printf "%.3f" $MAX_TIME)s"
-        echo -e "  📊 StdDev: $(printf "%.3f" $STDDEV)s"
-        
-        # Add to global results
-        echo "\"$db\": {" >> "$GLOBAL_RESULTS"
-        echo "\"mean_seconds\": $MEAN_TIME," >> "$GLOBAL_RESULTS"
-        echo "\"min_seconds\": $MIN_TIME," >> "$GLOBAL_RESULTS"
-        echo "\"max_seconds\": $MAX_TIME," >> "$GLOBAL_RESULTS"
-        echo "\"stddev_seconds\": $STDDEV" >> "$GLOBAL_RESULTS"
-        echo "}," >> "$GLOBAL_RESULTS"
-        
-        # Copy detailed results
-        mv "$DB_RESULTS.json" "$OUTPUT_PATH/${db}_hyperfine.json"
-    else
-        echo -e "${RED}❌ Failed to get results for $db${NC}"
-    fi
+	db=$(echo "$db" | xargs) # Trim whitespace
+	echo -e "\n${PURPLE}🗃️  Benchmarking $db...${NC}"
+
+	DB_RESULTS="$OUTPUT_PATH/${db}_results.json"
+	DB_CONFIG="config/modular/sqlc-${db}.yaml"
+
+	if [ ! -f "$DB_CONFIG" ]; then
+		echo -e "${RED}❌ Configuration not found: $DB_CONFIG${NC}"
+		continue
+	fi
+
+	# Warmup runs
+	echo -e "${YELLOW}🔥 Warming up ($WARMUP_RUNS runs)...${NC}"
+	for ((i = 1; i <= $WARMUP_RUNS; i++)); do
+		echo -n "."
+		sqlc -f "$DB_CONFIG" generate >/dev/null 2>&1
+	done
+	echo ""
+
+	# Benchmark runs
+	echo -e "${CYAN}📊 Running benchmark ($BENCHMARK_RUNS runs)...${NC}"
+
+	hyperfine \
+		--warmup $WARMUP_RUNS \
+		--runs $BENCHMARK_RUNS \
+		--shell none \
+		--export-json "$DB_RESULTS.json" \
+		--output none \
+		"sqlc -f $DB_CONFIG generate" \
+		--command-name "sqlc-$db-generate"
+
+	# Extract key metrics
+	if [ -f "$DB_RESULTS.json" ]; then
+		MEAN_TIME=$(yq e '.results[0].mean' "$DB_RESULTS.json" 2>/dev/null || echo "0")
+		MIN_TIME=$(yq e '.results[0].min' "$DB_RESULTS.json" 2>/dev/null || echo "0")
+		MAX_TIME=$(yq e '.results[0].max' "$DB_RESULTS.json" 2>/dev/null || echo "0")
+		STDDEV=$(yq e '.results[0].stddev' "$DB_RESULTS.json" 2>/dev/null || echo "0")
+
+		echo -e "${GREEN}📈 $db Results:${NC}"
+		echo -e "  ⏱️  Mean: $(printf "%.3f" $MEAN_TIME)s"
+		echo -e "  ⚡ Min: $(printf "%.3f" $MIN_TIME)s"
+		echo -e "  🐌 Max: $(printf "%.3f" $MAX_TIME)s"
+		echo -e "  📊 StdDev: $(printf "%.3f" $STDDEV)s"
+
+		# Add to global results
+		echo "\"$db\": {" >>"$GLOBAL_RESULTS"
+		echo "\"mean_seconds\": $MEAN_TIME," >>"$GLOBAL_RESULTS"
+		echo "\"min_seconds\": $MIN_TIME," >>"$GLOBAL_RESULTS"
+		echo "\"max_seconds\": $MAX_TIME," >>"$GLOBAL_RESULTS"
+		echo "\"stddev_seconds\": $STDDEV" >>"$GLOBAL_RESULTS"
+		echo "}," >>"$GLOBAL_RESULTS"
+
+		# Copy detailed results
+		mv "$DB_RESULTS.json" "$OUTPUT_PATH/${db}_hyperfine.json"
+	else
+		echo -e "${RED}❌ Failed to get results for $db${NC}"
+	fi
 done
 
 # Close global results
-echo "\"}}" >> "$GLOBAL_RESULTS"
+echo "\"}}" >>"$GLOBAL_RESULTS"
 
 # Generate summary report
 echo -e "\n${BLUE}📋 Generating summary report...${NC}"
-cat > "$OUTPUT_PATH/benchmark_report.md" << EOF
+cat >"$OUTPUT_PATH/benchmark_report.md" <<EOF
 # sqlc Performance Benchmark Report
 
 **Timestamp:** $TIMESTAMP  
@@ -183,18 +183,18 @@ EOF
 
 # Extract results for table
 if [ -f "$GLOBAL_RESULTS" ]; then
-    for db in "${DB_ARRAY[@]}"; do
-        db=$(echo "$db" | xargs)
-        MEAN_TIME=$(yq e ".results.$db.mean_seconds" "$GLOBAL_RESULTS" 2>/dev/null || echo "N/A")
-        MIN_TIME=$(yq e ".results.$db.min_seconds" "$GLOBAL_RESULTS" 2>/dev/null || echo "N/A")
-        MAX_TIME=$(yq e ".results.$db.max_seconds" "$GLOBAL_RESULTS" 2>/dev/null || echo "N/A")
-        STDDEV=$(yq e ".results.$db.stddev_seconds" "$GLOBAL_RESULTS" 2>/dev/null || echo "N/A")
-        
-        echo "| $db | $MEAN_TIME | $MIN_TIME | $MAX_TIME | $STDDEV |" >> "$OUTPUT_PATH/benchmark_report.md"
-    done
+	for db in "${DB_ARRAY[@]}"; do
+		db=$(echo "$db" | xargs)
+		MEAN_TIME=$(yq e ".results.$db.mean_seconds" "$GLOBAL_RESULTS" 2>/dev/null || echo "N/A")
+		MIN_TIME=$(yq e ".results.$db.min_seconds" "$GLOBAL_RESULTS" 2>/dev/null || echo "N/A")
+		MAX_TIME=$(yq e ".results.$db.max_seconds" "$GLOBAL_RESULTS" 2>/dev/null || echo "N/A")
+		STDDEV=$(yq e ".results.$db.stddev_seconds" "$GLOBAL_RESULTS" 2>/dev/null || echo "N/A")
+
+		echo "| $db | $MEAN_TIME | $MIN_TIME | $MAX_TIME | $STDDEV |" >>"$OUTPUT_PATH/benchmark_report.md"
+	done
 fi
 
-cat >> "$OUTPUT_PATH/benchmark_report.md" << EOF
+cat >>"$OUTPUT_PATH/benchmark_report.md" <<EOF
 
 ## Environment
 
@@ -209,33 +209,33 @@ EOF
 
 # List generated files
 find "$OUTPUT_PATH" -name "*.json" -o -name "*.md" | while read file; do
-    filename=$(basename "$file")
-    echo "- \`${filename}\`" >> "$OUTPUT_PATH/benchmark_report.md"
+	filename=$(basename "$file")
+	echo "- \`${filename}\`" >>"$OUTPUT_PATH/benchmark_report.md"
 done
 
-cat >> "$OUTPUT_PATH/benchmark_report.md" << EOF
+cat >>"$OUTPUT_PATH/benchmark_report.md" <<EOF
 
 ## Performance Analysis
 
 ### Fastest Generation
 $(echo "$DATABASES" | tr ',' '\n' | while read db; do
-    db=$(echo "$db" | xargs)
-    MEAN_TIME=$(yq e ".results.$db.mean_seconds" "$GLOBAL_RESULTS" 2>/dev/null || echo "999")
-    echo "$MEAN_TIME $db"
+	db=$(echo "$db" | xargs)
+	MEAN_TIME=$(yq e ".results.$db.mean_seconds" "$GLOBAL_RESULTS" 2>/dev/null || echo "999")
+	echo "$MEAN_TIME $db"
 done | sort -n | head -1 | cut -d' ' -f2-)
 
 ### Slowest Generation
 $(echo "$DATABASES" | tr ',' '\n' | while read db; do
-    db=$(echo "$db" | xargs)
-    MEAN_TIME=$(yq e ".results.$db.mean_seconds" "$GLOBAL_RESULTS" 2>/dev/null || echo "0")
-    echo "$MEAN_TIME $db"
+	db=$(echo "$db" | xargs)
+	MEAN_TIME=$(yq e ".results.$db.mean_seconds" "$GLOBAL_RESULTS" 2>/dev/null || echo "0")
+	echo "$MEAN_TIME $db"
 done | sort -n | tail -1 | cut -d' ' -f2-)
 
 ### Most Consistent
 $(echo "$DATABASES" | tr ',' '\n' | while read db; do
-    db=$(echo "$db" | xargs)
-    STDDEV=$(yq e ".results.$db.stddev_seconds" "$GLOBAL_RESULTS" 2>/dev/null || echo "999")
-    echo "$STDDEV $db"
+	db=$(echo "$db" | xargs)
+	STDDEV=$(yq e ".results.$db.stddev_seconds" "$GLOBAL_RESULTS" 2>/dev/null || echo "999")
+	echo "$STDDEV $db"
 done | sort -n | head -1 | cut -d' ' -f2-)
 
 ## Recommendations
@@ -252,8 +252,8 @@ EOF
 
 # Generate performance graph
 echo -e "${CYAN}📈 Generating performance graph...${NC}"
-if command -v python3 &> /dev/null; then
-    python3 -c "
+if command -v python3 &>/dev/null; then
+	python3 -c "
 import json
 import matplotlib.pyplot as plt
 import sys
@@ -298,7 +298,7 @@ else:
     print('⚠️  No data available for plotting')
 "
 else
-    echo -e "${YELLOW}⚠️  Python3 not available, skipping graph generation${NC}"
+	echo -e "${YELLOW}⚠️  Python3 not available, skipping graph generation${NC}"
 fi
 
 # Cleanup
@@ -313,11 +313,11 @@ echo -e "${YELLOW}📊 Raw data: $GLOBAL_RESULTS${NC}"
 # Show summary
 echo -e "\n${PURPLE}📊 Performance Summary:${NC}"
 if [ -f "$GLOBAL_RESULTS" ]; then
-    for db in "${DB_ARRAY[@]}"; do
-        db=$(echo "$db" | xargs)
-        MEAN_TIME=$(yq e ".results.$db.mean_seconds" "$GLOBAL_RESULTS" 2>/dev/null || echo "N/A")
-        echo -e "  🗃️  ${db}: $(printf "%-8s" "$MEAN_TIME")s"
-    done
+	for db in "${DB_ARRAY[@]}"; do
+		db=$(echo "$db" | xargs)
+		MEAN_TIME=$(yq e ".results.$db.mean_seconds" "$GLOBAL_RESULTS" 2>/dev/null || echo "N/A")
+		echo -e "  🗃️  ${db}: $(printf "%-8s" "$MEAN_TIME")s"
+	done
 fi
 
 echo -e "\n${CYAN}💡 Recommendations:${NC}"

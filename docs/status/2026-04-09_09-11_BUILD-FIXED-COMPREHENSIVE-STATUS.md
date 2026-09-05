@@ -1,10 +1,10 @@
 # Comprehensive Project Status Report
 
-**Date:** 2026-04-09 09:11 CEST  
-**Project:** template-sqlc  
-**Branch:** master (ahead of origin/master by 2 commits)  
-**Head:** af81e3a — chore(deps): downgrade Go version to 1.26.0  
-**Author:** Lars Artmann  
+**Date:** 2026-04-09 09:11 CEST\
+**Project:** template-sqlc\
+**Branch:** master (ahead of origin/master by 2 commits)\
+**Head:** af81e3a — chore(deps): downgrade Go version to 1.26.0\
+**Author:** Lars Artmann\
 **Reporter:** Crush (GLM-5.1)
 
 ---
@@ -79,16 +79,16 @@ The project build is now **FUNCTIONAL** after fixing the broken state caused by 
 
 ### D.1 Commit de9173e — Build Breakage (FIXED ✅)
 
-**Author:** MiniMax-M2.7-highspeed via Crush  
-**Date:** 2026-04-09 04:13:01  
+**Author:** MiniMax-M2.7-highspeed via Crush\
+**Date:** 2026-04-09 04:13:01\
 **Status:** RESOLVED by commits 9b73584 and af81e3a
 
-| Issue                                             | Severity    | Resolution                                                      |
-| ------------------------------------------------- | ----------- | --------------------------------------------------------------- |
-| SQLite build broken — unexported `db` field       | 🔴 CRITICAL | ✅ Changed to exported `DB` field in `shared.BaseQueries`       |
-| MySQL build broken — same unexported field issue  | 🔴 CRITICAL | ✅ Updated `mysql/db.go` to use exported `DB` field             |
-| PostgreSQL build broken — experimental build tags | 🔴 CRITICAL | ✅ Removed experimental build tags from `.golangci.yml`         |
-| Cross-package field access                        | 🟠 HIGH     | ✅ Exported `DB` and `Tx` fields in `shared/types.go`           |
+| Issue                                             | Severity    | Resolution                                                     |
+| ------------------------------------------------- | ----------- | -------------------------------------------------------------- |
+| SQLite build broken — unexported `db` field       | 🔴 CRITICAL | ✅ Changed to exported `DB` field in `shared.BaseQueries`      |
+| MySQL build broken — same unexported field issue  | 🔴 CRITICAL | ✅ Updated `mysql/db.go` to use exported `DB` field            |
+| PostgreSQL build broken — experimental build tags | 🔴 CRITICAL | ✅ Removed experimental build tags from `.golangci.yml`        |
+| Cross-package field access                        | 🟠 HIGH     | ✅ Exported `DB` and `Tx` fields in `shared/types.go`          |
 | Disabled prepared statements                      | 🟠 HIGH     | ⚠️ Still disabled — `emit_prepared_queries: false` in sqlc.yaml |
 | scripts/generate.sh post-processing               | 🟡 MEDIUM   | ⚠️ Still present — overwrites sqlc output (anti-pattern)        |
 
@@ -159,53 +159,53 @@ sudo rm -rf ~/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.1.darwin-arm64/
 
 ### Priority 1: PRODUCTION READINESS (Do This Week)
 
-| #   | Task                                       | Effort | Impact      |
-| --- | ------------------------------------------ | ------ | ----------- |
-| 1   | Fix Go toolchain cache corruption          | 15 min | 🔴 CRITICAL |
-| 2   | Re-enable prepared statements in sqlc.yaml | 5 min  | 🟠 HIGH     |
-| 3   | Remove scripts/generate.sh post-processing | 30 min | 🟠 HIGH     |
-| 4   | Add pre-commit hook for build verification | 30 min | 🟠 HIGH     |
-| 5   | Write at least 3 E2E tests (one per DB)    | 2 hr   | 🟠 HIGH     |
+| # | Task                                       | Effort | Impact      |
+| - | ------------------------------------------ | ------ | ----------- |
+| 1 | Fix Go toolchain cache corruption          | 15 min | 🔴 CRITICAL |
+| 2 | Re-enable prepared statements in sqlc.yaml | 5 min  | 🟠 HIGH     |
+| 3 | Remove scripts/generate.sh post-processing | 30 min | 🟠 HIGH     |
+| 4 | Add pre-commit hook for build verification | 30 min | 🟠 HIGH     |
+| 5 | Write at least 3 E2E tests (one per DB)    | 2 hr   | 🟠 HIGH     |
 
 ### Priority 2: CODE QUALITY (Next 2 Weeks)
 
-| #   | Task                                      | Effort | Impact    |
-| --- | ----------------------------------------- | ------ | --------- |
-| 6   | Fix deprecated Prometheus monitoring APIs | 1 hr   | 🟡 MEDIUM |
-| 7   | Add integration tests with Testcontainers | 4 hr   | 🟠 HIGH   |
-| 8   | Consolidate sqlc config files             | 1 hr   | 🟡 MEDIUM |
-| 9   | Add database migration runner             | 3 hr   | 🟠 HIGH   |
-| 10  | Add connection pooling configuration      | 1 hr   | 🟡 MEDIUM |
+| #  | Task                                      | Effort | Impact    |
+| -- | ----------------------------------------- | ------ | --------- |
+| 6  | Fix deprecated Prometheus monitoring APIs | 1 hr   | 🟡 MEDIUM |
+| 7  | Add integration tests with Testcontainers | 4 hr   | 🟠 HIGH   |
+| 8  | Consolidate sqlc config files             | 1 hr   | 🟡 MEDIUM |
+| 9  | Add database migration runner             | 3 hr   | 🟠 HIGH   |
+| 10 | Add connection pooling configuration      | 1 hr   | 🟡 MEDIUM |
 
 ### Priority 3: TESTING & RELIABILITY (This Month)
 
-| #   | Task                                    | Effort | Impact    |
-| --- | --------------------------------------- | ------ | --------- |
-| 11  | Achieve 80%+ test coverage              | 4 hr   | 🟠 HIGH   |
-| 12  | Add property-based/fuzz tests           | 3 hr   | 🟢 LOW    |
-| 13  | Add load/stress tests                   | 4 hr   | 🟡 MEDIUM |
-| 14  | Implement chaos testing for DB failures | 6 hr   | 🟡 MEDIUM |
-| 15  | Add benchmark tests for hot paths       | 2 hr   | 🟢 LOW    |
+| #  | Task                                    | Effort | Impact    |
+| -- | --------------------------------------- | ------ | --------- |
+| 11 | Achieve 80%+ test coverage              | 4 hr   | 🟠 HIGH   |
+| 12 | Add property-based/fuzz tests           | 3 hr   | 🟢 LOW    |
+| 13 | Add load/stress tests                   | 4 hr   | 🟡 MEDIUM |
+| 14 | Implement chaos testing for DB failures | 6 hr   | 🟡 MEDIUM |
+| 15 | Add benchmark tests for hot paths       | 2 hr   | 🟢 LOW    |
 
 ### Priority 4: ARCHITECTURE & FEATURES (Next Quarter)
 
-| #   | Task                                  | Effort | Impact    |
-| --- | ------------------------------------- | ------ | --------- |
-| 16  | Implement full domain services layer  | 8 hr   | 🟠 HIGH   |
-| 17  | Add structured logging (slog/zerolog) | 4 hr   | 🟡 MEDIUM |
-| 18  | Implement distributed tracing         | 6 hr   | 🟡 MEDIUM |
-| 19  | Add Redis caching layer               | 6 hr   | 🟡 MEDIUM |
-| 20  | Implement event sourcing for audit    | 16 hr  | 🟢 LOW    |
+| #  | Task                                  | Effort | Impact    |
+| -- | ------------------------------------- | ------ | --------- |
+| 16 | Implement full domain services layer  | 8 hr   | 🟠 HIGH   |
+| 17 | Add structured logging (slog/zerolog) | 4 hr   | 🟡 MEDIUM |
+| 18 | Implement distributed tracing         | 6 hr   | 🟡 MEDIUM |
+| 19 | Add Redis caching layer               | 6 hr   | 🟡 MEDIUM |
+| 20 | Implement event sourcing for audit    | 16 hr  | 🟢 LOW    |
 
 ### Priority 5: DEVEX & DOCUMENTATION (Ongoing)
 
-| #   | Task                                        | Effort | Impact    |
-| --- | ------------------------------------------- | ------ | --------- |
-| 21  | Create Docker Compose for local dev         | 2 hr   | 🟡 MEDIUM |
-| 22  | Write ADRs for key decisions                | 4 hr   | 🟡 MEDIUM |
-| 23  | Add API documentation (if HTTP layer added) | 4 hr   | ⬜ N/A    |
-| 24  | Create troubleshooting runbook              | 3 hr   | 🟡 MEDIUM |
-| 25  | Add performance tuning guide                | 3 hr   | 🟢 LOW    |
+| #  | Task                                        | Effort | Impact    |
+| -- | ------------------------------------------- | ------ | --------- |
+| 21 | Create Docker Compose for local dev         | 2 hr   | 🟡 MEDIUM |
+| 22 | Write ADRs for key decisions                | 4 hr   | 🟡 MEDIUM |
+| 23 | Add API documentation (if HTTP layer added) | 4 hr   | ⬜ N/A    |
+| 24 | Create troubleshooting runbook              | 3 hr   | 🟡 MEDIUM |
+| 25 | Add performance tuning guide                | 3 hr   | 🟢 LOW    |
 
 ---
 
@@ -243,19 +243,19 @@ sudo rm -rf ~/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.1.darwin-arm64/
 
 ## Key Metrics
 
-| Metric              | Value                                            |
-| ------------------- | ------------------------------------------------ |
-| Total Go files      | 40                                               |
-| Total Go lines      | ~9,139                                           |
-| Test functions      | 12                                               |
-| BDD scenarios       | Multiple (in `user_features_test.go`)            |
-| Linter errors       | 0 (config fixed)                                 |
-| Linter warnings     | Minimal (in generated code)                      |
-| Build status        | ✅ WORKING (with GOTOOLCHAIN=local)              |
+| Metric              | Value                                           |
+| ------------------- | ----------------------------------------------- |
+| Total Go files      | 40                                              |
+| Total Go lines      | ~9,139                                          |
+| Test functions      | 12                                              |
+| BDD scenarios       | Multiple (in `user_features_test.go`)           |
+| Linter errors       | 0 (config fixed)                                |
+| Linter warnings     | Minimal (in generated code)                     |
+| Build status        | ✅ WORKING (with GOTOOLCHAIN=local)             |
 | Test status         | ⚠️ UNKNOWN (build hangs without local toolchain) |
-| Go version          | 1.26.0 (downgraded from 1.26.1)                  |
-| sqlc version        | v1.30.0                                          |
-| Last working commit | af81e3a                                          |
+| Go version          | 1.26.0 (downgraded from 1.26.1)                 |
+| sqlc version        | v1.30.0                                         |
+| Last working commit | af81e3a                                         |
 
 ---
 

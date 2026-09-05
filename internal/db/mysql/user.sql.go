@@ -10,8 +10,7 @@ package mysql
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
-	"json"
+	"encoding/json/jsontext"
 )
 
 const CountActiveUsers = `-- name: CountActiveUsers :one
@@ -38,14 +37,14 @@ INSERT INTO users (
 `
 
 type CreateUserParams struct {
-	UUID            string          `db:"uuid" json:"uuid"`
-	Email           string          `db:"email" json:"email"`
-	Username        string          `db:"username" json:"username"`
-	PasswordHash    string          `db:"password_hash" json:"passwordHash"`
-	FirstName       string          `db:"first_name" json:"firstName"`
-	LastName        string          `db:"last_name" json:"lastName"`
-	ProfileMetadata json.RawMessage `db:"profile_metadata" json:"profileMetadata"`
-	IsActive        sql.NullBool    `db:"is_active" json:"isActive"`
+	UUID            string         `db:"uuid" json:"uuid"`
+	Email           string         `db:"email" json:"email"`
+	Username        string         `db:"username" json:"username"`
+	PasswordHash    string         `db:"password_hash" json:"passwordHash"`
+	FirstName       string         `db:"first_name" json:"firstName"`
+	LastName        string         `db:"last_name" json:"lastName"`
+	ProfileMetadata jsontext.Value `db:"profile_metadata" json:"profileMetadata"`
+	IsActive        sql.NullBool   `db:"is_active" json:"isActive"`
 }
 
 // CreateUser
@@ -340,14 +339,14 @@ WHERE id = ?
 `
 
 type UpdateUserParams struct {
-	Email           string          `db:"email" json:"email"`
-	Username        string          `db:"username" json:"username"`
-	FirstName       string          `db:"first_name" json:"firstName"`
-	LastName        string          `db:"last_name" json:"lastName"`
-	ProfileMetadata json.RawMessage `db:"profile_metadata" json:"profileMetadata"`
-	IsActive        sql.NullBool    `db:"is_active" json:"isActive"`
-	IsVerified      sql.NullBool    `db:"is_verified" json:"isVerified"`
-	ID              uint64          `db:"id" json:"id"`
+	Email           string         `db:"email" json:"email"`
+	Username        string         `db:"username" json:"username"`
+	FirstName       string         `db:"first_name" json:"firstName"`
+	LastName        string         `db:"last_name" json:"lastName"`
+	ProfileMetadata jsontext.Value `db:"profile_metadata" json:"profileMetadata"`
+	IsActive        sql.NullBool   `db:"is_active" json:"isActive"`
+	IsVerified      sql.NullBool   `db:"is_verified" json:"isVerified"`
+	ID              uint64         `db:"id" json:"id"`
 }
 
 // UpdateUser

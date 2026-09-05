@@ -229,7 +229,7 @@ func (v *UserValidator) validateName(field, name string) error {
 		return errors.NewMissingFieldError(field)
 	}
 
-	if len(name) > 100 { //nolint:mnd // maximum name length
+	if len(name) > 100 {
 		return errors.NewValidationError(field, "must not exceed 100 characters")
 	}
 

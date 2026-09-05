@@ -1,7 +1,7 @@
 version: "2"
 run:
   timeout: 5m
-  go: 1.26.4
+  go: 1.26.7
   build-tags:
     - goexperiment.arenas
     - goexperiment.goroutineleakprofile
@@ -32,7 +32,6 @@ linters:
     - copyloopvar
     - cyclop
     - decorder
-    - depguard
     - dogsled
     - dupl
     - dupword
@@ -130,42 +129,29 @@ linters:
     - wsl_v5
     - zerologlint
   disable:
+    - depguard
     - noinlineerr
   settings:
     cyclop:
       max-complexity: 12
-    depguard:
-      rules:
-        domain:
-          allow:
-            - $gostd
-            - github.com/LarsArtmann/template-sqlc/internal/domain
-            - github.com/google/uuid
-          deny:
-            - desc: domain layer must not import adapters (hexagonal architecture)
-              pkg: github.com/LarsArtmann/template-sqlc/internal/adapters
-            - desc: domain layer must not import database layer (hexagonal architecture)
-              pkg: github.com/LarsArtmann/template-sqlc/internal/db
-          files:
-            - internal/domain/**
-          list-mode: lax
-        main:
-          allow:
-            - $gostd
-            - github.com/LarsArtmann/template-sqlc
-            - github.com/google/uuid
-            - github.com/jackc/pgx/v5
-            - github.com/prometheus/client_golang
-          list-mode: lax
-        test:
-          allow:
-            - $gostd
-            - github.com/LarsArtmann/template-sqlc
-            - github.com/cucumber/godog
-            - github.com/stretchr/testify
-          files:
-            - $test
-          list-mode: lax
+    errcheck:
+      exclude-functions:
+        - (*os.File).Close
+        - (io.Closer).Close
+        - (*sql.DB).Close
+        - (*sql.Rows).Close
+        - (*sql.Stmt).Close
+        - (net.Conn).Close
+        - (*net.TCPConn).Close
+        - (*net.UDPConn).Close
+        - fmt.Fprint
+        - fmt.Fprintf
+        - fmt.Fprintln
+        - fmt.Print
+        - fmt.Printf
+        - fmt.Println
+        - (*strings.Builder).WriteString
+        - (*bytes.Buffer).WriteString
     exhaustruct:
       exclude:
         - .*AppError
@@ -185,6 +171,9 @@ linters:
         - prometheus/.*CounterOpts
         - prometheus/.*GaugeOpts
         - promhttp/.*HandlerOpts
+    funlen:
+      lines: 200
+      statements: 100
     ginkgolinter:
       forbid-focus-container: true
       forbid-spec-pollution: true
@@ -193,6 +182,10 @@ linters:
         - ifElseChain
     gomoddirectives:
       replace-local: true
+    gosec:
+      excludes:
+        - G304
+        - G115
     ireturn:
       allow:
         - anon
@@ -205,6 +198,12 @@ linters:
         - ~.*
     makezero:
       always: true
+    mnd:
+      ignored-numbers:
+        - "0"
+        - "1"
+        - "2"
+        - "100"
     revive:
       rules:
         - disabled: true

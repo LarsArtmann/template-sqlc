@@ -84,12 +84,12 @@ sql:
     # Flexible path configuration - supports directories, files, or glob patterns
     queries:
       - "sql/sqlite/queries" # Directory containing .sql files
-      # - "sql/sqlite/queries/*.sql"      # Glob pattern for specific files
-      # - "sql/sqlite/queries/**/*.sql"   # Recursive glob pattern
+    # - "sql/sqlite/queries/*.sql"      # Glob pattern for specific files
+    # - "sql/sqlite/queries/**/*.sql"   # Recursive glob pattern
     schema:
       - "sql/sqlite/schema" # Directory containing schema files
-      # - "sql/sqlite/migrations/001_initial.up.sql"  # Specific migration files
-      # - "sql/sqlite/migrations/*.up.sql"            # Migration glob pattern
+    # - "sql/sqlite/migrations/001_initial.up.sql"  # Specific migration files
+    # - "sql/sqlite/migrations/*.up.sql"            # Migration glob pattern
 
     # === QUERY VALIDATION SETTINGS ===
     # strict_function_checks: Validate SQL function existence (recommended for production)
@@ -310,28 +310,28 @@ sql:
           updated_at: "UpdatedAt" # updated_at -> UpdatedAt
           deleted_at: "DeletedAt" # deleted_at -> DeletedAt (soft delete)
 
-          # === BOOLEAN FIELD PATTERNS (EXAMPLES) ===
-          # Add your own boolean field rename rules here as needed:
-          # is_active: "IsActive"                    # Standard boolean pattern
-          # has_premium: "HasPremium"                # Has/Is prefixes
-          # can_edit: "CanEdit"                      # Permission patterns
-          # should_notify: "ShouldNotify"            # Action patterns
-          #
-          # Examples from real projects (uncomment if needed):
-          # enable_notifications: "EnableNotifications"
-          # require_approval: "RequireApproval"
-          # allow_guests: "AllowGuests"
+  # === BOOLEAN FIELD PATTERNS (EXAMPLES) ===
+  # Add your own boolean field rename rules here as needed:
+  # is_active: "IsActive"                    # Standard boolean pattern
+  # has_premium: "HasPremium"                # Has/Is prefixes
+  # can_edit: "CanEdit"                      # Permission patterns
+  # should_notify: "ShouldNotify"            # Action patterns
+  #
+  # Examples from real projects (uncomment if needed):
+  # enable_notifications: "EnableNotifications"
+  # require_approval: "RequireApproval"
+  # allow_guests: "AllowGuests"
 
-          # === DOMAIN-SPECIFIC PATTERNS (EXAMPLES) ===
-          # Add your own domain-specific rename rules here as needed:
-          # user_profile: "UserProfile"      # Domain-specific field names
-          # product_category: "ProductCategory"
-          # order_status: "OrderStatus"
-          #
-          # Examples of common patterns you might want to customize:
-          # - Remove prefixes: AiModel -> Model, DbUser -> User
-          # - Fix legacy naming: usr_nm -> UserName, prod_desc -> ProductDescription
-          # - Standardize acronyms: api_key -> APIKey, json_data -> JSONData
+  # === DOMAIN-SPECIFIC PATTERNS (EXAMPLES) ===
+  # Add your own domain-specific rename rules here as needed:
+  # user_profile: "UserProfile"      # Domain-specific field names
+  # product_category: "ProductCategory"
+  # order_status: "OrderStatus"
+  #
+  # Examples of common patterns you might want to customize:
+  # - Remove prefixes: AiModel -> Model, DbUser -> User
+  # - Fix legacy naming: usr_nm -> UserName, prod_desc -> ProductDescription
+  # - Standardize acronyms: api_key -> APIKey, json_data -> JSONData
 
   # PostgreSQL Configuration - FULLY COMPREHENSIVE
   - name: "postgres"

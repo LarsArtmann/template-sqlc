@@ -20,8 +20,8 @@ echo -e "${YELLOW}📅 Timestamp: $TIMESTAMP${NC}"
 
 # Check if monolithic sqlc.yaml exists
 if [ ! -f "sqlc.yaml" ]; then
-    echo -e "${RED}❌ sqlc.yaml not found${NC}"
-    exit 1
+	echo -e "${RED}❌ sqlc.yaml not found${NC}"
+	exit 1
 fi
 
 # Create backup
@@ -43,25 +43,25 @@ echo -e "  🔌 Plugins: $PLUGIN_COUNT"
 # Extract database configurations
 echo -e "${YELLOW}🔧 Extracting database configurations...${NC}"
 for i in $(seq 0 $((DATABASE_COUNT - 1))); do
-    DB_NAME=$(yq e ".sql[$i].name" sqlc.yaml 2>/dev/null || echo "database$i")
-    echo -e "  📦 Extracting: $DB_NAME"
-    
-    # Extract to separate file
-    yq e ".sql[$i]" sqlc.yaml > "config/extracted-${DB_NAME}.yaml"
+	DB_NAME=$(yq e ".sql[$i].name" sqlc.yaml 2>/dev/null || echo "database$i")
+	echo -e "  📦 Extracting: $DB_NAME"
+
+	# Extract to separate file
+	yq e ".sql[$i]" sqlc.yaml >"config/extracted-${DB_NAME}.yaml"
 done
 
 # Create modular configurations
 echo -e "${YELLOW}🏗️  Creating modular configurations...${NC}"
 for extracted in config/extracted-*.yaml; do
-    if [ -f "$extracted" ]; then
-        DB_NAME=$(basename "$extracted" .yaml | sed 's/extracted-//')
-        ./scripts/build-database-config.sh "$DB_NAME" "config/modular"
-    fi
+	if [ -f "$extracted" ]; then
+		DB_NAME=$(basename "$extracted" .yaml | sed 's/extracted-//')
+		./scripts/build-database-config.sh "$DB_NAME" "config/modular"
+	fi
 done
 
 # Create usage guide
 echo -e "${YELLOW}📚 Creating usage guide...${NC}"
-cat > "config/MIGRATION_GUIDE.md" << 'EOF'
+cat >"config/MIGRATION_GUIDE.md" <<'EOF'
 # sqlc Configuration Migration Guide
 
 ## What Happened
@@ -135,13 +135,13 @@ rm -f config/extracted-*.yaml
 
 # Show before/after comparison
 echo -e "${BLUE}📊 Configuration Size Comparison:${NC}"
-BACKUP_SIZE=$(wc -l < "$BACKUP_DIR/sqlc.yaml.$TIMESTAMP")
+BACKUP_SIZE=$(wc -l <"$BACKUP_DIR/sqlc.yaml.$TIMESTAMP")
 echo -e "  📄 Original: $BACKUP_SIZE lines"
 
 for config in config/modular/sqlc-*.yaml; do
-    if [ -f "$config" ]; then
-        LINES=$(wc -l < "$config")
-        NAME=$(basename "$config")
-        echo -e "  📄 $NAME: $LINES lines"
-    fi
+	if [ -f "$config" ]; then
+		LINES=$(wc -l <"$config")
+		NAME=$(basename "$config")
+		echo -e "  📄 $NAME: $LINES lines"
+	fi
 done

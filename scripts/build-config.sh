@@ -25,8 +25,8 @@ echo -e "${YELLOW}📁 Output: ${OUTPUT_DIR}${NC}"
 
 # Check if config directory exists
 if [ ! -d "config/internal" ]; then
-    echo -e "${RED}❌ config/internal directory not found${NC}"
-    exit 1
+	echo -e "${RED}❌ config/internal directory not found${NC}"
+	exit 1
 fi
 
 # Build configuration
@@ -36,32 +36,32 @@ cd ..
 
 # Validate generated configuration
 echo -e "${YELLOW}🔍 Validating generated configuration...${NC}"
-if command -v yq &> /dev/null; then
-    if yq eval . sqlc.yaml > /dev/null 2>&1; then
-        echo -e "${GREEN}✅ Configuration is valid YAML${NC}"
-    else
-        echo -e "${RED}❌ Generated configuration is invalid YAML${NC}"
-        exit 1
-    fi
+if command -v yq &>/dev/null; then
+	if yq eval . sqlc.yaml >/dev/null 2>&1; then
+		echo -e "${GREEN}✅ Configuration is valid YAML${NC}"
+	else
+		echo -e "${RED}❌ Generated configuration is invalid YAML${NC}"
+		exit 1
+	fi
 else
-    echo -e "${YELLOW}⚠️  yq not found, skipping YAML validation${NC}"
+	echo -e "${YELLOW}⚠️  yq not found, skipping YAML validation${NC}"
 fi
 
 # Show configuration stats
 echo -e "${BLUE}📊 Configuration statistics:${NC}"
-if command -v yq &> /dev/null; then
-    DATABASE_COUNT=$(yq e '.sql | length' sqlc.yaml)
-    RULE_COUNT=$(yq e '.rules | length' sqlc.yaml)
-    PLUGIN_COUNT=$(yq e '.plugins | length' sqlc.yaml)
-    LINES=$(wc -l < sqlc.yaml)
-    
-    echo -e "  🗃️  Databases: ${DATABASE_COUNT}"
-    echo -e "  📏 Rules: ${RULE_COUNT}"
-    echo -e "  🔌 Plugins: ${PLUGIN_COUNT}"
-    echo -e "  📄 Total lines: ${LINES}"
+if command -v yq &>/dev/null; then
+	DATABASE_COUNT=$(yq e '.sql | length' sqlc.yaml)
+	RULE_COUNT=$(yq e '.rules | length' sqlc.yaml)
+	PLUGIN_COUNT=$(yq e '.plugins | length' sqlc.yaml)
+	LINES=$(wc -l <sqlc.yaml)
+
+	echo -e "  🗃️  Databases: ${DATABASE_COUNT}"
+	echo -e "  📏 Rules: ${RULE_COUNT}"
+	echo -e "  🔌 Plugins: ${PLUGIN_COUNT}"
+	echo -e "  📄 Total lines: ${LINES}"
 else
-    LINES=$(wc -l < sqlc.yaml)
-    echo -e "  📄 Total lines: ${LINES}"
+	LINES=$(wc -l <sqlc.yaml)
+	echo -e "  📄 Total lines: ${LINES}"
 fi
 
 echo -e "${GREEN}✨ Configuration build complete!${NC}"

@@ -17,14 +17,14 @@ OUTPUT_DIR="${2:-config/generated}"
 
 # Validate database
 case "$DATABASE" in
-    "sqlite"|"postgres"|"mysql")
-        echo -e "${GREEN}🗃️  Building $DATABASE configuration...${NC}"
-        ;;
-    *)
-        echo -e "${RED}❌ Invalid database: $DATABASE${NC}"
-        echo "Valid options: sqlite, postgres, mysql"
-        exit 1
-        ;;
+"sqlite" | "postgres" | "mysql")
+	echo -e "${GREEN}🗃️  Building $DATABASE configuration...${NC}"
+	;;
+*)
+	echo -e "${RED}❌ Invalid database: $DATABASE${NC}"
+	echo "Valid options: sqlite, postgres, mysql"
+	exit 1
+	;;
 esac
 
 # Create output directory
@@ -40,26 +40,26 @@ cp "$BASE_CONFIG" "$OUTPUT_FILE"
 
 # Append database-specific configuration
 echo -e "${YELLOW}🔗 Adding $DATABASE-specific configuration...${NC}"
-cat >> "$OUTPUT_FILE" << EOF
+cat >>"$OUTPUT_FILE" <<EOF
 
 # === $DATABASE SPECIFIC CONFIGURATION ===
 sql:
 EOF
 
 # Extract SQL section from database config
-yq e '.sql' "$DB_CONFIG" >> "$OUTPUT_FILE"
+yq e '.sql' "$DB_CONFIG" >>"$OUTPUT_FILE"
 
 # Add database-specific validation rules
 case "$DATABASE" in
-    "postgres")
-        yq e '.sql[0].rules // []' "$DB_CONFIG" >> "$OUTPUT_FILE"
-        ;;
+"postgres")
+	yq e '.sql[0].rules // []' "$DB_CONFIG" >>"$OUTPUT_FILE"
+	;;
 esac
 
 echo -e "${GREEN}✅ Generated: $OUTPUT_FILE${NC}"
 
 # Show stats
-LINES=$(wc -l < "$OUTPUT_FILE")
+LINES=$(wc -l <"$OUTPUT_FILE")
 echo -e "${YELLOW}📊 Configuration: $LINES lines${NC}"
 
 echo -e "${GREEN}💡 Use with: sqlc -f $OUTPUT_FILE generate${NC}"

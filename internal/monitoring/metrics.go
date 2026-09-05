@@ -106,7 +106,7 @@ func newGauge(name, help, subsystem string) prometheus.Gauge {
 
 // newMetrics creates and configures all metrics for the application.
 //
-//nolint:funlen // Metrics initialization requires comprehensive setup
+
 func newMetrics(registry *prometheus.Registry) *Metrics {
 	metrics := &Metrics{
 		CodeGenDuration: newHistogram(HistogramConfig{

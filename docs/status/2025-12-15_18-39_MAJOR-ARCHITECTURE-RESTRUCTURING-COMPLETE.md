@@ -1,7 +1,7 @@
 # sqlc Template Project Status Report
 
-**Date:** 2025-12-15 18:39 CET  
-**Report:** Major Architecture Restructuring Complete  
+**Date:** 2025-12-15 18:39 CET\
+**Report:** Major Architecture Restructuring Complete\
 **Status:** 🚨 BLOCKER IDENTIFIED - CRITICAL ARCHITECTURAL DECISION NEEDED
 
 ---
@@ -226,16 +226,16 @@ func DomainUserFromSQLite(sqliteUser interface{}) (*entities.User, error) {
 
 | Component                 | Score | Status                            | Critical Issues |
 | ------------------------- | ----- | --------------------------------- | --------------- |
-| **Domain Layer**          | 9/10  | ✅ Well designed                  |
-| **Service Layer**         | 8/10  | ✅ Business logic complete        |
-| **Repository Interfaces** | 9/10  | ✅ Proper abstraction             |
-| **Adapter Layer**         | 1/10  | 🚨 Empty implementations          |
-| **Configuration System**  | 2/10  | 🚨 Won't work with sqlc           |
-| **Type System**           | 1/10  | 🚨 No conversion implementation   |
-| **Testing Framework**     | 7/10  | ✅ Good structure, not executable |
-| **Build System**          | 8/10  | ✅ Comprehensive automation       |
-| **Monitoring**            | 8/10  | ✅ Complete metrics               |
-| **Documentation**         | 9/10  | ✅ Comprehensive guides           |
+| **Domain Layer**          | 9/10  | ✅ Well designed                  |                 |
+| **Service Layer**         | 8/10  | ✅ Business logic complete        |                 |
+| **Repository Interfaces** | 9/10  | ✅ Proper abstraction             |                 |
+| **Adapter Layer**         | 1/10  | 🚨 Empty implementations          |                 |
+| **Configuration System**  | 2/10  | 🚨 Won't work with sqlc           |                 |
+| **Type System**           | 1/10  | 🚨 No conversion implementation   |                 |
+| **Testing Framework**     | 7/10  | ✅ Good structure, not executable |                 |
+| **Build System**          | 8/10  | ✅ Comprehensive automation       |                 |
+| **Monitoring**            | 8/10  | ✅ Complete metrics               |                 |
+| **Documentation**         | 9/10  | ✅ Comprehensive guides           |                 |
 
 **Overall Architecture Health: 5/10** - Good design, critical implementation blockers
 
@@ -375,8 +375,8 @@ func DomainUserFromSQLite(sqliteUser interface{}) (*entities.User, error) {
 
 ## 📋 NEXT STATUS REPORT
 
-**Target Date:** 2025-12-16 18:39 CET  
-**Focus:** Configuration Blocker Resolution  
+**Target Date:** 2025-12-16 18:39 CET\
+**Focus:** Configuration Blocker Resolution\
 **Expected Deliverables:**
 
 - ✅ Working configuration system
@@ -393,8 +393,8 @@ func DomainUserFromSQLite(sqliteUser interface{}) (*entities.User, error) {
 
 ---
 
-**Prepared by:** sqlc Template Team  
-**Contact:** template@sqlc.dev  
+**Prepared by:** sqlc Template Team\
+**Contact:** template@sqlc.dev\
 **Repository:** https://github.com/LarsArtmann/template-sqlc
 
 **Next Review:** 24 hours from now or upon blocker resolution

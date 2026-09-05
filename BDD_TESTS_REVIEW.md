@@ -67,29 +67,29 @@ github.com/cucumber/godog v0.15.1
 
 ### Scenario Status
 
-| #   | Scenario                                   | Status  | Issue                                                          |
-| --- | ------------------------------------------ | ------- | -------------------------------------------------------------- |
-| 1   | Create a user with valid data              | PASS    | OK                                                             |
-| 2   | Create user with existing email            | PASS    | OK                                                             |
-| 3   | Create user with existing username         | PASS    | OK                                                             |
-| 4   | Create user with invalid email             | PASS    | OK                                                             |
-| 5   | Create user with invalid username          | PASS    | OK                                                             |
-| 6   | Authenticate user with valid credentials   | PASS    | OK                                                             |
-| 7   | Authenticate user with invalid credentials | PASS    | OK                                                             |
-| 8   | Authenticate with inactive user            | PARTIAL | Missing step: `I have valid user credentials for this account` |
-| 9   | Authenticate with suspended user           | PARTIAL | Missing step: `I have valid user credentials for this account` |
-| 10  | Update user profile                        | PASS    | OK                                                             |
-| 11  | Change user role                           | PASS    | OK                                                             |
-| 12  | Verify user account                        | PARTIAL | Missing step: `a user verified event should be published`      |
-| 13  | Deactivate user account                    | PASS    | OK                                                             |
-| 14  | Get user statistics                        | FAIL    | Multiple undefined steps                                       |
-| 15  | Create user with metadata and tags         | FAIL    | Undefined steps for metadata/tags assertions                   |
-| 16  | Create admin user                          | FAIL    | Undefined steps for role/privileges                            |
-| 17  | Create moderator user                      | FAIL    | Undefined steps for role/privileges                            |
-| 18  | Create user with pending status            | FAIL    | Undefined steps                                                |
-| 19  | Create user with suspended status          | FAIL    | Undefined steps                                                |
-| 20  | User session expiration                    | FAIL    | Undefined steps                                                |
-| 21  | Multiple active sessions                   | FAIL    | Undefined steps                                                |
+| #  | Scenario                                   | Status  | Issue                                                          |
+| -- | ------------------------------------------ | ------- | -------------------------------------------------------------- |
+| 1  | Create a user with valid data              | PASS    | OK                                                             |
+| 2  | Create user with existing email            | PASS    | OK                                                             |
+| 3  | Create user with existing username         | PASS    | OK                                                             |
+| 4  | Create user with invalid email             | PASS    | OK                                                             |
+| 5  | Create user with invalid username          | PASS    | OK                                                             |
+| 6  | Authenticate user with valid credentials   | PASS    | OK                                                             |
+| 7  | Authenticate user with invalid credentials | PASS    | OK                                                             |
+| 8  | Authenticate with inactive user            | PARTIAL | Missing step: `I have valid user credentials for this account` |
+| 9  | Authenticate with suspended user           | PARTIAL | Missing step: `I have valid user credentials for this account` |
+| 10 | Update user profile                        | PASS    | OK                                                             |
+| 11 | Change user role                           | PASS    | OK                                                             |
+| 12 | Verify user account                        | PARTIAL | Missing step: `a user verified event should be published`      |
+| 13 | Deactivate user account                    | PASS    | OK                                                             |
+| 14 | Get user statistics                        | FAIL    | Multiple undefined steps                                       |
+| 15 | Create user with metadata and tags         | FAIL    | Undefined steps for metadata/tags assertions                   |
+| 16 | Create admin user                          | FAIL    | Undefined steps for role/privileges                            |
+| 17 | Create moderator user                      | FAIL    | Undefined steps for role/privileges                            |
+| 18 | Create user with pending status            | FAIL    | Undefined steps                                                |
+| 19 | Create user with suspended status          | FAIL    | Undefined steps                                                |
+| 20 | User session expiration                    | FAIL    | Undefined steps                                                |
+| 21 | Multiple active sessions                   | FAIL    | Undefined steps                                                |
 
 ### Background Steps (NOT IMPLEMENTED)
 

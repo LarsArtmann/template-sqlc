@@ -165,7 +165,7 @@ A: No, only include the `sqlc.yaml` configuration. Generated code depends on act
 **Q: How do I test my configuration changes?**
 A: Run `sqlc compile` to validate syntax. Use `sqlc generate` with actual SQL files to test code generation.
 
-**Q: Can I add configurations for my specific domain (e.g., e-commerce)?**  
+**Q: Can I add configurations for my specific domain (e.g., e-commerce)?**\
 A: Yes! Add them as commented examples in the "Alternative Configurations" section. Keep them generic enough for others to adapt.
 
 **Q: Should I update the README?**
