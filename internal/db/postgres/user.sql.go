@@ -58,8 +58,7 @@ type CreateUserParams struct {
 //	)
 //	RETURNING id, uuid, email, username, password_hash, first_name, last_name, created_at, updated_at, last_login_at, is_active, is_verified, profile_metadata
 func (q *Queries) CreateUser(ctx context.Context, arg *CreateUserParams) (*Users, error) {
-	row := q.db.QueryRow(
-		ctx, CreateUser,
+	row := q.db.QueryRow(ctx, CreateUser,
 		arg.UUID,
 		arg.Email,
 		arg.Username,
@@ -380,8 +379,7 @@ type UpdateUserParams struct {
 //	WHERE id = $1
 //	RETURNING id, uuid, email, username, password_hash, first_name, last_name, created_at, updated_at, last_login_at, is_active, is_verified, profile_metadata
 func (q *Queries) UpdateUser(ctx context.Context, arg *UpdateUserParams) (*Users, error) {
-	row := q.db.QueryRow(
-		ctx, UpdateUser,
+	row := q.db.QueryRow(ctx, UpdateUser,
 		arg.ID,
 		arg.Email,
 		arg.Username,

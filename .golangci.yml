@@ -177,9 +177,17 @@ linters:
     ginkgolinter:
       forbid-focus-container: true
       forbid-spec-pollution: true
+    gocognit:
+      min-complexity: 25
+    goconst:
+      ignore-tests: true
+      min-len: 4
+      min-occurrences: 5
     gocritic:
       disabled-checks:
         - ifElseChain
+    gocyclo:
+      min-complexity: 20
     gomoddirectives:
       replace-local: true
     gosec:
@@ -204,12 +212,25 @@ linters:
         - "1"
         - "2"
         - "100"
+    nestif:
+      min-complexity: 6
     revive:
       rules:
         - disabled: true
           name: exported
         - disabled: true
           name: package-comments
+    tagalign:
+      align: false
+      order:
+        - binding
+        - json
+        - yaml
+        - xml
+        - toml
+        - validate
+        - mapstructure
+      sort: true
     tagliatelle:
       case:
         rules:
@@ -262,6 +283,15 @@ linters:
           - testpackage
           - tparallel
           - varnamelen
+          - cyclop
+          - goconst
+          - forcetypeassert
+          - errcheck
+          - wrapcheck
+          - ireturn
+          - recvcheck
+          - contextcheck
+          - exhaustive
       - path: _test\.go
         text: error returned from
         linters:
@@ -272,6 +302,18 @@ linters:
           - unused
     paths:
       - \.gen\.go$
+      - ^internal/db/mysql/db\.go$
+      - ^internal/db/mysql/models\.go$
+      - ^internal/db/mysql/querier\.go$
+      - ^internal/db/mysql/user\.sql\.go$
+      - ^internal/db/postgres/db\.go$
+      - ^internal/db/postgres/models\.go$
+      - ^internal/db/postgres/querier\.go$
+      - ^internal/db/postgres/user\.sql\.go$
+      - ^internal/db/sqlite/db\.go$
+      - ^internal/db/sqlite/models\.go$
+      - ^internal/db/sqlite/querier\.go$
+      - ^internal/db/sqlite/user\.sql\.go$
       - _mock\.go$
       - _templ\.go$
       - internal/db/mysql
@@ -281,6 +323,7 @@ linters:
       - internal/db/sqlite
       - internal/db/sqlite/
       - internal/tests/integration/
+      - mock_.*\.go$
       - vendor/
 formatters:
   enable:
@@ -294,6 +337,18 @@ formatters:
   exclusions:
     generated: lax
     paths:
+      - ^internal/db/mysql/db\.go$
+      - ^internal/db/mysql/models\.go$
+      - ^internal/db/mysql/querier\.go$
+      - ^internal/db/mysql/user\.sql\.go$
+      - ^internal/db/postgres/db\.go$
+      - ^internal/db/postgres/models\.go$
+      - ^internal/db/postgres/querier\.go$
+      - ^internal/db/postgres/user\.sql\.go$
+      - ^internal/db/sqlite/db\.go$
+      - ^internal/db/sqlite/models\.go$
+      - ^internal/db/sqlite/querier\.go$
+      - ^internal/db/sqlite/user\.sql\.go$
       - _mock\.go$
       - _templ\.go$
       - internal/db/mysql
@@ -303,6 +358,7 @@ formatters:
       - internal/db/sqlite
       - internal/db/sqlite/
       - internal/tests/integration/
+      - mock_.*\.go$
 issues:
   max-issues-per-linter: 50
   max-same-issues: 10

@@ -8,7 +8,9 @@ package mysql
 
 import (
 	"database/sql"
+
 	"encoding/json/jsontext"
+	"json"
 )
 
 type Users struct {
