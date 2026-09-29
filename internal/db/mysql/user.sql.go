@@ -10,9 +10,7 @@ package mysql
 import (
 	"context"
 	"database/sql"
-
 	"encoding/json/jsontext"
-	"json"
 )
 
 const CountActiveUsers = `-- name: CountActiveUsers :one
