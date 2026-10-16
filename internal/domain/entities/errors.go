@@ -11,26 +11,26 @@ import (
 // Domain errors for user entity.
 var (
 	// ErrInvalidEmail is returned when email validation fails.
-	ErrInvalidEmail        = NewValidationError("email", "must be a valid email address")
-	ErrInvalidUsername     = NewValidationError("username", "must be 3-50 characters")
-	ErrInvalidPasswordHash = NewValidationError("password_hash", "must be a valid hash")
-	ErrInvalidFirstName    = NewValidationError("first_name", "must not be empty")
-	ErrInvalidLastName     = NewValidationError("last_name", "must not be empty")
-	ErrInvalidUserStatus   = NewValidationError("status", "must be a valid user status")
-	ErrInvalidUserRole     = NewValidationError("role", "must be a valid user role")
+	ErrInvalidEmail error        = NewValidationError("email", "must be a valid email address")
+	ErrInvalidUsername error     = NewValidationError("username", "must be 3-50 characters")
+	ErrInvalidPasswordHash error = NewValidationError("password_hash", "must be a valid hash")
+	ErrInvalidFirstName error    = NewValidationError("first_name", "must not be empty")
+	ErrInvalidLastName error     = NewValidationError("last_name", "must not be empty")
+	ErrInvalidUserStatus error   = NewValidationError("status", "must be a valid user status")
+	ErrInvalidUserRole error     = NewValidationError("role", "must be a valid user role")
 
 	// ErrUserNotFound is returned when a user is not found.
-	ErrUserNotFound           = NewNotFoundError("user", "user not found")
-	ErrUserAlreadyExists      = NewConflictError("user", "user already exists")
-	ErrInvalidCredentials     = NewAuthenticationError("invalid credentials")
-	ErrAccountSuspended       = NewAuthorizationError("account suspended")
-	ErrAccountInactive        = NewAuthorizationError("account inactive")
-	ErrInsufficientPrivileges = NewAuthorizationError("insufficient privileges")
+	ErrUserNotFound error           = NewNotFoundError("user", "user not found")
+	ErrUserAlreadyExists error      = NewConflictError("user", "user already exists")
+	ErrInvalidCredentials error     = NewAuthenticationError("invalid credentials")
+	ErrAccountSuspended error       = NewAuthorizationError("account suspended")
+	ErrAccountInactive error        = NewAuthorizationError("account inactive")
+	ErrInsufficientPrivileges error = NewAuthorizationError("insufficient privileges")
 
 	// ErrSessionNotFound is returned when a session is not found.
-	ErrSessionNotFound     = NewNotFoundError("session", "session not found")
-	ErrSessionExpired      = NewAuthenticationError("session expired")
-	ErrInvalidSessionToken = NewAuthenticationError("invalid session token")
+	ErrSessionNotFound error     = NewNotFoundError("session", "session not found")
+	ErrSessionExpired error      = NewAuthenticationError("session expired")
+	ErrInvalidSessionToken error = NewAuthenticationError("invalid session token")
 )
 
 // ValidationError represents a field validation error.
